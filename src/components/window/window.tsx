@@ -1,5 +1,7 @@
 import { motion, type Variants, useDragControls } from 'framer-motion'
 import { type RefObject } from 'react'
+import './window.css'
+import '../../styles/prose.css'
 
 interface WindowProps {
   id: string
@@ -50,7 +52,7 @@ export function Window({ id, title, children, onClose, onFocus, zIndex, defaultP
         <span>{title}</span>
         <button className="window-close" onClick={() => onClose(id)}>✕</button>
       </div>
-      <div className="window-body">{children}</div>
+      <div className="window-body prose">{children}</div>
     </motion.div>
   )
 }
