@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Earthy / cashew */
+  --paper:        #f5f0e8;
+  --paper-dim:    #e8e0cc;
+  --ink:          #2b2118;
+  --cashew:       #c8a96e;
+  --cashew-light: #ede0bc;
+  --cashew-dark:  #8b6914;
+
+  /* Godot brand */
+  --godot-blue:   #478cbf;
+  --godot-dark:   #003166;
+
+  /* Godot node type colors */
+  --node-green:   #74c782;  /* Node */
+  --node-blue:    #68d8ef;  /* Node2D */
+  --node-red:     #fc7f7f;  /* Node3D */
+  --node-teal:    #87d4de;  /* Control */
+
+  --font: 'Caveat', cursive;
+}
+
+html, body, #root {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: var(--font);
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--paper-dim);
+}
+
+/* ── Desktop ── */
+.desktop {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.desktop-icons-grid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  max-width: 600px;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  width: 90px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 2px solid transparent;
+  user-select: none;
+}
+.desktop-icon:hover {
+  background: var(--cashew-light);
+  border-color: var(--ink);
+}
+.desktop-icon .icon-emoji { font-size: 2.4rem; }
+
+/* ── Window ── */
+.window {
+  position: absolute;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 var(--ink);
+  display: flex;
+  flex-direction: column;
+  transform-origin: center center;
+}
+
+.window-titlebar {
+  background: var(--cashew);
+  border-bottom: 2px solid var(--ink);
+  border-radius: 4px 4px 0 0;
+  padding: 6px 10px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: grab;
+  user-select: none;
+}
+.window-titlebar:active { cursor: grabbing; }
+
+.window-close {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 50%;
+  width: 22px; height: 22px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.window-close:hover { background: #c0392b; }
+
+.window-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 70vh;
+}
+
+/* ── MDX prose ── */
+.window-body h1, .window-body h2, .window-body h3 {
+  margin: 0.6em 0 0.3em;
+  font-weight: 700;
+}
+.window-body p { margin-bottom: 0.7em; line-height: 1.5; }
+.window-body a { color: var(--cashew-dark); text-decoration: underline wavy; }
+.window-body code {
+  background: var(--paper-dim);
+  border: 1px solid var(--cashew);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: monospace;
+  font-size: 0.82em;
+}
+.window-body pre {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-bottom: 0.8em;
+}
+.window-body blockquote {
+  border-left: 4px solid var(--cashew);
+  padding-left: 12px;
+  color: var(--cashew-dark);
+  margin: 0.6em 0;
+}
