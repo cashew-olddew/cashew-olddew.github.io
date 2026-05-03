@@ -1,153 +1,90 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@layer base {
 
-:root {
-  /* Earthy / cashew */
-  --paper:        #f5f0e8;
-  --paper-dim:    #e8e0cc;
-  --ink:          #2b2118;
-  --cashew:       #c8a96e;
-  --cashew-light: #ede0bc;
-  --cashew-dark:  #8b6914;
+  /* - Raw Palette - */
+  :root {
+    --paper:          #f5f0e8;
+    --paper-dim:      #e8e0cc;
+    --ink:            #2b2118;
+    --cashew:         #c8a96e;
+    --cashew-light:   #ede0bc;
+    --cashew-dark:    #8b6914;
+    --danger:         #c0392b;
 
-  /* Godot brand */
-  --godot-blue:   #478cbf;
-  --godot-dark:   #003166;
+    /* TODO: Add Godot official colors */
 
-  /* Godot node type colors */
-  --node-green:   #74c782;  /* Node */
-  --node-blue:    #68d8ef;  /* Node2D */
-  --node-red:     #fc7f7f;  /* Node3D */
-  --node-teal:    #87d4de;  /* Control */
+    /* - Semantic aliases - */
+    --color-bg:           var(--paper-dim);
+    --color-surface:      var(--paper);
+    --color-surface-hover:var(--cashew-light);
+    --color-accent:       var(--cashew);
+    --color-accent-dark:  var(--cashew-dark);
+    --color-text:         var(--ink);
+    --color-border:       var(--ink);
+    --color-link:         var(--cashew-dark);
+    --color-danger:       var(--danger);
 
-  --font: 'Caveat', cursive;
-}
+    /* - Typography - */
+    --font-display:   'Caveat', cursive;
+    --font-mono:      ui-monospace, 'Cascadia Code', monospace;
 
-html, body, #root {
-  width: 100%; height: 100%;
-  overflow: hidden;
-  font-family: var(--font);
-  font-size: 18px;
-  color: var(--ink);
-  background: var(--paper-dim);
-}
+    --text-sm:        0.85rem;
+    --text-base:      1rem;
+    --text-lg:        1.25rem;
+    --text-xl:        1.6rem;
+    --text-2xl:       2rem;
 
-/* ── Desktop ── */
-.desktop {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
+    --leading-tight:  1.3;
+    --leading-base:   1.55;
+    --leading-loose:  1.75;
 
-.desktop-icons-grid {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 24px;
-  max-width: 600px;
-}
+    --weight-normal:  400;
+    --weight-bold:    700;
 
-.desktop-icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 8px;
-  width: 90px;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 700;
-  border: 2px solid transparent;
-  user-select: none;
-}
-.desktop-icon:hover {
-  background: var(--cashew-light);
-  border-color: var(--ink);
-}
-.desktop-icon .icon-emoji { font-size: 2.4rem; }
+    /* - Spacing (8px base) - */
+    --space-1:   0.25rem;   /*  4px - hairline gap */
+    --space-2:   0.5rem;    /*  8px - tight inline */
+    --space-3:   0.75rem;   /* 12px - compact padding */
+    --space-4:   1rem;      /* 16px - base unit */
+    --space-6:   1.5rem;    /* 24px - comfortable gap */
+    --space-8:   2rem;      /* 32px - section breathing room */
+    --space-12:  3rem;      /* 48px - large section separation */
 
-/* ── Window ── */
-.window {
-  position: absolute;
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-radius: 6px;
-  box-shadow: 4px 4px 0 var(--ink);
-  display: flex;
-  flex-direction: column;
-  transform-origin: center center;
-}
+    /* - Borders & radius - */
+    --border-width:  2px;
+    --radius-sm:     4px;
+    --radius-md:     6px;
+    --radius-full:   9999px;
 
-.window-titlebar {
-  background: var(--cashew);
-  border-bottom: 2px solid var(--ink);
-  border-radius: 4px 4px 0 0;
-  padding: 6px 10px;
-  font-weight: 700;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: grab;
-  user-select: none;
-}
-.window-titlebar:active { cursor: grabbing; }
+    /* - Shadows - */
+    --shadow-window: 4px 4px 0 var(--color-border);
+    --shadow-inset:  inset 0 1px 3px rgba(0,0,0,0.08);
 
-.window-close {
-  background: var(--ink);
-  color: var(--paper);
-  border: none;
-  border-radius: 50%;
-  width: 22px; height: 22px;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.window-close:hover { background: #c0392b; }
+    /* - Transitions - */
+    --transition-fast: 0.1s ease;
+    --transition-base: 0.2s ease;
+  }
 
-.window-body {
-  padding: 16px;
-  overflow-y: auto;
-  flex: 1;
-  max-height: 70vh;
-}
+  /* - Reset - */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-/* ── MDX prose ── */
-.window-body h1, .window-body h2, .window-body h3 {
-  margin: 0.6em 0 0.3em;
-  font-weight: 700;
-}
-.window-body p { margin-bottom: 0.7em; line-height: 1.5; }
-.window-body a { color: var(--cashew-dark); text-decoration: underline wavy; }
-.window-body code {
-  background: var(--paper-dim);
-  border: 1px solid var(--cashew);
-  border-radius: 3px;
-  padding: 1px 5px;
-  font-family: monospace;
-  font-size: 0.82em;
-}
-.window-body pre {
-  background: var(--ink);
-  color: var(--paper);
-  padding: 12px;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin-bottom: 0.8em;
-}
-.window-body blockquote {
-  border-left: 4px solid var(--cashew);
-  padding-left: 12px;
-  color: var(--cashew-dark);
-  margin: 0.6em 0;
+  /* - Base - */
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family:      var(--font-display);
+    font-size:        var(--text-base);
+    line-height:      var(--leading-base);
+    color:            var(--color-text);
+    background-color: var(--color-bg);
+  }
 }

@@ -1,0 +1,56 @@
+@layer components {
+
+  .window {
+    position: absolute;
+    background: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-window);
+    display: flex;
+    flex-direction: column;
+    transform-origin: center center;
+  }
+
+  .window-titlebar {
+    background: var(--color-accent);
+    border-bottom: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    padding: var(--space-2) var(--space-4);
+    font-weight: var(--weight-bold);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .window-titlebar:active {
+    cursor: grabbing;
+  }
+
+  .window-close {
+    background: var(--color-border);
+    color: var(--color-surface);
+    border: none;
+    border-radius: var(--radius-full);
+    width: 1.4rem;
+    height: 1.4rem;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+  }
+
+  .window-close:hover {
+    background: var(--color-danger);
+  }
+
+  .window-body {
+    padding: var(--space-4);
+    overflow-y: auto;
+    flex: 1;
+    max-height: 70vh;
+  }
+}

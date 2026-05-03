@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { Window } from './components/Window'
+import { Window } from './components/window/window'
 import { posts } from './posts'
 import { useSound } from './hooks/useSound'
+import './styles/desktop.css'
 
 interface OpenWindow {
   id: string
