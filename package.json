@@ -12,12 +12,13 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
     "@mdx-js/rollup": "^3.1.1",
     "framer-motion": "^12.38.0",
     "gh-pages": "^6.3.0",
     "howler": "^2.2.4",
+    "open-props": "^1.7.23",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {

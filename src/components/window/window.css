@@ -1,22 +1,20 @@
 @layer components {
-
   .window {
     position: absolute;
-    background: var(--color-surface);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-window);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-3);
+    box-shadow: var(--shadow-4);
     display: flex;
     flex-direction: column;
-    transform-origin: center center;
+    transform-origin: center;
   }
 
   .window-titlebar {
-    background: var(--color-accent);
-    border-bottom: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    padding: var(--space-2) var(--space-4);
-    font-weight: var(--weight-bold);
+    background: linear-gradient(to bottom, var(--accent-soft), var(--accent));
+    border-bottom: 2px solid var(--border);
+    padding: var(--size-2) var(--size-4);
+    font-weight: var(--font-weight-7);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -29,26 +27,27 @@
   }
 
   .window-close {
-    background: var(--color-border);
-    color: var(--color-surface);
+    background: var(--border);
+    color: white;
     border: none;
-    border-radius: var(--radius-full);
-    width: 1.4rem;
-    height: 1.4rem;
-    font-size: var(--text-sm);
+    border-radius: var(--radius-round);
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: var(--font-size-0);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background var(--transition-fast);
+    transition: all 0.15s ease;
   }
 
   .window-close:hover {
-    background: var(--color-danger);
+    background: var(--danger);
+    transform: scale(1.1);
   }
 
   .window-body {
-    padding: var(--space-4);
+    padding: var(--size-4);
     overflow-y: auto;
     flex: 1;
     max-height: 70vh;
