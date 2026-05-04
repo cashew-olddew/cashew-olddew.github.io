@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { Window } from './components/window/window'
+import { Window, type WindowPosition } from './components/window/window'
 import { posts } from './posts'
 import { useSound } from './hooks/useSound'
 import './styles/desktop.css'
@@ -9,8 +9,8 @@ interface OpenWindow {
   id: string
   title: string
   content: React.ReactNode
-  zIndex: number
-  defaultPosition: { x: number; y: number }
+  windowPosition: WindowPosition
+  maximized?: boolean
 }
 
 let topZ = 10
@@ -20,7 +20,7 @@ export default function App() {
   const { play } = useSound()
   const desktopRef = useRef<HTMLDivElement>(null)
 
-  const openPost = useCallback(async (postId: string) => {
+  const openPost = async (postId: string) => {
     const alreadyOpen = windows.find(w => w.id === postId)
     if (alreadyOpen) {
       play('click')
@@ -38,23 +38,38 @@ export default function App() {
       id: postId,
       title: `${post.emoji} ${post.title}`,
       content: <MDXContent />,
-      zIndex: topZ,
-      defaultPosition: {
-        x: 80 + prev.length * 28,
-        y: 60 + prev.length * 28,
-      },
+      windowPosition: {
+        zIndex: topZ,
+        defaultPosition: {
+          x: 80 + prev.length * 28,
+          y: 60 + prev.length * 28,
+        },
+        constraintsRef: desktopRef
+      }
     }])
-  }, [windows, play])
+  }
 
-  const closeWindow = useCallback((id: string) => {
+  const maximizeWindow = (id: string) => {
+    play('maximize')
+
+    setWindows(prev =>
+      prev.map(w =>
+        w.id === id
+          ? { ...w, maximized: !w.maximized }
+          : w
+      )
+    )
+  }
+
+  const closeWindow = (id: string) => {
     play('close')
     setWindows(prev => prev.filter(w => w.id !== id))
-  }, [play])
+  }
 
-  const focusWindow = useCallback((id: string) => {
+  const focusWindow = (id: string) => {
     topZ++
     setWindows(prev => prev.map(w => w.id === id ? { ...w, zIndex: topZ } : w))
-  }, [])
+  }
 
   return (
     <div className="desktop" ref={desktopRef}>
@@ -72,20 +87,25 @@ export default function App() {
       </div>
 
       <AnimatePresence>
-        {windows.map(w => (
-          <Window
+        {windows.map(w => {
+          const windowPosition: WindowPosition = {
+            zIndex: w.windowPosition.zIndex,
+            defaultPosition: w.windowPosition.defaultPosition,
+            constraintsRef: desktopRef
+          }
+          return <Window
             key={w.id}
             id={w.id}
             title={w.title}
-            onClose={closeWindow}
-            onFocus={focusWindow}
-            zIndex={w.zIndex}
-            defaultPosition={w.defaultPosition}
-            constraintsRef={desktopRef}
+            onMaximize={() => maximizeWindow(w.id)}
+            onClose={() => closeWindow(w.id)}
+            onFocus={() => focusWindow(w.id)}
+            windowPosition={windowPosition}
+            maximized={w.maximized}
           >
             {w.content}
           </Window>
-        ))}
+        })}
       </AnimatePresence>
     </div>
   )
