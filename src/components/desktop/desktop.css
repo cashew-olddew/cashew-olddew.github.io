@@ -1,10 +1,15 @@
 @layer components {
   .desktop {
-    position: relative;
+    display: flex;
+    flex-direction: column;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    padding-bottom: var(--size-11);
+  }
+
+  .desktop-workspace {
+    position: relative;
+    flex: 1;
   }
 
   .desktop-icons-grid {

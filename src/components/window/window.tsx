@@ -5,17 +5,20 @@ import "../../styles/prose.css";
 
 import Cross from "../../assets/ui/cross.svg?react";
 import Maximize from '../../assets/ui/maximize.svg?react'
-import border from '../../assets/ui/border.svg' // Intentionally not react component
+import ChevronsDown from '../../assets/ui/chevrons-down.svg?react'
+import border from '../../assets/ui/border.svg'
 
 interface WindowProps {
   title: string;
   children: React.ReactNode;
 
   onMaximize: () => void;
+  onMinimize: () => void;
   onClose: () => void;
   onFocus: () => void;
 
   maximized?: boolean
+  minimized?: boolean
 
   windowPosition: WindowPosition;
 }
@@ -33,6 +36,11 @@ const variants = {
     opacity: 1,
     transition: { type: "spring", stiffness: 380, damping: 22 },
   },
+  minimized: {
+    scale: 0,
+    opacity: 0,
+    transition: { type: "spring", stiffness: 380, damping: 28 },
+  },
   exit: {
     scale: 0.75,
     opacity: 0,
@@ -48,9 +56,11 @@ export function Window({
   title,
   children,
   onMaximize,
+  onMinimize,
   onClose,
   onFocus,
   maximized,
+  minimized,
   windowPosition,
 }: Readonly<WindowProps>) {
   const dragControls = useDragControls();
@@ -70,6 +80,10 @@ export function Window({
     onMaximize();
   };
 
+  const handleMinimize = () => {
+    onMinimize();
+  };
+
   return (
     <motion.div
       className="window"
@@ -80,10 +94,11 @@ export function Window({
         y,
         top: maximized ? 0 : undefined,
         left: maximized ? 0 : undefined,
-        width: maximized ? '100vw' : 560,
-        height: maximized ? '100vh' : 'auto'
+        width: maximized ? '100%' : 560,
+        height: maximized ? '100%' : 'auto',
+        pointerEvents: minimized ? 'none' : undefined,
       }}
-      drag={!maximized}
+      drag={!maximized && !minimized}
       dragMomentum={false}
       dragControls={dragControls}
       dragListener={false}
@@ -92,7 +107,7 @@ export function Window({
       onMouseDown={() => onFocus()}
       variants={variants}
       initial="initial"
-      animate="animate"
+      animate={minimized ? 'minimized' : 'animate'}
       exit="exit"
     >
       <div
@@ -101,6 +116,9 @@ export function Window({
       >
         <span>{title}</span>
         <div className="window-titlebar-controls">
+          <button onClick={handleMinimize}>
+            <ChevronsDown />
+          </button>
           <button onClick={handleMaximize}>
             <Maximize />
           </button>
