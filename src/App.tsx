@@ -95,7 +95,6 @@ export default function App() {
           }
           return <Window
             key={w.id}
-            id={w.id}
             title={w.title}
             onMaximize={() => maximizeWindow(w.id)}
             onClose={() => closeWindow(w.id)}

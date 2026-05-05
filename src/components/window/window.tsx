@@ -1,5 +1,5 @@
-import { motion, type Variants, useDragControls } from "framer-motion";
-import { type RefObject } from "react";
+import { motion, type Variants, useDragControls, useMotionValue } from "framer-motion";
+import { type RefObject, useRef } from "react";
 import "./window.css";
 import "../../styles/prose.css";
 
@@ -7,7 +7,6 @@ import Cross from "../../assets/ui/cross.svg?react";
 import Maximize from '../../assets/ui/maximize.svg?react'
 
 interface WindowProps {
-  id: string;
   title: string;
   children: React.ReactNode;
 
@@ -42,7 +41,6 @@ const variants = {
 
 
 export function Window({
-  id,
   title,
   children,
   onMaximize,
@@ -52,19 +50,32 @@ export function Window({
   windowPosition,
 }: Readonly<WindowProps>) {
   const dragControls = useDragControls();
+  const x = useMotionValue(windowPosition.defaultPosition.x);
+  const y = useMotionValue(windowPosition.defaultPosition.y);
+  const savedPosition = useRef<{ x: number; y: number } | null>(null);
+
+  const handleMaximize = () => {
+    if (!maximized) {
+      savedPosition.current = { x: x.get(), y: y.get() };
+      x.set(0);
+      y.set(0);
+    } else if (savedPosition.current) {
+      x.set(savedPosition.current.x);
+      y.set(savedPosition.current.y);
+    }
+    onMaximize();
+  };
 
   return (
     <motion.div
       className="window"
       style={{
         zIndex: windowPosition.zIndex,
-
-        x: windowPosition.defaultPosition.x,
-        y: windowPosition.defaultPosition.y,
-
+        x,
+        y,
         position: maximized ? 'absolute' : 'relative',
-                top: maximized ? 0 : windowPosition.defaultPosition.y,
-        left: maximized ? 0 : windowPosition.defaultPosition.x,
+        top: maximized ? 0 : undefined,
+        left: maximized ? 0 : undefined,
         width: maximized ? '100vw' : 560,
         height: maximized ? '100vh' : 'auto'
       }}
@@ -86,7 +97,7 @@ export function Window({
       >
         <span>{title}</span>
         <div className="window-titlebar-controls">
-          <button onClick={onMaximize}>
+          <button onClick={handleMaximize}>
             <Maximize />
           </button>
           <button className="window-close" onClick={onClose}>
