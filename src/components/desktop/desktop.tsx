@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Window, type WindowPosition } from '../window/window'
+import { Taskbar } from '../taskbar/taskbar'
 import { posts } from '../../posts'
 import { useSound } from '../../hooks/useSound'
 import './desktop.css'
@@ -103,6 +104,11 @@ export function Desktop() {
           )
         })}
       </AnimatePresence>
+
+      <Taskbar
+        windows={windows.map(w => ({ id: w.id, title: w.title }))}
+        onItemClick={focusWindow}
+      />
     </div>
   )
 }

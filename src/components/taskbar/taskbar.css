@@ -1,0 +1,88 @@
+@layer components {
+  .taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--size-9);
+
+    background: var(--sand-2);
+    font-family: var(--font-hand);
+
+    display: flex;
+    align-items: center;
+    padding: 0 var(--size-1);
+  }
+
+  .taskbar::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: 1;
+
+    border-style: solid;
+    border-width: 12px 0 0 0;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
+
+    pointer-events: none;
+  }
+
+  .taskbar-orb {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, 0);
+
+    width: calc(var(--size-9));
+    height: calc(var(--size-9));
+    border-radius: 50%;
+
+    background: var(--surface);
+
+    border-style: solid;
+    border-width: 3px;
+
+    z-index: 1;
+  }
+
+  .taskbar-items {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    gap: 0;
+  }
+
+  .taskbar-item {
+    flex: 0 0 10%;
+    max-width: 10%;
+    height: 100%;
+
+    background: none;
+    font-family: var(--font-hand);
+    font-size: var(--font-size-2);
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-style: solid;
+    border-width: 0 12px 0 0;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
+
+    padding: 0 var(--size-1);
+  }
+
+  .taskbar-item--minimized .taskbar-item-title {
+    opacity: 0.5;
+  }
+
+  .taskbar-item-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
