@@ -1,7 +1,9 @@
-@import "open-props/style";
-@import "open-props/normalize";
+@layer reset, base, components;
 
-@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap");
+@import "open-props/style" layer(reset);
+@import "open-props/normalize" layer(reset);
+
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Short+Stack&display=swap");
 
 @layer base {
   :root {
@@ -23,6 +25,7 @@
 
     /* fonts */
     --font-display: "Caveat", cursive;
+    --font-hand: "Short Stack", cursive;
     --font-mono: var(--font-mono);
   }
 

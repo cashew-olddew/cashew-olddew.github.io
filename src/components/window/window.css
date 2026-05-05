@@ -2,23 +2,37 @@
   .window {
     position: absolute;
     background: var(--surface);
-    border: 2px solid var(--border);
-    border-radius: var(--radius-3);
-    box-shadow: var(--shadow-4);
+    font-family: var(--font-hand);
+
     display: flex;
     flex-direction: column;
-    transform-origin: center;
 
-    .maximized {
-      border-radius: 0;
-    }
+    transform-origin: center;
+  }
+
+  .window::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: 1;
+
+    border-style: solid;
+    border-width: 6px;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
+
+    pointer-events: none;
   }
 
   .window-titlebar {
-    background: linear-gradient(to bottom, var(--accent-soft), var(--accent));
-    border-bottom: 2px solid var(--border);
-    padding: var(--size-2) var(--size-4);
+    background: var(--surface);
     font-weight: var(--font-weight-7);
+
+    border-bottom-style: solid;
+    border-width: 0 0 6px 0;
+    border-image: url('../../assets/ui/border.svg') 10 stretch;
+
+    padding: var(--size-2) var(--size-2);
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -32,15 +46,15 @@
 
     button {
       background: none;
-      width: 2rem;
-      height: 2rem;
+      width: var(--size-7);
+      height: var(--size-7);
       cursor: pointer;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      transition: all 0.15s ease;
+      transition: all 0.15s var(--ease-2);
     }
 
     button:hover {

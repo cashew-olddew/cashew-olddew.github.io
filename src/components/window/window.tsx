@@ -5,6 +5,7 @@ import "../../styles/prose.css";
 
 import Cross from "../../assets/ui/cross.svg?react";
 import Maximize from '../../assets/ui/maximize.svg?react'
+import border from '../../assets/ui/border.svg' // Intentionally not react component
 
 interface WindowProps {
   title: string;
@@ -39,6 +40,9 @@ const variants = {
   },
 } satisfies Variants;
 
+const cssVars = {
+  '--border-img': `url(${border})`,
+} as React.CSSProperties
 
 export function Window({
   title,
@@ -70,10 +74,10 @@ export function Window({
     <motion.div
       className="window"
       style={{
+        ...cssVars,
         zIndex: windowPosition.zIndex,
         x,
         y,
-        position: maximized ? 'absolute' : 'relative',
         top: maximized ? 0 : undefined,
         left: maximized ? 0 : undefined,
         width: maximized ? '100vw' : 560,
