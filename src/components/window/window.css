@@ -1,56 +1,83 @@
 @layer components {
-
   .window {
     position: absolute;
-    background: var(--color-surface);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-window);
+    background: var(--surface);
+    font-family: var(--font-hand);
+
     display: flex;
     flex-direction: column;
-    transform-origin: center center;
+
+    transform-origin: center;
+  }
+
+  .window::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: 1;
+
+    border-style: solid;
+    border-width: 6px;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
+
+    pointer-events: none;
   }
 
   .window-titlebar {
-    background: var(--color-accent);
-    border-bottom: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    padding: var(--space-2) var(--space-4);
-    font-weight: var(--weight-bold);
+    background: var(--surface);
+    font-weight: var(--font-weight-7);
+
+    border-bottom-style: solid;
+    border-width: 0 0 6px 0;
+    border-image: url('../../assets/ui/border.svg') 10 stretch;
+
+    padding: var(--size-2) var(--size-2);
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: grab;
     user-select: none;
+
+    .window-titlebar-controls {
+      display: flex;
+      flex-direction: row;
+    }
+
+    button {
+      background: none;
+      width: var(--size-7);
+      height: var(--size-7);
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      transition: all 0.15s var(--ease-2);
+    }
+
+    button:hover {
+      transform: scale(1.5) rotate(-5deg);
+
+      svg {
+        fill: var(--danger);
+      }
+    }
   }
 
   .window-titlebar:active {
     cursor: grabbing;
   }
 
-  .window-close {
-    background: var(--color-border);
-    color: var(--color-surface);
-    border: none;
-    border-radius: var(--radius-full);
-    width: 1.4rem;
-    height: 1.4rem;
-    font-size: var(--text-sm);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background var(--transition-fast);
-  }
-
-  .window-close:hover {
-    background: var(--color-danger);
-  }
-
   .window-body {
-    padding: var(--space-4);
+    padding: var(--size-4);
     overflow-y: auto;
     flex: 1;
     max-height: 70vh;
+
+    width: 760px;
+    max-width: 760px;
+    margin: 0 auto;
   }
 }

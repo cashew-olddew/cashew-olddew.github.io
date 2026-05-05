@@ -7,6 +7,7 @@ const sounds = {
   open:  new Howl({ src: [`${BASE}sounds/open.mp3`],  volume: 0.4 }),
   close: new Howl({ src: [`${BASE}sounds/close.mp3`], volume: 0.4 }),
   click: new Howl({ src: [`${BASE}sounds/click.mp3`], volume: 0.3 }),
+  maximize: new Howl({ src: [`${BASE}sounds/maximize.mp3`], volume: 0.3})
 }
 
 export function useSound() {

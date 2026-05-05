@@ -1,42 +1,57 @@
 @layer components {
+  .prose h1 {
+    font-size: var(--font-size-6);
+    margin-bottom: var(--size-4);
+  }
 
-  .prose h1 { font-size: var(--text-2xl); margin-bottom: var(--space-4); }
-  .prose h2 { font-size: var(--text-xl);  margin-top: var(--space-8); margin-bottom: var(--space-3); }
-  .prose h3 { font-size: var(--text-lg);  margin-top: var(--space-6); margin-bottom: var(--space-2); }
+  .prose h2 {
+    font-size: var(--font-size-5);
+    margin-top: var(--size-7);
+    margin-bottom: var(--size-3);
+  }
 
-  .prose h1, .prose h2, .prose h3 {
-    font-weight: var(--weight-bold);
-    line-height: var(--leading-tight);
+  .prose h3 {
+    font-size: var(--font-size-4);
+    margin-top: var(--size-6);
+    margin-bottom: var(--size-2);
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3 {
+    font-weight: var(--font-weight-7);
+    line-height: var(--font-lineheight-1);
   }
 
   .prose p {
-    margin-bottom: var(--space-4);
-    line-height: var(--leading-loose);
+    margin-bottom: var(--size-4);
+    line-height: var(--font-lineheight-4);
   }
 
   .prose a {
-    color: var(--color-link);
+    color: var(--link);
     text-decoration: underline wavy;
   }
 
   .prose code {
     font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    background: var(--paper-dim);
-    border: 1px solid var(--color-accent);
-    border-radius: var(--radius-sm);
-    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-0);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2);
+    padding: var(--size-1) var(--size-2);
   }
 
   .prose pre {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--stone-10);
+    color: var(--stone-0);
     font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    padding: var(--space-4);
-    border-radius: var(--radius-sm);
+    font-size: var(--font-size-0);
+    padding: var(--size-4);
+    border-radius: var(--radius-3);
     overflow-x: auto;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--size-5);
+    box-shadow: var(--shadow-3);
   }
 
   .prose pre code {
@@ -46,26 +61,27 @@
   }
 
   .prose blockquote {
-    border-left: var(--border-width) solid var(--color-accent);
-    padding-left: var(--space-4);
-    color: var(--color-accent-dark);
-    margin: var(--space-4) 0;
+    border-left: 4px solid var(--accent);
+    padding-left: var(--size-4);
+    color: var(--stone-9);
+    margin: var(--size-5) 0;
     font-style: italic;
   }
 
-  .prose ul, .prose ol {
-    padding-left: var(--space-6);
-    margin-bottom: var(--space-4);
+  .prose ul,
+  .prose ol {
+    padding-left: var(--size-6);
+    margin-bottom: var(--size-4);
   }
 
   .prose li {
-    margin-bottom: var(--space-2);
-    line-height: var(--leading-base);
+    margin-bottom: var(--size-2);
+    line-height: var(--font-lineheight-3);
   }
 
   .prose hr {
     border: none;
-    border-top: var(--border-width) solid var(--color-accent);
-    margin: var(--space-8) 0;
+    border-top: 2px dashed var(--accent-soft);
+    margin: var(--size-7) 0;
   }
 }

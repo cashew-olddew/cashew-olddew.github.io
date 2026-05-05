@@ -1,10 +1,15 @@
 @layer components {
-
   .desktop {
-    position: relative;
+    display: flex;
+    flex-direction: column;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+  }
+
+  .desktop-workspace {
+    position: relative;
+    flex: 1;
   }
 
   .desktop-icons-grid {
@@ -15,7 +20,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: var(--space-6);
+    gap: var(--size-6);
     max-width: 600px;
   }
 
@@ -23,27 +28,27 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-2);
+    gap: var(--size-2);
+    padding: var(--size-3);
     width: 90px;
-    border-radius: var(--radius-md);
-    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-3);
+    border: 2px solid transparent;
     cursor: pointer;
     text-align: center;
-    font-size: var(--text-sm);
-    font-weight: var(--weight-bold);
+    font-size: var(--font-size-0);
+    font-weight: var(--font-weight-6);
     user-select: none;
-    transition: background var(--transition-fast),
-                border-color var(--transition-fast);
+    transition: all 0.15s ease;
   }
 
   .desktop-icon:hover {
-    background: var(--color-surface-hover);
-    border-color: var(--color-border);
+    background: var(--surface-hover);
+    border-color: var(--border);
+    transform: translateY(-2px);
   }
 
   .desktop-icon .icon-emoji {
-    font-size: var(--text-2xl);
+    font-size: var(--font-size-5);
     line-height: 1;
   }
 }
