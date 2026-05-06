@@ -1,0 +1,1 @@
+import{t as e}from"./index-RygUoThq.js";var t=e();function n(e){return(0,t.jsx)({h1:`h1`,...e.components}.h1,{children:`Hey 3! 🥜`})}function r(e={}){let{wrapper:r}=e.components||{};return r?(0,t.jsx)(r,{...e,children:(0,t.jsx)(n,{...e})}):n(e)}export{r as default};
