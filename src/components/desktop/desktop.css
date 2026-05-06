@@ -10,45 +10,10 @@
   .desktop-workspace {
     position: relative;
     flex: 1;
-  }
+    overflow: hidden;
 
-  .desktop-icons-grid {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--size-6);
-    max-width: 600px;
-  }
-
-  .desktop-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--size-2);
-    padding: var(--size-3);
-    width: 90px;
-    border-radius: var(--radius-3);
-    border: 2px solid transparent;
-    cursor: pointer;
-    text-align: center;
-    font-size: var(--font-size-0);
-    font-weight: var(--font-weight-6);
-    user-select: none;
-    transition: all 0.15s ease;
-  }
-
-  .desktop-icon:hover {
-    background: var(--surface-hover);
-    border-color: var(--border);
-    transform: translateY(-2px);
-  }
-
-  .desktop-icon .icon-emoji {
-    font-size: var(--font-size-5);
-    line-height: 1;
+    >.icons-grid {
+      position: absolute;
+    }
   }
 }

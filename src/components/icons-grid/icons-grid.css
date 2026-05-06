@@ -1,0 +1,41 @@
+@layer components {
+  .icons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-auto-rows: 100px;
+    gap: var(--size-2);
+    padding: var(--size-2);
+    width: 100%;
+  }
+
+  .desktop-icon {
+    display: flex;
+
+    flex-direction: column;
+    align-items: center;
+
+    gap: var(--size-1);
+    padding: var(--size-2);
+    border-radius: var(--radius-1);
+    border: 2px solid transparent;
+
+    cursor: pointer;
+    text-align: center;
+    font-size: var(--font-size-1);
+    font-family: var(--font-hand);
+    font-weight: var(--font-weight-6);
+    user-select: none;
+    transition: all 0.15s ease;
+  }
+
+  .desktop-icon:hover {
+    background: var(--surface-hover);
+    border-color: var(--border);
+    transform: translateY(-2px);
+  }
+
+  .desktop-icon .icon-emoji {
+    font-size: var(--font-size-5);
+    line-height: 1;
+  }
+}

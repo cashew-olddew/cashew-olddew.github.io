@@ -94,8 +94,10 @@ export function Window({
         y,
         top: maximized ? 0 : undefined,
         left: maximized ? 0 : undefined,
-        width: maximized ? '100%' : 560,
+        width: maximized ? '100%' : 'fit-content',
+        maxWidth: maximized ? undefined : 800,
         height: maximized ? '100%' : 'auto',
+        maxHeight: maximized ? undefined: 800,
         pointerEvents: minimized ? 'none' : undefined,
       }}
       drag={!maximized && !minimized}
@@ -127,7 +129,7 @@ export function Window({
           </button>
         </div>
       </div>
-      <div className="window-body prose">{children}</div>
+      <div className="window-body">{children}</div>
     </motion.div>
   );
 }
