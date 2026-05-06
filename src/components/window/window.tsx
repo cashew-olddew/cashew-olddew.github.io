@@ -19,6 +19,7 @@ interface WindowProps {
 
   maximized?: boolean
   minimized?: boolean
+  variant?: 'folder' | 'post'
 
   windowPosition: WindowPosition;
 }
@@ -61,6 +62,7 @@ export function Window({
   onFocus,
   maximized,
   minimized,
+  variant = 'post',
   windowPosition,
 }: Readonly<WindowProps>) {
   const dragControls = useDragControls();
@@ -86,19 +88,12 @@ export function Window({
 
   return (
     <motion.div
-      className="window"
+      className={`window window--${variant}${maximized ? ' window--maximized' : ''}${minimized ? ' window--minimized' : ''}`}
       style={{
         ...cssVars,
         zIndex: windowPosition.zIndex,
         x,
         y,
-        top: maximized ? 0 : undefined,
-        left: maximized ? 0 : undefined,
-        width: maximized ? '100%' : 'fit-content',
-        maxWidth: maximized ? undefined : 800,
-        height: maximized ? '100%' : 'auto',
-        maxHeight: maximized ? undefined: 800,
-        pointerEvents: minimized ? 'none' : undefined,
       }}
       drag={!maximized && !minimized}
       dragMomentum={false}

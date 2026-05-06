@@ -10,6 +10,39 @@
     transform-origin: center;
   }
 
+  .window--folder {
+    width: fit-content;
+    max-width: 800px;
+    height: auto;
+    max-height: 70vh;
+  }
+
+  .window--post {
+    width: 860px;
+    max-width: 860px;
+    height: auto;
+    max-height: 80vh;
+  }
+
+  @mixin maximized-attributes {
+
+  }
+
+  .window--folder.window--maximized,
+  .window--post.window--maximized {
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: unset;
+    height: 100%;
+    max-height: unset;
+  }
+
+
+  .window--minimized {
+    pointer-events: none;
+  }
+
   .window::before {
     content: '';
     position: absolute;
@@ -74,7 +107,6 @@
     padding: var(--size-2);
     overflow-y: auto;
     flex: 1;
-    max-height: 70vh;
     .prose {
       padding: var(--size-2);
       width: 760px;
