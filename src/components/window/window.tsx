@@ -94,8 +94,10 @@ export function Window({
         y,
         top: maximized ? 0 : undefined,
         left: maximized ? 0 : undefined,
-        width: maximized ? '100%' : 760,
+        width: maximized ? '100%' : 'fit-content',
+        maxWidth: maximized ? undefined : 800,
         height: maximized ? '100%' : 'auto',
+        maxHeight: maximized ? undefined: 800,
         pointerEvents: minimized ? 'none' : undefined,
       }}
       drag={!maximized && !minimized}

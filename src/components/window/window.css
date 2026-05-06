@@ -71,13 +71,15 @@
   }
 
   .window-body {
-    padding: var(--size-4);
+    padding: var(--size-2);
     overflow-y: auto;
     flex: 1;
     max-height: 70vh;
-
-    width: 760px;
-    max-width: 760px;
-    margin: 0 auto;
+    .prose {
+      padding: var(--size-2);
+      width: 760px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
   }
 }
