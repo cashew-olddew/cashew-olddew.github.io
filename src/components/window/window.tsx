@@ -94,7 +94,7 @@ export function Window({
         y,
         top: maximized ? 0 : undefined,
         left: maximized ? 0 : undefined,
-        width: maximized ? '100%' : 560,
+        width: maximized ? '100%' : 760,
         height: maximized ? '100%' : 'auto',
         pointerEvents: minimized ? 'none' : undefined,
       }}

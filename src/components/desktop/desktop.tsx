@@ -2,7 +2,9 @@ import { useState, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Window, type WindowPosition } from '../window/window'
 import { Taskbar } from '../taskbar/taskbar'
-import { posts } from '../../posts'
+import { IconsGrid } from '../icons-grid/icons-grid'
+import { Folder } from '../folder/folder'
+import { getChildren, type DesktopItem } from '../../posts'
 import { useSound } from '../../hooks/useSound'
 import './desktop.css'
 
@@ -21,25 +23,32 @@ export function Desktop() {
   const [windows, setWindows] = useState<OpenWindow[]>([])
   const { play } = useSound()
   const workspaceRef = useRef<HTMLDivElement>(null)
+  const rootItems = getChildren(null)
 
-  const openPost = async (postId: string) => {
-    const alreadyOpen = windows.find(w => w.id === postId)
+  const openItem = async (item: DesktopItem) => {
+    const alreadyOpen = windows.find(w => w.id === item.id)
     if (alreadyOpen) {
       play('click')
       topZ++
-      setWindows(prev => prev.map(w => w.id === postId ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w))
+      setWindows(prev => prev.map(w => w.id === item.id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w))
       return
     }
 
     play('open')
-    const post = posts.find(p => p.id === postId)!
-    const { default: MDXContent } = await post.load()
     topZ++
 
+    let content: React.ReactNode
+    if (item.type === 'folder') {
+      content = <Folder folderId={item.id} onOpen={openItem} />
+    } else {
+      const { default: MDXContent } = await item.load!()
+      content = <div className="prose"><MDXContent /></div>
+    }
+
     setWindows(prev => [...prev, {
-      id: postId,
-      title: `${post.emoji} ${post.title}`,
-      content: <div className="prose"><MDXContent /></div>,
+      id: item.id,
+      title: `${item.emoji} ${item.title}`,
+      content,
       windowPosition: {
         zIndex: topZ,
         defaultPosition: {
@@ -78,18 +87,7 @@ export function Desktop() {
   return (
     <div className="desktop">
       <div className="desktop-workspace" ref={workspaceRef}>
-        <div className="desktop-icons-grid">
-          {posts.map(post => (
-            <div
-              key={post.id}
-              className="desktop-icon"
-              onDoubleClick={() => openPost(post.id)}
-            >
-              <span className="icon-emoji">{post.emoji}</span>
-              <span>{post.title}</span>
-            </div>
-          ))}
-        </div>
+        <IconsGrid items={rootItems} onOpen={openItem} />
 
         <AnimatePresence>
           {windows.map(w => {
