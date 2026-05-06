@@ -127,7 +127,7 @@ export function Window({
           </button>
         </div>
       </div>
-      <div className="window-body prose">{children}</div>
+      <div className="window-body">{children}</div>
     </motion.div>
   );
 }

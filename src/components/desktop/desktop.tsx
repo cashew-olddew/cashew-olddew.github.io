@@ -39,7 +39,7 @@ export function Desktop() {
     setWindows(prev => [...prev, {
       id: postId,
       title: `${post.emoji} ${post.title}`,
-      content: <MDXContent />,
+      content: <div className="prose"><MDXContent /></div>,
       windowPosition: {
         zIndex: topZ,
         defaultPosition: {
