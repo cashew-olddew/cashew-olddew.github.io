@@ -9,6 +9,7 @@ import ChevronsDown from '../../assets/ui/chevrons-down.svg?react'
 import border from '../../assets/ui/border.svg'
 
 interface WindowProps {
+  id: string;
   title: string;
   children: React.ReactNode;
 

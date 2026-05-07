@@ -1,11 +1,12 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Window, type WindowPosition } from '../window/window'
 import { Taskbar } from '../taskbar/taskbar'
 import { IconsGrid } from '../icons-grid/icons-grid'
 import { Folder } from '../folder/folder'
-import { getChildren, type DesktopItem } from '../../posts'
+import { getChildren, items, type DesktopItem } from '../../posts'
 import { useSound } from '../../hooks/useSound'
+import { readFromURL, updateURL } from '../../utils/desktopURL'
 import './desktop.css'
 
 interface OpenWindow {
@@ -27,14 +28,6 @@ export function Desktop() {
   const rootItems = getChildren(null)
 
   const openItem = async (item: DesktopItem) => {
-    const alreadyOpen = windows.find(w => w.id === item.id)
-    if (alreadyOpen) {
-      play('click')
-      topZ++
-      setWindows(prev => prev.map(w => w.id === item.id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w))
-      return
-    }
-
     play('open')
     topZ++
 
@@ -46,20 +39,52 @@ export function Desktop() {
       content = <div className="prose"><MDXContent /></div>
     }
 
-    setWindows(prev => [...prev, {
-      id: item.id,
-      title: `${item.emoji} ${item.title}`,
-      content,
-      variant: item.type === 'folder' ? 'folder' : 'post',
-      windowPosition: {
-        zIndex: topZ,
-        defaultPosition: {
-          x: 80 + prev.length * 28,
-          y: 60 + prev.length * 28,
-        },
-        constraintsRef: workspaceRef
+    setWindows(prev => {
+      const alreadyOpen = prev.find(w => w.id === item.id)
+      if (alreadyOpen) {
+        updateURL(prev.map(w => w.id), item.id)
+        return prev.map(w => w.id === item.id ? {
+           ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } 
+          } : w)
       }
-    }])
+
+      const newWindow: OpenWindow = {
+        id: item.id,
+        title: `${item.emoji} ${item.title}`,
+        content,
+        variant: item.type === 'folder' ? 'folder' : 'post',
+        windowPosition: {
+          zIndex: topZ,
+          defaultPosition: {
+            x: 80 + prev.length * 28,
+            y: 60 + prev.length * 28,
+          },
+          constraintsRef: workspaceRef
+        }
+      }
+      const next = [...prev, newWindow]
+      updateURL(next.map(w => w.id), item.id)
+      return next
+    })
+  }
+
+  useEffect(() => {
+    restoreFromURL()
+  }, [])
+
+  async function restoreFromURL() {
+    const { openIds, focusId } = readFromURL()
+    if (openIds.length === 0) return
+
+    const toOpen = openIds
+      .map(id => items.find(i => i.id === id))
+      .filter((i): i is DesktopItem => i !== undefined)
+
+    for (const item of toOpen) {
+      await openItem(item)
+    }
+
+    if (focusId) focusWindow(focusId)
   }
 
   const maximizeWindow = (id: string) => {
@@ -78,12 +103,20 @@ export function Desktop() {
 
   const closeWindow = (id: string) => {
     play('close')
-    setWindows(prev => prev.filter(w => w.id !== id))
+    setWindows(prev => {
+      const next = prev.filter(w => w.id !== id)
+      const focusId = next.at(-1)?.id ?? null
+      updateURL(next.map(w => w.id), focusId)
+      return next
+    })
   }
 
   const focusWindow = (id: string) => {
     topZ++
-    setWindows(prev => prev.map(w => w.id === id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w))
+    setWindows(prev => {
+      updateURL(prev.map(w => w.id), id)
+      return prev.map(w => w.id === id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w)
+    })
   }
 
   return (
@@ -101,6 +134,7 @@ export function Desktop() {
             return (
               <Window
                 key={w.id}
+                id={w.id}
                 title={w.title}
                 onMaximize={() => maximizeWindow(w.id)}
                 onMinimize={() => minimizeWindow(w.id)}
