@@ -1,41 +1,30 @@
-# Very important example
+import { Media, MediaGroup } from '../components'
+import Radio from "../assets/ui/radio.svg?react";
 
-This is a very very long text that I am writing because I want to see just how wonderful and amazing
-the content of this blog could look.
+## Single image
 
-I hope you are having a wonderful day! You look great today!
+<Media label="A peanut. Very cute.">
+  <Radio width={200} height={'auto'}/>
+</Media>
 
-Oh and this repeats:
+## YouTube embed
 
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
+<Media label="Watch this" labelPosition="above">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+    allowFullScreen
+  />
+</Media>
 
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
+## Comparison
 
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-I hope you are having a wonderful day! You look great today!
-
-Here are some peanuts for you.
-🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜🥜
+<MediaGroup>
+  <Media label="Before">
+    <Radio width={200} height={'auto'}/>
+  </Media>
+  <Media label="After">
+    <Radio width={200} height={'auto'}/>
+  </Media>
+</MediaGroup>
