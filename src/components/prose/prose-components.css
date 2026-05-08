@@ -1,0 +1,14 @@
+@layer components {
+  .prose .prose-separator {
+    border: none;
+    height: 10px;
+
+    background: url('../../assets/ui/hr.svg') center center / 100% 100% no-repeat;
+  }
+
+  .prose-align {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+}

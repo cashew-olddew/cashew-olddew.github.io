@@ -34,6 +34,10 @@
     flex-wrap: wrap;
     gap: var(--size-2);
     margin: var(--size-4) 0;
+
+    &.media-center {
+      align-items: center;
+    }
   }
 
   .media-group > .media {

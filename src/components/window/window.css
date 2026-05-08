@@ -24,10 +24,6 @@
     max-height: 80vh;
   }
 
-  @mixin maximized-attributes {
-
-  }
-
   .window--folder.window--maximized,
   .window--post.window--maximized {
     top: 0;
