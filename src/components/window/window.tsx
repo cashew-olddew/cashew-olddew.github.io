@@ -73,7 +73,7 @@ export function Window({
 
   const handleMaximize = () => {
     if (!maximized) {
-      savedPosition.current = { x: x.get(), y: y.get() };
+      savedPosition.current = { x: x.get(), y: y.get() }
       x.set(0);
       y.set(0);
     } else if (savedPosition.current) {
@@ -114,7 +114,7 @@ export function Window({
       >
         <span>{title}</span>
         <div className="window-titlebar-controls">
-          <button onClick={handleMinimize}>
+          <button className="window-minimize" onClick={handleMinimize}>
             <ChevronsDown />
           </button>
           <button onClick={handleMaximize}>

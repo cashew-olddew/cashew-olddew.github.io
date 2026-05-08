@@ -24,10 +24,6 @@
     max-height: 80vh;
   }
 
-  @mixin maximized-attributes {
-
-  }
-
   .window--folder.window--maximized,
   .window--post.window--maximized {
     top: 0;
@@ -112,6 +108,23 @@
       width: 760px;
       max-width: 760px;
       margin: 0 auto;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .window--folder,
+    .window--post {
+      max-width: 80vw;
+      max-height: 80vh;
+    }
+
+    .window-body .prose {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .window-titlebar button.window-minimize {
+      display: none;
     }
   }
 }

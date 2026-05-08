@@ -8,6 +8,7 @@ interface MediaProps {
 }
 
 interface MediaGroupProps {
+  align: "center"
   children: React.ReactNode
 }
 
@@ -27,9 +28,9 @@ export function Media({ label, labelPosition = 'below', width, children }: Reado
   )
 }
 
-export function MediaGroup({ children }: Readonly<MediaGroupProps>) {
+export function MediaGroup({ align, children }: Readonly<MediaGroupProps>) {
   return (
-    <div className="media-group">
+    <div className={`media-group${align ? ' media-center' : ''}`}>
       {children}
     </div>
   )
