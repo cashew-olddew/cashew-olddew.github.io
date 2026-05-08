@@ -6,7 +6,7 @@ import { IconsGrid } from '../icons-grid/icons-grid'
 import { Folder } from '../folder/folder'
 import { getChildren, items, type DesktopItem } from '../../posts'
 import { useSound } from '../../hooks/useSound'
-import { readFromURL, updateURL } from '../../utils/desktopURL'
+import { readFromURL, pushURL, replaceURL } from '../../utils/desktopURL'
 import './desktop.css'
 
 interface OpenWindow {
@@ -25,11 +25,27 @@ export function Desktop() {
   const [windows, setWindows] = useState<OpenWindow[]>([])
   const { play } = useSound()
   const workspaceRef = useRef<HTMLDivElement>(null)
+  const openWindowIds = useRef<Set<string>>(new Set())
   const rootItems = getChildren(null)
 
   const openItem = async (item: DesktopItem, options?: { maximized?: boolean }) => {
-    topZ++
+    const alreadyOpen = openWindowIds.current.has(item.id)
+    if (alreadyOpen) {
+      play('click')
+      topZ++
+      setWindows(prev => {
+        const next = prev.map(w => w.id === item.id
+          ? { ...w, minimized: false, windowPosition: { ...w.windowPosition, zIndex: topZ } }
+          : w
+        )
+        const maximizedId = next.find(w => w.maximized)?.id ?? null
+        replaceURL(next.map(w => w.id), item.id, maximizedId)
+        return next
+      })
+      return
+    }
 
+    topZ++
     let content: React.ReactNode
     if (item.type === 'folder') {
       content = <Folder folderId={item.id} onOpen={openItem} />
@@ -38,19 +54,8 @@ export function Desktop() {
       content = <div className="prose"><MDXContent /></div>
     }
 
+    openWindowIds.current.add(item.id)
     setWindows(prev => {
-      const alreadyOpen = prev.find(w => w.id === item.id)
-      if (alreadyOpen) {
-        play('click')
-        const next = prev.map(w => w.id === item.id
-          ? { ...w, minimized: false, windowPosition: { ...w.windowPosition, zIndex: topZ } }
-          : w
-        )
-        const maximizedId = next.find(w => w.maximized)?.id ?? null
-        updateURL(next.map(w => w.id), item.id, maximizedId)
-        return next
-      }
-
       play('open')
       const newWindow: OpenWindow = {
         id: item.id,
@@ -67,7 +72,7 @@ export function Desktop() {
         }
       }
       const next = [...prev, newWindow]
-      updateURL(next.map(w => w.id), item.id, null)
+      pushURL(next.map(w => w.id), item.id, null)
       return next
     })
   }
@@ -99,7 +104,7 @@ export function Desktop() {
         : w
       )
       const maximizedId = next.find(w => w.maximized)?.id ?? null
-      updateURL(next.map(w => w.id), id, maximizedId)
+      replaceURL(next.map(w => w.id), id, maximizedId)
       return next
     })
   }
@@ -109,18 +114,19 @@ export function Desktop() {
     setWindows(prev => {
       const next = prev.map(w => w.id === id ? { ...w, minimized: !w.minimized, maximized: false } : w)
       const maximizedId = next.find(w => w.maximized)?.id ?? null
-      updateURL(next.map(w => w.id), id, maximizedId)
+      replaceURL(next.map(w => w.id), id, maximizedId)
       return next
     })
   }
 
   const closeWindow = (id: string) => {
     play('close')
+    openWindowIds.current.delete(id)
     setWindows(prev => {
       const next = prev.filter(w => w.id !== id)
       const focusId = next.at(-1)?.id ?? null
       const maximizedId = next.find(w => w.maximized)?.id ?? null
-      updateURL(next.map(w => w.id), focusId, maximizedId)
+      pushURL(next.map(w => w.id), focusId, maximizedId)
       return next
     })
   }
@@ -129,7 +135,7 @@ export function Desktop() {
     topZ++
     setWindows(prev => {
       const maximizedId = prev.find(w => w.maximized)?.id ?? null
-      updateURL(prev.map(w => w.id), id, maximizedId)
+      replaceURL(prev.map(w => w.id), id, maximizedId)
       return prev.map(w => w.id === id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w)
     })
   }
