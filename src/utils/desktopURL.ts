@@ -16,6 +16,10 @@ export function readFromURL(): { openIds: string[]; focusId: string | null; maxi
   return { openIds, focusId, maximizedId }
 }
 
-export function updateURL(openIds: string[], focusId: string | null, maximizedId: string | null = null): void {
+export function pushURL(openIds: string[], focusId: string | null, maximizedId: string | null = null): void {
   history.pushState({ openIds, focusId, maximizedId }, '', buildSearch(openIds, focusId, maximizedId))
+}
+
+export function replaceURL(openIds: string[], focusId: string | null, maximizedId: string | null = null): void {
+  history.replaceState({ openIds, focusId, maximizedId }, '', buildSearch(openIds, focusId, maximizedId))
 }
