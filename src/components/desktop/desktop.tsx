@@ -27,8 +27,7 @@ export function Desktop() {
   const workspaceRef = useRef<HTMLDivElement>(null)
   const rootItems = getChildren(null)
 
-  const openItem = async (item: DesktopItem) => {
-    play('open')
+  const openItem = async (item: DesktopItem, options?: { maximized?: boolean }) => {
     topZ++
 
     let content: React.ReactNode
@@ -42,28 +41,33 @@ export function Desktop() {
     setWindows(prev => {
       const alreadyOpen = prev.find(w => w.id === item.id)
       if (alreadyOpen) {
-        updateURL(prev.map(w => w.id), item.id)
-        return prev.map(w => w.id === item.id ? {
-           ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } 
-          } : w)
+        play('click')
+        const next = prev.map(w => w.id === item.id
+          ? { ...w, minimized: false, windowPosition: { ...w.windowPosition, zIndex: topZ } }
+          : w
+        )
+        const maximizedId = next.find(w => w.maximized)?.id ?? null
+        updateURL(next.map(w => w.id), item.id, maximizedId)
+        return next
       }
 
+      play('open')
       const newWindow: OpenWindow = {
         id: item.id,
         title: `${item.emoji} ${item.title}`,
         content,
         variant: item.type === 'folder' ? 'folder' : 'post',
+        maximized: options?.maximized,
         windowPosition: {
           zIndex: topZ,
-          defaultPosition: {
-            x: 80 + prev.length * 28,
-            y: 60 + prev.length * 28,
-          },
+          defaultPosition: options?.maximized
+            ? { x: 0, y: 0 }
+            : { x: 80 + prev.length * 28, y: 60 + prev.length * 28 },
           constraintsRef: workspaceRef
         }
       }
       const next = [...prev, newWindow]
-      updateURL(next.map(w => w.id), item.id)
+      updateURL(next.map(w => w.id), item.id, null)
       return next
     })
   }
@@ -73,7 +77,7 @@ export function Desktop() {
   }, [])
 
   async function restoreFromURL() {
-    const { openIds, focusId } = readFromURL()
+    const { openIds, focusId, maximizedId } = readFromURL()
     if (openIds.length === 0) return
 
     const toOpen = openIds
@@ -81,24 +85,33 @@ export function Desktop() {
       .filter((i): i is DesktopItem => i !== undefined)
 
     for (const item of toOpen) {
-      await openItem(item)
+      await openItem(item, item.id === maximizedId ? { maximized: true } : undefined)
     }
 
-    if (focusId) focusWindow(focusId)
+    if (focusId && focusId !== maximizedId) focusWindow(focusId)
   }
 
-  const maximizeWindow = (id: string) => {
+  const maximizeWindow = (id: string, forceMaximize = false) => {
     play('maximize')
-    setWindows(prev =>
-      prev.map(w => w.id === id ? { ...w, maximized: !w.maximized, minimized: false } : w)
-    )
+    setWindows(prev => {
+      const next = prev.map(w => w.id === id
+        ? { ...w, maximized: forceMaximize ? true : !w.maximized, minimized: false }
+        : w
+      )
+      const maximizedId = next.find(w => w.maximized)?.id ?? null
+      updateURL(next.map(w => w.id), id, maximizedId)
+      return next
+    })
   }
 
   const minimizeWindow = (id: string) => {
     play('close')
-    setWindows(prev =>
-      prev.map(w => w.id === id ? { ...w, minimized: !w.minimized, maximized: false } : w)
-    )
+    setWindows(prev => {
+      const next = prev.map(w => w.id === id ? { ...w, minimized: !w.minimized, maximized: false } : w)
+      const maximizedId = next.find(w => w.maximized)?.id ?? null
+      updateURL(next.map(w => w.id), id, maximizedId)
+      return next
+    })
   }
 
   const closeWindow = (id: string) => {
@@ -106,7 +119,8 @@ export function Desktop() {
     setWindows(prev => {
       const next = prev.filter(w => w.id !== id)
       const focusId = next.at(-1)?.id ?? null
-      updateURL(next.map(w => w.id), focusId)
+      const maximizedId = next.find(w => w.maximized)?.id ?? null
+      updateURL(next.map(w => w.id), focusId, maximizedId)
       return next
     })
   }
@@ -114,7 +128,8 @@ export function Desktop() {
   const focusWindow = (id: string) => {
     topZ++
     setWindows(prev => {
-      updateURL(prev.map(w => w.id), id)
+      const maximizedId = prev.find(w => w.maximized)?.id ?? null
+      updateURL(prev.map(w => w.id), id, maximizedId)
       return prev.map(w => w.id === id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w)
     })
   }
@@ -136,8 +151,7 @@ export function Desktop() {
                 key={w.id}
                 id={w.id}
                 title={w.title}
-                onMaximize={() => maximizeWindow(w.id)}
-                onMinimize={() => minimizeWindow(w.id)}
+                onMaximize={() => maximizeWindow(w.id)}                onMinimize={() => minimizeWindow(w.id)}
                 onClose={() => closeWindow(w.id)}
                 onFocus={() => focusWindow(w.id)}
                 windowPosition={windowPosition}
@@ -152,10 +166,12 @@ export function Desktop() {
         </AnimatePresence>
       </div>
 
-      <Taskbar
-        windows={windows.map(w => ({ id: w.id, title: w.title, minimized: w.minimized }))}
-        onItemClick={minimizeWindow}
-      />
+      <div className="desktop-taskbar">
+        <Taskbar
+          windows={windows.map(w => ({ id: w.id, title: w.title, minimized: w.minimized }))}
+          onItemClick={minimizeWindow}
+        />
+      </div>
     </div>
   )
 }
