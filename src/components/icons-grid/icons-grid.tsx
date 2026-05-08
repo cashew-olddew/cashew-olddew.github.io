@@ -17,7 +17,7 @@ export function IconsGrid({ items, onOpen }: Readonly<IconsGridProps>) {
             gridColumn: item.gridSlot?.x ?? 'auto',
             gridRow: item.gridSlot?.y ?? 'auto',
           }}
-          onDoubleClick={() => onOpen(item)}
+          onClick={() => onOpen(item)}
         >
           <span className="icon-emoji">{item.emoji}</span>
           <span>{item.title}</span>
