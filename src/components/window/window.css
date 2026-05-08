@@ -110,4 +110,21 @@
       margin: 0 auto;
     }
   }
+
+  @media (max-width: 1024px) {
+    .window--folder,
+    .window--post {
+      max-width: 80vw;
+      max-height: 80vh;
+    }
+
+    .window-body .prose {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .window-titlebar button.window-minimize {
+      display: none;
+    }
+  }
 }
