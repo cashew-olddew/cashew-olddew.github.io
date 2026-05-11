@@ -4,7 +4,8 @@ import { Window, type WindowPosition } from '../window/window'
 import { Taskbar } from '../taskbar/taskbar'
 import { IconsGrid } from '../icons-grid/icons-grid'
 import { Folder } from '../folder/folder'
-import { getChildren, items, type DesktopItem } from '../../posts'
+import { MobileView } from '../web-view/web-view'
+import { getChildren, items, getAncestorPath, type DesktopItem } from '../../posts'
 import { useSound } from '../../hooks/useSound'
 import { readFromURL, pushURL, replaceURL } from '../../utils/desktopURL'
 import './desktop.css'
@@ -19,10 +20,12 @@ interface OpenWindow {
   minimized?: boolean
 }
 
-let topZ = 10
 
 export function Desktop() {
+  const topZRef = useRef(10);
   const [windows, setWindows] = useState<OpenWindow[]>([])
+  const [webMode, setWebMode] = useState(false)
+  const [initialWebStackIds, setInitialWebStackIds] = useState<string[]>([])
   const { play } = useSound()
   const workspaceRef = useRef<HTMLDivElement>(null)
   const openWindowIds = useRef<Set<string>>(new Set())
@@ -32,10 +35,10 @@ export function Desktop() {
     const alreadyOpen = openWindowIds.current.has(item.id)
     if (alreadyOpen) {
       play('click')
-      topZ++
+      topZRef.current++
       setWindows(prev => {
         const next = prev.map(w => w.id === item.id
-          ? { ...w, minimized: false, windowPosition: { ...w.windowPosition, zIndex: topZ } }
+          ? { ...w, minimized: false, windowPosition: { ...w.windowPosition, zIndex: topZRef.current } }
           : w
         )
         const maximizedId = next.find(w => w.maximized)?.id ?? null
@@ -45,7 +48,7 @@ export function Desktop() {
       return
     }
 
-    topZ++
+    topZRef.current++
     let content: React.ReactNode
     if (item.type === 'folder') {
       content = <Folder folderId={item.id} onOpen={openItem} />
@@ -55,8 +58,8 @@ export function Desktop() {
     }
 
     openWindowIds.current.add(item.id)
+    play('open')
     setWindows(prev => {
-      play('open')
       const newWindow: OpenWindow = {
         id: item.id,
         title: `${item.emoji} ${item.title}`,
@@ -64,7 +67,7 @@ export function Desktop() {
         variant: item.type === 'folder' ? 'folder' : 'post',
         maximized: options?.maximized,
         windowPosition: {
-          zIndex: topZ,
+          zIndex: topZRef.current,
           defaultPosition: options?.maximized
             ? { x: 0, y: 0 }
             : { x: 80 + prev.length * 28, y: 60 + prev.length * 28 },
@@ -82,7 +85,14 @@ export function Desktop() {
   }, [])
 
   async function restoreFromURL() {
-    const { openIds, focusId, maximizedId } = readFromURL()
+    const { openIds, focusId, maximizedId, view } = readFromURL()
+
+    if (view === 'web') {
+      setWebMode(true)
+      setInitialWebStackIds(openIds)
+      return
+    }
+
     if (openIds.length === 0) return
 
     const toOpen = openIds
@@ -132,52 +142,93 @@ export function Desktop() {
   }
 
   const focusWindow = (id: string) => {
-    topZ++
+    topZRef.current++
     setWindows(prev => {
       const maximizedId = prev.find(w => w.maximized)?.id ?? null
       replaceURL(prev.map(w => w.id), id, maximizedId)
-      return prev.map(w => w.id === id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZ } } : w)
+      return prev.map(w => w.id === id ? { ...w, windowPosition: { ...w.windowPosition, zIndex: topZRef.current } } : w)
     })
   }
 
   return (
     <div className="desktop">
-      <div className="desktop-workspace" ref={workspaceRef}>
-        <IconsGrid items={rootItems} onOpen={openItem} />
-
-        <AnimatePresence>
-          {windows.map(w => {
-            const windowPosition: WindowPosition = {
-              zIndex: w.windowPosition.zIndex,
-              defaultPosition: w.windowPosition.defaultPosition,
-              constraintsRef: workspaceRef
-            }
-            return (
-              <Window
-                key={w.id}
-                id={w.id}
-                title={w.title}
-                onMaximize={() => maximizeWindow(w.id)}                onMinimize={() => minimizeWindow(w.id)}
-                onClose={() => closeWindow(w.id)}
-                onFocus={() => focusWindow(w.id)}
-                windowPosition={windowPosition}
-                maximized={w.maximized}
-                minimized={w.minimized}
-                variant={w.variant}
-              >
-                {w.content}
-              </Window>
+      <button
+        className={`desktop-mode-toggle${webMode ? ' desktop-mode-toggle--web' : ''}`}
+        onClick={() => {
+          const next = !webMode
+          setWebMode(next)
+          if (next) {
+            const focused = windows.reduce<OpenWindow | null>(
+              (a, b) => !a || b.windowPosition.zIndex > a.windowPosition.zIndex ? b : a,
+              null
             )
-          })}
-        </AnimatePresence>
-      </div>
+            const stackIds = focused ? getAncestorPath(focused.id) : []
+            setInitialWebStackIds(stackIds)
+            replaceURL(stackIds, null, null, 'web')
+          } else {
+            // Read the current web stack from the URL (MobileView keeps it in sync)
+            const { openIds } = readFromURL()
+            const focusId = openIds.at(-1) ?? null
+            
+            // Clear all windows and restore them from url.
+            // Probably it would be better to cleanly build the window state,
+            // but this seems like a decent fix for now
+            setWindows([])
+            openWindowIds.current.clear()
+            setInitialWebStackIds([])
+            replaceURL(openIds, focusId, null)
+            if (openIds.length > 0) {
+              void restoreFromURL()
+            }
+          }
+        }}
+        title={webMode ? 'Switch to desktop mode' : 'Switch to website mode'}
+      >
+        {webMode ? '🖥️' : '🌐'}
+      </button>
 
-      <div className="desktop-taskbar">
-        <Taskbar
-          windows={windows.map(w => ({ id: w.id, title: w.title, minimized: w.minimized }))}
-          onItemClick={minimizeWindow}
-        />
-      </div>
+      {webMode
+        ? <MobileView rootItems={rootItems} initialStackIds={initialWebStackIds} />
+        : <>
+            <div className="desktop-workspace" ref={workspaceRef}>
+              <IconsGrid items={rootItems} onOpen={openItem} />
+
+              <AnimatePresence>
+                {windows.map(w => {
+                  const windowPosition: WindowPosition = {
+                    zIndex: w.windowPosition.zIndex,
+                    defaultPosition: w.windowPosition.defaultPosition,
+                    constraintsRef: workspaceRef
+                  }
+                  return (
+                    <Window
+                      key={w.id}
+                      id={w.id}
+                      title={w.title}
+                      onMaximize={() => maximizeWindow(w.id)}
+                      onMinimize={() => minimizeWindow(w.id)}
+                      onClose={() => closeWindow(w.id)}
+                      onFocus={() => focusWindow(w.id)}
+                      windowPosition={windowPosition}
+                      maximized={w.maximized}
+                      minimized={w.minimized}
+                      variant={w.variant}
+                    >
+                      {w.content}
+                    </Window>
+                  )
+                })}
+              </AnimatePresence>
+            </div>
+
+            <div className="desktop-taskbar">
+              <Taskbar
+                windows={windows.map(w => ({ id: w.id, title: w.title, minimized: w.minimized }))}
+                onItemClick={minimizeWindow}
+              />
+            </div>
+          </>
+      }
     </div>
   )
 }

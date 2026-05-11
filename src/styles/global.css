@@ -45,3 +45,27 @@
     background: var(--bg);
   }
 }
+
+@layer components {
+  /* Shared scrollable content body used by .window-body and .web-view-content */
+  .content-body {
+    padding: var(--size-2);
+    overflow-y: auto;
+    touch-action: auto;
+    flex: 1;
+
+    .prose {
+      padding: var(--size-2);
+      width: 760px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .content-body .prose {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+}

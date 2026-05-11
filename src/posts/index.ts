@@ -32,5 +32,16 @@ export const items: DesktopItem[] = [
 export const getChildren = (parentId: string | null) =>
   items.filter(i => i.parent === parentId)
 
+/** Returns the chain from root to the item (inclusive), e.g. ['blog', 'make-it-exist-first'] */
+export const getAncestorPath = (id: string): string[] => {
+  const path: string[] = []
+  let current = items.find(i => i.id === id)
+  while (current) {
+    path.unshift(current.id)
+    current = current.parent ? items.find(i => i.id === current!.parent) : undefined
+  }
+  return path
+}
+
 export const posts = items.filter(i => i.type === 'post')
 export const folders = items.filter(i => i.type === 'folder')
