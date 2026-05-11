@@ -8,6 +8,7 @@
     flex-direction: column;
 
     transform-origin: center;
+    touch-action: none;
   }
 
   .window--folder {
@@ -102,6 +103,7 @@
   .window-body {
     padding: var(--size-2);
     overflow-y: auto;
+    touch-action: auto;
     flex: 1;
     .prose {
       padding: var(--size-2);
