@@ -1,0 +1,82 @@
+@layer components {
+  .web-view {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: var(--surface);
+    font-family: var(--font-hand);
+  }
+
+  .web-view-header {
+    display: flex;
+    align-items: center;
+    gap: var(--size-3);
+    padding: var(--size-2) var(--size-3);
+    min-height: var(--size-9);
+    flex-shrink: 0;
+
+    border-bottom-style: solid;
+    border-width: 0 0 6px 0;
+    border-image: url('../../assets/ui/border.svg') 10 stretch;
+  }
+
+  .web-view-back {
+    background: none;
+    font-family: var(--font-hand);
+    font-size: var(--font-size-1);
+    cursor: pointer;
+    flex-shrink: 0;
+    width: var(--size-6);
+    height: var(--size-6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .web-view-back svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .web-view-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--size-1);
+    font-size: var(--font-size-1);
+    overflow: hidden;
+  }
+
+  .web-view-breadcrumb-segment {
+    display: flex;
+    align-items: center;
+    gap: var(--size-1);
+  }
+
+  .web-view-breadcrumb {
+    background: none;
+    font-family: var(--font-hand);
+    font-size: var(--font-size-1);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    flex-shrink: 0;
+  }
+
+  .web-view-breadcrumb--current {
+    font-weight: var(--font-weight-7);
+    text-decoration: none;
+    cursor: default;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .web-view-breadcrumb-sep {
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  /* .web-view-content shared scrollable body styles live in .content-body (global.css) */
+}
