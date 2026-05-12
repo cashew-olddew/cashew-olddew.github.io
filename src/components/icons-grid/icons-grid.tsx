@@ -19,7 +19,10 @@ export function IconsGrid({ items, onOpen }: Readonly<IconsGridProps>) {
           }}
           onClick={() => onOpen(item)}
         >
-          <span className="icon-emoji">{item.emoji}</span>
+          {item.icon
+            ? <img src={item.icon} alt={item.title} className="icon-image" />
+            : <span className="icon-emoji">{item.emoji}</span>
+          }
           <span>{item.title}</span>
         </div>
       ))}

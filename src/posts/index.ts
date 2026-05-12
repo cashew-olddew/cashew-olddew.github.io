@@ -1,13 +1,32 @@
-export interface DesktopItem {
+import Youtube from '../assets/link-icons/yt.png'
+import Kofi from '../assets/link-icons/kofi.png'
+import Patreon from '../assets/link-icons/patreon.png'
+
+type BaseItem = {
   id: string
   title: string
   emoji: string
-  type: 'post' | 'folder'
+  icon?: string
   parent: string | null
-  date?: string
   gridSlot?: { x: number; y: number }
-  load?: () => Promise<{ default: React.ComponentType }>
 }
+
+export type PostItem = BaseItem & {
+  type: 'post'
+  date?: string
+  load: () => Promise<{ default: React.ComponentType }>
+}
+
+export type FolderItem = BaseItem & {
+  type: 'folder'
+}
+
+export type LinkItem = BaseItem & {
+  type: 'link'
+  url: string
+}
+
+export type DesktopItem = PostItem | FolderItem | LinkItem
 
 export const items: DesktopItem[] = [
   {
@@ -27,6 +46,45 @@ export const items: DesktopItem[] = [
     date: '2026-05-03',
     load: () => import('./make-it-exist-first/make-it-exist-first.mdx'),
   },
+  {
+    id: 'support-kofi',
+    title: 'Ko-Fi',
+    emoji: '☕',
+    icon: Kofi,
+    type: 'link',
+    parent: null,
+    gridSlot: { x: 1, y: 3 },
+    url: 'https://ko-fi.com/cashewolddew',
+  },
+  {
+    id: 'support-patreon',
+    title: 'Patreon',
+    emoji: '🪙',
+    type: 'link',
+    icon: Patreon,
+    parent: null,
+    gridSlot: { x: 2, y: 3 },
+    url: 'https://patreon.com/CashewOldDew',
+  },
+  {
+    id: 'support-youtube',
+    title: 'YouTube Members',
+    emoji: '▶️',
+    icon: Youtube,
+    type: 'link',
+    parent: null,
+    gridSlot: { x: 2, y: 4 },
+    url: 'https://www.youtube.com/@cashewolddew/join',
+  },
+  {
+    id: 'fangs-and-faith',
+    title: 'Fangs & Faith',
+    emoji: '🎮',
+    type: 'link',
+    parent: null,
+    gridSlot: { x: 1, y: 4 },
+    url: 'https://store.steampowered.com/app/3032430/Fangs__Faith_Solitaire/',
+  },
 ]
 
 export const getChildren = (parentId: string | null) =>
@@ -43,5 +101,5 @@ export const getAncestorPath = (id: string): string[] => {
   return path
 }
 
-export const posts = items.filter(i => i.type === 'post')
-export const folders = items.filter(i => i.type === 'folder')
+export const posts = items.filter((i): i is PostItem => i.type === 'post')
+export const folders = items.filter((i): i is FolderItem => i.type === 'folder')

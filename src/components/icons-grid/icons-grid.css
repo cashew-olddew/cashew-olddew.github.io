@@ -38,4 +38,10 @@
     font-size: var(--font-size-5);
     line-height: 1;
   }
+
+  .desktop-icon .icon-image {
+    width: var(--font-size-5);
+    height: var(--font-size-5);
+    object-fit: contain;
+  }
 }

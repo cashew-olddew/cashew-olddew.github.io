@@ -18,8 +18,8 @@ interface MobileViewProps {
 }
 
 async function loadPage(item: DesktopItem): Promise<MobilePage> {
-  if (item.type === 'folder') return { item }
-  const { default: PostContent } = await item.load!()
+  if (item.type !== 'post') return { item }
+  const { default: PostContent } = await item.load()
   return { item, PostContent }
 }
 
@@ -43,6 +43,10 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
   }, [initialStackIds])
 
   const openItem = async (item: DesktopItem) => {
+    if (item.type === 'link') {
+      window.open(item.url, '_blank', 'noopener,noreferrer')
+      return
+    }
     const page = await loadPage(item)
     setStack(prev => {
       const next = [...prev, page]

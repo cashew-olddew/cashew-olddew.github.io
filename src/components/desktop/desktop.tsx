@@ -33,6 +33,11 @@ export function Desktop() {
   const rootItems = getChildren(null)
 
   const openItem = async (item: DesktopItem, options?: { maximized?: boolean }) => {
+    if (item.type === 'link') {
+      window.open(item.url, '_blank', 'noopener,noreferrer')
+      return
+    }
+
     const alreadyOpen = openWindowIds.current.has(item.id)
     if (alreadyOpen) {
       play('click')
@@ -54,7 +59,7 @@ export function Desktop() {
     if (item.type === 'folder') {
       content = <Folder folderId={item.id} onOpen={openItem} />
     } else {
-      const { default: MDXContent } = await item.load!()
+      const { default: MDXContent } = await item.load()
       content = <div className="prose"><MDXContent /></div>
     }
 
