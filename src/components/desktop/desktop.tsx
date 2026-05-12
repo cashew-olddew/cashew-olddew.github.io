@@ -5,6 +5,7 @@ import { Taskbar } from '../taskbar/taskbar'
 import { IconsGrid } from '../icons-grid/icons-grid'
 import { Folder } from '../folder/folder'
 import { MobileView } from '../web-view/web-view'
+import { DesktopCornerButtons } from './desktop-corner-buttons'
 import { getChildren, items, getAncestorPath, type DesktopItem } from '../../posts'
 import { useSound } from '../../hooks/useSound'
 import { readFromURL, pushURL, replaceURL } from '../../utils/desktopURL'
@@ -152,9 +153,9 @@ export function Desktop() {
 
   return (
     <div className="desktop">
-      <button
-        className={`desktop-mode-toggle${webMode ? ' desktop-mode-toggle--web' : ''}`}
-        onClick={() => {
+      <DesktopCornerButtons
+        webMode={webMode}
+        onToggleWebMode={() => {
           const next = !webMode
           setWebMode(next)
           if (next) {
@@ -169,7 +170,7 @@ export function Desktop() {
             // Read the current web stack from the URL (MobileView keeps it in sync)
             const { openIds } = readFromURL()
             const focusId = openIds.at(-1) ?? null
-            
+
             // Clear all windows and restore them from url.
             // Probably it would be better to cleanly build the window state,
             // but this seems like a decent fix for now
@@ -182,10 +183,7 @@ export function Desktop() {
             }
           }
         }}
-        title={webMode ? 'Switch to desktop mode' : 'Switch to website mode'}
-      >
-        {webMode ? '🖥️' : '🌐'}
-      </button>
+      />
 
       {webMode
         ? <MobileView rootItems={rootItems} initialStackIds={initialWebStackIds} />

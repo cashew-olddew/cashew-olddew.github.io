@@ -26,6 +26,9 @@
   .prose p {
     margin-bottom: var(--size-4);
     line-height: var(--font-lineheight-4);
+
+    /* Set so that accessible fonts fill the correct screen amount */
+    max-inline-size: unset;
   }
 
   .prose a {
