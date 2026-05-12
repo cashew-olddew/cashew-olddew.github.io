@@ -18,39 +18,9 @@
     }
   }
 
-  .desktop-mode-toggle {
-    position: fixed;
-    bottom: var(--size-10);
-    right: var(--size-3);
-    z-index: 9999;
-
-    background: var(--sand-1);
-    font-size: var(--font-size-3);
-    width: var(--size-9);
-    height: var(--size-9);
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-style: solid;
-    border-width: 6px;
-    border-image: url('../../assets/ui/border.svg') 12 stretch;
-    border-radius: 20%;
-  }
-
-  .desktop-mode-toggle--web {
-    bottom: var(--size-3);
-  }
-
   @media (max-width: 768px) {
     .desktop-taskbar {
       display: none;
-    }
-
-    .desktop-mode-toggle {
-      bottom: var(--size-3);
     }
 
     .desktop-workspace {

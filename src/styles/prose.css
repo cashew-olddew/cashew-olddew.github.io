@@ -26,6 +26,9 @@
   .prose p {
     margin-bottom: var(--size-4);
     line-height: var(--font-lineheight-4);
+
+    /* Set so that accessible fonts fill the correct screen amount */
+    max-inline-size: unset;
   }
 
   .prose a {
@@ -35,29 +38,56 @@
 
   .prose code {
     font-family: var(--font-mono);
-    font-size: var(--font-size-0);
-    background: var(--surface-hover);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-2);
-    padding: var(--size-1) var(--size-2);
+    font-size: var(--font-size-1);
   }
 
   .prose pre {
-    background: var(--stone-10);
-    color: var(--stone-0);
-    font-family: var(--font-mono);
-    font-size: var(--font-size-0);
+    width: 100%;
+
     padding: var(--size-4);
-    border-radius: var(--radius-3);
     overflow-x: auto;
     margin-bottom: var(--size-5);
-    box-shadow: var(--shadow-3);
+
+    border-style: solid;
+    border-width: 12px;
+    border-image: url('../assets/ui/border.svg') 12 stretch;
+
+    mark {
+      background: var(--jungle-2);
+    }
   }
 
   .prose pre code {
     background: none;
     border: none;
     padding: 0;
+  }
+
+  .prose pre code[data-line-numbers] {
+    counter-reset: line;
+  }
+
+  .prose pre code[data-line-numbers] > [data-line]::before {
+    counter-increment: line;
+    content: counter(line);
+
+    display: inline-block;
+    width: 0.75rem;
+    margin-right: 1rem;
+    text-align: right;
+    color: var(--stone-4);
+  }
+
+  .prose pre code[data-line-numbers-max-digits="2"] > [data-line]::before {
+    width: 1.25rem;
+  }
+  
+  .prose pre code[data-line-numbers-max-digits="3"] > [data-line]::before {
+    width: 1.75rem;
+  }
+  
+  .prose pre code[data-line-numbers-max-digits="4"] > [data-line]::before {
+    width: 2.25rem;
   }
 
   .prose blockquote {
