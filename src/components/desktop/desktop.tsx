@@ -33,6 +33,11 @@ export function Desktop() {
   const rootItems = getChildren(null)
 
   const openItem = async (item: DesktopItem, options?: { maximized?: boolean }) => {
+    if (item.type === 'link') {
+      window.open(item.url, '_blank', 'noopener,noreferrer')
+      return
+    }
+
     const alreadyOpen = openWindowIds.current.has(item.id)
     if (alreadyOpen) {
       play('click')
@@ -53,8 +58,8 @@ export function Desktop() {
     let content: React.ReactNode
     if (item.type === 'folder') {
       content = <Folder folderId={item.id} onOpen={openItem} />
-    } else {
-      const { default: MDXContent } = await item.load!()
+    } else if (item.type === 'post') {
+      const { default: MDXContent } = await item.load()
       content = <div className="prose"><MDXContent /></div>
     }
 
@@ -63,7 +68,7 @@ export function Desktop() {
     setWindows(prev => {
       const newWindow: OpenWindow = {
         id: item.id,
-        title: `${item.emoji} ${item.title}`,
+        title: `${'emoji' in item ? item.emoji : ''} ${item.title}`,
         content,
         variant: item.type === 'folder' ? 'folder' : 'post',
         maximized: options?.maximized,

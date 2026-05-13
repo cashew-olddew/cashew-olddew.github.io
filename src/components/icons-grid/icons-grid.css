@@ -1,14 +1,47 @@
 @layer components {
   .icons-grid {
     display: grid;
-    grid-template-columns: repeat(4, 100px);
-    grid-auto-rows: 100px;
-    gap: var(--size-2);
+    grid-template-columns: repeat(auto-fill, 120px);
+    grid-auto-rows: 120px;
+    gap: var(--size-3);
     padding: var(--size-2);
     width: 100%;
   }
 
+  .icons-group {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+
+    position: relative;
+    padding: var(--size-2);
+
+    border-style: solid;
+    border-width: 12px;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
+  }
+
+  .icons-group-title {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -75%);
+
+    background: var(--icons-group-title-bg, var(--bg));
+    padding: 0 var(--size-2);
+
+    font-family: var(--font-hand);
+    font-weight: var(--font-weight-6);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
   .desktop-icon {
+    appearance: none;
+    background: transparent;
+
+    place-self: center;
+
     display: flex;
 
     flex-direction: column;
@@ -37,5 +70,11 @@
   .desktop-icon .icon-emoji {
     font-size: var(--font-size-5);
     line-height: 1;
+  }
+
+  .desktop-icon .icon-image {
+    width: var(--font-size-5);
+    height: var(--font-size-5);
+    object-fit: contain;
   }
 }

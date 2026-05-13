@@ -1,13 +1,40 @@
-export interface DesktopItem {
+import Youtube from '../assets/link-icons/yt.png'
+import Kofi from '../assets/link-icons/kofi.png'
+import Patreon from '../assets/link-icons/patreon.png'
+import FangsAndFaith from '../assets/link-icons/fangs_and_faith.ico'
+
+type BaseItem = {
   id: string
   title: string
-  emoji: string
-  type: 'post' | 'folder'
+  icon?: string
   parent: string | null
-  date?: string
   gridSlot?: { x: number; y: number }
-  load?: () => Promise<{ default: React.ComponentType }>
 }
+
+export type PostItem = BaseItem & {
+  type: 'post'
+  emoji: string
+  date?: string
+  load: () => Promise<{ default: React.ComponentType }>
+}
+
+export type FolderItem = BaseItem & {
+  type: 'folder'
+  emoji: string
+}
+
+export type GroupItem = BaseItem & {
+  type: 'group'
+  gridSpan: { cols: number; rows: number }
+}
+
+export type LinkItem = BaseItem & {
+  type: 'link'
+  emoji: string
+  url: string
+}
+
+export type DesktopItem = PostItem | FolderItem | GroupItem | LinkItem
 
 export const items: DesktopItem[] = [
   {
@@ -27,6 +54,54 @@ export const items: DesktopItem[] = [
     date: '2026-05-03',
     load: () => import('./make-it-exist-first/make-it-exist-first.mdx'),
   },
+  {
+    id: 'support-group',
+    title: 'Support my work',
+    type: 'group',
+    parent: null,
+    gridSlot: { x: 1, y: 3 },
+    gridSpan: { cols: 2, rows: 2 },
+  },
+  {
+    id: 'support-kofi',
+    title: 'Ko-Fi',
+    emoji: '☕',
+    icon: Kofi,
+    type: 'link',
+    parent: 'support-group',
+    gridSlot: { x: 1, y: 1 },
+    url: 'https://ko-fi.com/cashewolddew',
+  },
+  {
+    id: 'support-patreon',
+    title: 'Patreon',
+    emoji: '🪙',
+    type: 'link',
+    icon: Patreon,
+    parent: 'support-group',
+    gridSlot: { x: 2, y: 1 },
+    url: 'https://patreon.com/CashewOldDew',
+  },
+  {
+    id: 'support-youtube',
+    title: 'YouTube Members',
+    emoji: '▶️',
+    icon: Youtube,
+    type: 'link',
+    parent: 'support-group',
+    gridSlot: { x: 2, y: 2 },
+    url: 'https://www.youtube.com/@cashewolddew/join',
+  },
+  {
+    id: 'fangs-and-faith',
+    title: 'Fangs & Faith',
+    emoji: '🎮',
+    icon: FangsAndFaith,
+    type: 'link',
+    parent: 'support-group',
+    gridSlot: { x: 1, y: 2 },
+    url: 'https://store.steampowered.com/app/3032430/Fangs__Faith_Solitaire/',
+  },
 ]
 
 export const getChildren = (parentId: string | null) =>
@@ -43,5 +118,5 @@ export const getAncestorPath = (id: string): string[] => {
   return path
 }
 
-export const posts = items.filter(i => i.type === 'post')
-export const folders = items.filter(i => i.type === 'folder')
+export const posts = items.filter((i): i is PostItem => i.type === 'post')
+export const folders = items.filter((i): i is FolderItem => i.type === 'folder')
