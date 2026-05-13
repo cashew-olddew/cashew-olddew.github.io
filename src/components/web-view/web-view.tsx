@@ -93,10 +93,10 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
                 <span className="web-view-breadcrumb-sep">/</span>
                 {isCurrent
                   ? <span className="web-view-breadcrumb web-view-breadcrumb--current">
-                      {page.item.emoji} {page.item.title}
+                      {'emoji' in page.item ? page.item.emoji : ''} {page.item.title}
                     </span>
                   : <button className="web-view-breadcrumb" onClick={() => goToIndex(i + 1)}>
-                      {page.item.emoji} {page.item.title}
+                      {'emoji' in page.item ? page.item.emoji : ''} {page.item.title}
                     </button>
                 }
               </span>
