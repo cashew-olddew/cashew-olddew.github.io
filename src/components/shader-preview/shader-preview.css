@@ -3,22 +3,18 @@
 @layer components {
   .shader-preview {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--size-4);
     margin-bottom: var(--size-5);
-    align-items: flex-start;
+
+    pre {
+      margin-bottom: 0;
+    }
   }
 
-  .shader-preview--top {
-    flex-direction: column;
-  }
-
-  .shader-preview--side {
-    flex-direction: row;
-  }
-
-  /* On narrow screens always stack */
+  /* On narrow screens always stack vertically */
   @media (max-width: 640px) {
-    .shader-preview--side {
+    .shader-preview {
       flex-direction: column;
     }
   }
@@ -26,70 +22,35 @@
   /* ---- Canvas ---- */
 
   .shader-preview-canvas-wrap {
+    position: relative;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: var(--size-2);
+
+    canvas {
+      border-radius: 4% 8% 11% 10%;
+    }
+  }
+
+  .shader-preview-canvas-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 1;
+
+    border-style: solid;
+    border-width: 8px;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
   }
 
   .shader-preview-canvas {
     display: block;
-    width: 256px;
-    height: 256px;
+    position: relative;
 
-    border-style: solid;
-    border-width: 12px;
-    border-image: url('../../assets/ui/border.svg') 12 stretch;
-    /* Canvas pixels should map 1:1 */
-    image-rendering: pixelated;
-  }
-
-  .shader-preview--top .shader-preview-canvas {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-  }
-
-  /* ---- Error box ---- */
-
-  .shader-preview-error {
-    background: color-mix(in srgb, var(--danger) 10%, transparent);
-    border: 2px solid var(--danger);
-    border-radius: var(--radius-2);
-    padding: var(--size-2);
-    font-family: var(--font-mono);
-    font-size: var(--font-size-0);
-    color: var(--danger);
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-width: 256px;
-  }
-
-  /* ---- Code block ---- */
-
-  /* Override shiki's default pre/code so it matches the site's prose style */
-  .shader-preview-code {
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-  }
-
-  .shader-preview-code pre {
-    width: 100%;
-    padding: var(--size-4);
-    overflow-x: auto;
-    margin: 0;
-
-    border-style: solid;
-    border-width: 12px;
-    border-image: url('../../assets/ui/border.svg') 12 stretch;
-  }
-
-  .shader-preview-code code {
-    font-family: var(--font-mono);
-    font-size: var(--font-size-1);
-    background: none;
-    border: none;
-    padding: 0;
+    width: 128px;
+    height: 128px;
+    max-width: 128px;
+    max-height: 128px;
   }
 }

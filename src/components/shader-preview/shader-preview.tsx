@@ -1,6 +1,6 @@
 /* WARNING: This file has been AI generated */
 
-import { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { codeToHtml } from 'shiki'
 import defaultSprite from '../../assets/link-icons/kofi.png'
 import './shader-preview.css'
@@ -10,11 +10,21 @@ import './shader-preview.css'
 // ---------------------------------------------------------------------------
 
 const FRAG_PREAMBLE = `precision mediump float;
+
 uniform sampler2D uTexture;
 uniform float uTime;
 uniform vec2 uTexturePixelSize;
 uniform vec2 uScreenPixelSize;
+
 varying vec2 vUV;
+
+#define TEXTURE uTexture
+#define UV vUV
+#define TIME uTime
+#define TEXTURE_PIXEL_SIZE uTexturePixelSize
+#define SCREEN_PIXEL_SIZE uScreenPixelSize
+#define FRAGCOORD gl_FragCoord
+#define COLOR gl_FragColor
 `
 
 function gdshaderToGLSL(raw: string): string {
@@ -35,15 +45,6 @@ function gdshaderToGLSL(raw: string): string {
   // Strip any vertex() function entirely (not used in fragment WebGL)
   s = s.replace(/void\s+vertex\s*\(\s*\)\s*\{[^}]*\}/gs, '')
 
-  // Built-in variable substitutions (order matters for TEXTURE_PIXEL_SIZE before TEXTURE)
-  s = s.replace(/\bTEXTURE_PIXEL_SIZE\b/g, 'uTexturePixelSize')
-  s = s.replace(/\bSCREEN_PIXEL_SIZE\b/g, 'uScreenPixelSize')
-  s = s.replace(/\bFRAGCOORD\b/g, 'gl_FragCoord')
-  s = s.replace(/\bTEXTURE\b/g, 'uTexture')
-  s = s.replace(/\bTIME\b/g, 'uTime')
-  s = s.replace(/\bUV\b/g, 'vUV')
-  // COLOR last so it doesn't partially match other names
-  s = s.replace(/\bCOLOR\b/g, 'gl_FragColor')
 
   // GLSL ES 1.0 uses texture2D(); gdshader/GLSL ES 3.0 uses texture()
   s = s.replace(/\btexture\s*\(/g, 'texture2D(')
@@ -99,8 +100,23 @@ function buildProgram(gl: WebGLRenderingContext, vertSrc: string, fragSrc: strin
 // ---------------------------------------------------------------------------
 
 interface ShaderPreviewProps {
-  /** Whether the preview sits beside or above the code block. Default: 'side' */
-  layout?: 'side' | 'top'
+  /**
+   * Maps to CSS `flex-direction` on the flex container.
+   * E.g. 'row' | 'row-reverse' | 'column' | 'column-reverse'
+   */
+  direction?: React.CSSProperties['flexDirection']
+  /**
+   * Maps to CSS `justify-content` on the flex container.
+   * Controls placement along the main (horizontal) axis.
+   * E.g. 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly'
+   */
+  layoutX?: React.CSSProperties['justifyContent']
+  /**
+   * Maps to CSS `align-items` on the flex container.
+   * Controls placement along the cross (vertical) axis.
+   * E.g. 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline'
+   */
+  layoutY?: React.CSSProperties['alignItems']
   /** URL of a sprite/image to use as TEXTURE. Defaults to kofi.png. */
   sprite?: string
   /**
@@ -115,9 +131,8 @@ interface ShaderPreviewProps {
   children?: string
 }
 
-export function ShaderPreview({ layout = 'side', sprite = defaultSprite, fullShader, children }: Readonly<ShaderPreviewProps>) {
+export function ShaderPreview({ direction = 'row', layoutX = 'flex-start', layoutY = 'center', sprite = defaultSprite, fullShader, children }: Readonly<ShaderPreviewProps>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [error, setError] = useState<string | null>(null)
 
   const displayCode = children ?? fullShader
 
@@ -143,16 +158,15 @@ export function ShaderPreview({ layout = 'side', sprite = defaultSprite, fullSha
     if (!canvas) return
 
     const gl = canvas.getContext('webgl')
-    if (!gl) { setError('WebGL not supported in this browser.'); return }
+    if (!gl) { return }
 
     const fragSrc = gdshaderToGLSL(fullShader)
 
     let program: WebGLProgram
     try {
       program = buildProgram(gl, VERT_SRC, fragSrc)
-      setError(null)
     } catch (e) {
-      setError(String(e))
+      console.log(String(e))
       return
     }
 
@@ -236,12 +250,9 @@ export function ShaderPreview({ layout = 'side', sprite = defaultSprite, fullSha
   }, [fullShader, sprite])
 
   return (
-    <div className={`shader-preview shader-preview--${layout}`}>
+    <div className="shader-preview" style={{ flexDirection: direction, justifyContent: layoutX, alignItems: layoutY }}>
       <div className="shader-preview-canvas-wrap">
         <canvas ref={canvasRef} width={256} height={256} className="shader-preview-canvas" />
-        {error && (
-          <pre className="shader-preview-error">{error}</pre>
-        )}
       </div>
       <div
         className="shader-preview-code"

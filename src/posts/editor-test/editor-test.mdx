@@ -3,7 +3,9 @@ import { ShaderPreview } from '../../components'
 import Kofi from '../../assets/link-icons/kofi.png'
 
 {/* Full shader — also shown as the code block */}
-<ShaderPreview fullShader={`shader_type canvas_item;
+<ShaderPreview 
+  layout="right"
+  fullShader={`shader_type canvas_item;
 
 void fragment() {
   vec2 uv = UV;
@@ -12,7 +14,9 @@ void fragment() {
 
 {/* Full shader on top, snippet shown in the code block */}
 <ShaderPreview
-  layout="top"
+  layoutX="center"
+  layoutY="center"
+  direction="column-reverse"
   fullShader={`shader_type canvas_item;
 void fragment() {
   COLOR = texture(TEXTURE, UV + vec2(sin(TIME * 2.0) * 0.05, 0.0));
@@ -24,6 +28,7 @@ UV + vec2(sin(TIME * 2.0) * 0.05, 0.0)`}
 
 {/* Custom sprite with a tint — full shader runs, snippet shown */}
 <ShaderPreview
+  layout="left"
   sprite={Kofi}
   fullShader={`shader_type canvas_item;
 void fragment() {
