@@ -27,6 +27,25 @@ varying vec2 vUV;
 #define COLOR gl_FragColor
 `
 
+// Removes a top-level `void <name>() { ... }` function, handling nested braces.
+function stripFunction(src: string, name: string): string {
+  const pattern = new RegExp(String.raw`void\s+${name}\s*\(\s*\)\s*\{`)
+  const match = pattern.exec(src)
+  if (!match) return src
+
+  let depth = 0
+  let i = match.index + match[0].length - 1 // position of opening '{'
+  while (i < src.length) {
+    if (src[i] === '{') depth++
+    else if (src[i] === '}') {
+      depth--
+      if (depth === 0) return src.slice(0, match.index) + src.slice(i + 1)
+    }
+    i++
+  }
+  return src // unbalanced — return as-is
+}
+
 function gdshaderToGLSL(raw: string): string {
   let s = raw
 
@@ -42,9 +61,8 @@ function gdshaderToGLSL(raw: string): string {
     s = `void main() {\n${s}\n}`
   }
 
-  // Strip any vertex() function entirely (not used in fragment WebGL)
-  s = s.replace(/void\s+vertex\s*\(\s*\)\s*\{[^}]*\}/gs, '')
-
+  // Strip any vertex() function (brace-counter handles nested blocks)
+  s = stripFunction(s, 'vertex')
 
   // GLSL ES 1.0 uses texture2D(); gdshader/GLSL ES 3.0 uses texture()
   s = s.replace(/\btexture\s*\(/g, 'texture2D(')
