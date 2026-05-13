@@ -1,6 +1,7 @@
 import Youtube from '../assets/link-icons/yt.png'
 import Kofi from '../assets/link-icons/kofi.png'
 import Patreon from '../assets/link-icons/patreon.png'
+import FangsAndFaith from '../assets/link-icons/fangs_and_faith.ico'
 
 type BaseItem = {
   id: string
@@ -80,6 +81,7 @@ export const items: DesktopItem[] = [
     id: 'fangs-and-faith',
     title: 'Fangs & Faith',
     emoji: '🎮',
+    icon: FangsAndFaith,
     type: 'link',
     parent: null,
     gridSlot: { x: 1, y: 4 },
