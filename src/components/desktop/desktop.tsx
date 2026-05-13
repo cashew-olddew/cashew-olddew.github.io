@@ -58,7 +58,7 @@ export function Desktop() {
     let content: React.ReactNode
     if (item.type === 'folder') {
       content = <Folder folderId={item.id} onOpen={openItem} />
-    } else {
+    } else if (item.type === 'post') {
       const { default: MDXContent } = await item.load()
       content = <div className="prose"><MDXContent /></div>
     }
@@ -68,7 +68,7 @@ export function Desktop() {
     setWindows(prev => {
       const newWindow: OpenWindow = {
         id: item.id,
-        title: `${item.emoji} ${item.title}`,
+        title: `${'emoji' in item ? item.emoji : ''} ${item.title}`,
         content,
         variant: item.type === 'folder' ? 'folder' : 'post',
         maximized: options?.maximized,

@@ -14,19 +14,12 @@
 
     >.icons-grid {
       position: absolute;
-      grid-template-columns: repeat(7, 5%); /* Magic */
     }
   }
 
   @media (max-width: 768px) {
     .desktop-taskbar {
       display: none;
-    }
-
-    .desktop-workspace {
-      >.icons-grid {
-        grid-template-columns: repeat(5, 20%);
-      }
     }
   }
 }

@@ -6,7 +6,6 @@ import FangsAndFaith from '../assets/link-icons/fangs_and_faith.ico'
 type BaseItem = {
   id: string
   title: string
-  emoji: string
   icon?: string
   parent: string | null
   gridSlot?: { x: number; y: number }
@@ -14,20 +13,28 @@ type BaseItem = {
 
 export type PostItem = BaseItem & {
   type: 'post'
+  emoji: string
   date?: string
   load: () => Promise<{ default: React.ComponentType }>
 }
 
 export type FolderItem = BaseItem & {
   type: 'folder'
+  emoji: string
+}
+
+export type GroupItem = BaseItem & {
+  type: 'group'
+  gridSpan: { cols: number; rows: number }
 }
 
 export type LinkItem = BaseItem & {
   type: 'link'
+  emoji: string
   url: string
 }
 
-export type DesktopItem = PostItem | FolderItem | LinkItem
+export type DesktopItem = PostItem | FolderItem | GroupItem | LinkItem
 
 export const items: DesktopItem[] = [
   {
@@ -48,13 +55,21 @@ export const items: DesktopItem[] = [
     load: () => import('./make-it-exist-first/make-it-exist-first.mdx'),
   },
   {
+    id: 'support-group',
+    title: 'Support my work',
+    type: 'group',
+    parent: null,
+    gridSlot: { x: 1, y: 3 },
+    gridSpan: { cols: 2, rows: 2 },
+  },
+  {
     id: 'support-kofi',
     title: 'Ko-Fi',
     emoji: '☕',
     icon: Kofi,
     type: 'link',
-    parent: null,
-    gridSlot: { x: 1, y: 3 },
+    parent: 'support-group',
+    gridSlot: { x: 1, y: 1 },
     url: 'https://ko-fi.com/cashewolddew',
   },
   {
@@ -63,8 +78,8 @@ export const items: DesktopItem[] = [
     emoji: '🪙',
     type: 'link',
     icon: Patreon,
-    parent: null,
-    gridSlot: { x: 2, y: 3 },
+    parent: 'support-group',
+    gridSlot: { x: 2, y: 1 },
     url: 'https://patreon.com/CashewOldDew',
   },
   {
@@ -73,8 +88,8 @@ export const items: DesktopItem[] = [
     emoji: '▶️',
     icon: Youtube,
     type: 'link',
-    parent: null,
-    gridSlot: { x: 2, y: 4 },
+    parent: 'support-group',
+    gridSlot: { x: 2, y: 2 },
     url: 'https://www.youtube.com/@cashewolddew/join',
   },
   {
@@ -83,8 +98,8 @@ export const items: DesktopItem[] = [
     emoji: '🎮',
     icon: FangsAndFaith,
     type: 'link',
-    parent: null,
-    gridSlot: { x: 1, y: 4 },
+    parent: 'support-group',
+    gridSlot: { x: 1, y: 2 },
     url: 'https://store.steampowered.com/app/3032430/Fangs__Faith_Solitaire/',
   },
 ]

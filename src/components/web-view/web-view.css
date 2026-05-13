@@ -6,6 +6,7 @@
     height: 100%;
     background: var(--surface);
     font-family: var(--font-hand);
+    --icons-group-title-bg: var(--surface);
   }
 
   .web-view-header {
