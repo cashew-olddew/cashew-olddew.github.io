@@ -55,15 +55,6 @@ export const items: DesktopItem[] = [
     load: () => import('./make-it-exist-first/make-it-exist-first.mdx'),
   },
   {
-    id: 'editor-test',
-    title: 'editor test',
-    emoji: '🥜',
-    type: 'post',
-    parent: null,
-    date: '2026-05-13',
-    load: () => import('./editor-test/editor-test.mdx'),
-  },
-  {
     id: 'support-group',
     title: 'Support my work',
     type: 'group',
