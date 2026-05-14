@@ -100,8 +100,6 @@
     cursor: grabbing;
   }
 
-  /* .window-body shared scrollable body styles live in .content-body (global.css) */
-
   /* Folder windows: fixed grid that fits the window; maximized folders: infinite auto-fill */
   .window--folder:not(.window--maximized) .icons-grid {
     grid-template-columns: repeat(4, 100px);

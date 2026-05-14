@@ -1,5 +1,6 @@
 @layer components {
   .web-view {
+    position: relative;
     display: flex;
     flex-direction: column;
     width: 100%;

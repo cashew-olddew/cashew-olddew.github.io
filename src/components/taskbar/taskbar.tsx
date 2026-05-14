@@ -14,7 +14,6 @@ interface TaskbarProps {
 export function Taskbar({ windows, onItemClick }: Readonly<TaskbarProps>) {
   return (
     <div className="taskbar">
-      <div className="taskbar-orb" />
       <div className="taskbar-items">
         {windows.map(w => (
           <button

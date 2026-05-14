@@ -1,0 +1,31 @@
+@layer components {
+  /* Shared reading progress bar for both web and window views */
+  .reading-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    z-index: 2;
+    background: transparent;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .reading-progress-bar {
+    height: 100%;
+    background: var(--orange-6);
+    transition: width 80ms linear;
+  }
+
+  /* Shared post date */
+  .post-date {
+    display: block;
+    margin: 0 auto var(--size-10) auto;
+    padding: 0 var(--size-2);
+    text-align: left;
+    font-size: var(--font-size-1);
+    font-weight: var(--font-weight-4);
+    opacity: 0.6;
+  }
+}
