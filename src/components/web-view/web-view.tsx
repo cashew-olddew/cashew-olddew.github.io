@@ -1,9 +1,12 @@
 ﻿import { useState, useEffect } from 'react'
+import { useScrollProgress } from '../../hooks/useScrollProgress'
 import { getChildren, items, type DesktopItem } from '../../posts'
 import { IconsGrid } from '../icons-grid/icons-grid'
 import { pushURL, replaceURL } from '../../utils/desktopURL'
+import { formatDate } from '../../utils/dateUtils'
 import ArrowLeft from '../../assets/ui/arrow-left.svg?react'
 import '../../styles/prose.css'
+import '../../styles/shared-components.css'
 import './web-view.css'
 
 interface MobilePage {
@@ -25,6 +28,7 @@ async function loadPage(item: DesktopItem): Promise<MobilePage> {
 
 export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewProps>) {
   const [stack, setStack] = useState<MobilePage[]>([])
+  const { progress: scrollProgress, onScroll, reset: resetScroll } = useScrollProgress()
 
   useEffect(() => {
     if (!initialStackIds?.length) { setStack([]); return }
@@ -48,6 +52,7 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
       return
     }
     const page = await loadPage(item)
+    resetScroll()
     setStack(prev => {
       const next = [...prev, page]
       pushURL(next.map(p => p.item.id), null, null, 'web')
@@ -55,11 +60,14 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
     })
   }
 
-  const goToIndex = (index: number) => setStack(prev => {
-    const next = prev.slice(0, index)
-    replaceURL(next.map(p => p.item.id), null, null, 'web')
-    return next
-  })
+  const goToIndex = (index: number) => {
+    resetScroll()
+    setStack(prev => {
+      const next = prev.slice(0, index)
+      replaceURL(next.map(p => p.item.id), null, null, 'web')
+      return next
+    })
+  }
 
   const goBack = () => goToIndex(stack.length - 1)
 
@@ -104,8 +112,19 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
           })}
         </nav>
       </div>
-      <div className="web-view-content content-body">
+      {current?.item.type === 'post' && (
+        <div className="reading-progress">
+          <div className="reading-progress-bar" style={{ width: `${scrollProgress * 100}%` }} />
+        </div>
+      )}
+      <div
+        className="web-view-content content-body"
+        onScroll={onScroll}
+      >
         {renderContent()}
+        {current?.item.type === 'post' && 'date' in current.item && current.item.date && (
+          <p className="post-date">{formatDate(current.item.date)}</p>
+        )}
       </div>
     </div>
   )

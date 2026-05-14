@@ -1,7 +1,10 @@
 import { motion, type Variants, useDragControls, useMotionValue } from "framer-motion";
 import { type RefObject, useRef } from "react";
+import { useScrollProgress } from "../../hooks/useScrollProgress";
+import { formatDate } from "../../utils/dateUtils";
 import "./window.css";
 import "../../styles/prose.css";
+import "../../styles/shared-components.css";
 
 import Cross from "../../assets/ui/cross.svg?react";
 import Maximize from '../../assets/ui/maximize.svg?react'
@@ -21,6 +24,7 @@ interface WindowProps {
   maximized?: boolean
   minimized?: boolean
   variant?: 'folder' | 'post'
+  date?: string
 
   windowPosition: WindowPosition;
 }
@@ -64,8 +68,10 @@ export function Window({
   maximized,
   minimized,
   variant = 'post',
+  date,
   windowPosition,
 }: Readonly<WindowProps>) {
+  const { progress: scrollProgress, onScroll } = useScrollProgress()
   const dragControls = useDragControls();
   const x = useMotionValue(windowPosition.defaultPosition.x);
   const y = useMotionValue(windowPosition.defaultPosition.y);
@@ -125,7 +131,20 @@ export function Window({
           </button>
         </div>
       </div>
-      <div className="window-body content-body">{children}</div>
+      {variant === 'post' && (
+        <div className="reading-progress">
+          <div className="reading-progress-bar" style={{ width: `${scrollProgress * 100}%` }} />
+        </div>
+      )}
+      <div
+        className="window-body content-body"
+        onScroll={onScroll}
+      >
+        {children}
+        {date && variant === 'post' && (
+          <p className="post-date">{formatDate(date)}</p>
+        )}
+      </div>
     </motion.div>
   );
 }

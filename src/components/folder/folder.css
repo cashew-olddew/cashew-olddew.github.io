@@ -1,0 +1,32 @@
+@layer components {
+  .folder {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .folder-toolbar {
+    position: absolute;
+    right: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--size-1) var(--size-2);
+    flex-shrink: 0;
+  }
+
+  .folder-sort-btn {
+    appearance: none;
+    background: none;
+    font-family: var(--font-hand);
+    font-size: var(--font-size-0);
+    font-weight: var(--font-weight-6);
+    cursor: pointer;
+    padding: var(--size-1) var(--size-2);
+    opacity: 0.65;
+    transition: opacity 0.15s var(--ease-2);
+  }
+
+  .folder-sort-btn:hover {
+    opacity: 1;
+  }
+}

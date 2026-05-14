@@ -17,6 +17,7 @@ interface OpenWindow {
   content: React.ReactNode
   windowPosition: WindowPosition
   variant: 'folder' | 'post'
+  date?: string
   maximized?: boolean
   minimized?: boolean
 }
@@ -71,6 +72,7 @@ export function Desktop() {
         title: `${'emoji' in item ? item.emoji : ''} ${item.title}`,
         content,
         variant: item.type === 'folder' ? 'folder' : 'post',
+        date: item.type === 'post' ? item.date : undefined,
         maximized: options?.maximized,
         windowPosition: {
           zIndex: topZRef.current,
@@ -216,6 +218,7 @@ export function Desktop() {
                       maximized={w.maximized}
                       minimized={w.minimized}
                       variant={w.variant}
+                      date={w.date}
                     >
                       {w.content}
                     </Window>
