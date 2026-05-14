@@ -1,0 +1,57 @@
+import { Media, MediaGroup, Separator, Align } from '../../../components'
+import Hint from '../../../components/prose/hint'
+
+import shaderExample1 from './assets/shader-example-gif.webm'
+import shaderExample2 from './assets/shader-example-gif-2.webm'
+import shaderExample3 from './assets/shader-example-gif-3.webm'
+
+# Shaders Introduction
+
+It's very hard for me to put into words how much I love shaders, so instead I'm going to tell you how much they made me suffer!
+
+Alright, '_suffer_' might be too harsh of a word, but I can definitely say that I didn't always have a great time in my shader learning process.
+Here's why:
+
+#### Shaders are intimidating
+
+<Separator />
+
+Let's say that you just heard about this cool new "shaders" thing. 
+You search the term on the internet and find yourself in awe with just how great Minecraft can look.
+You install a shader and enter the 2 week Minecraft phase.
+
+Time passes and you grow to be a wiser person. 
+The next time you search for shaders, you add "programming" to the query because now you actually want to learn how they work.
+You find this cool [shadertoy](https://www.shadertoy.com/) website and you're struck with a different kind of awe.
+Literal pieces of art, expanding, moving, self-replicating, _infinite_.
+
+I'll just let the images speak for themselves:
+
+<MediaGroup>
+    <Media label="Credits: whisky_shusuky">
+        <video src={shaderExample1} autoPlay loop muted playsInline />
+    </Media>
+    <Media label="Credits: Jan Mróz">
+        <video src={shaderExample2} autoPlay loop muted playsInline />
+    </Media>
+    <Media label="Credits: Danilw">
+        <video src={shaderExample3} autoPlay loop muted playsInline />
+    </Media>
+</MediaGroup>
+
+But the real art is the code behind those visuals. They say art is meant to be admired, not understood, which is lucky because, _Oh My God_, look at this thing:
+
+```glsl title="The mountain shape in the Cyber Fuji shader"
+    vec2 k1 = vec2(r2,he);
+    vec2 k2 = vec2(r2-r1,2.0*he);
+    p.x = abs(p.x);
+    vec2 ca = vec2(p.x-min(p.x,(p.y<0.0)?r1:r2), abs(p.y)-he);
+    vec2 cb = p - k1 + k2*clamp( dot(k1-p,k2)/dot2(k2), 0.0, 1.0 );
+    float s = (cb.x<0.0 && ca.y<0.0) ? -1.0 : 1.0;
+    return s*sqrt( min(dot2(ca),dot2(cb)) );
+```
+
+Less lucky, though, is that your GPU doesn't have an appreciation for aesthetics, so maybe you do have to understand it a little. 
+
+>If you're tempted to close the tab now, I don't blame you, but I promise shaders are worth it.
+

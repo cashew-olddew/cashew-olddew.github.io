@@ -46,6 +46,23 @@ export const items: DesktopItem[] = [
     gridSlot: { x: 1, y: 1 },
   },
   {
+    id: 'shaders',
+    title: 'Shaders',
+    emoji: '🎨',
+    type: 'folder',
+    parent: null,
+    gridSlot: { x: 2, y: 1 },
+  },
+  {
+    id: 'shaders-1',
+    title: "1. Shaders Introduction",
+    emoji: '🎨',
+    type: 'post',
+    parent: 'shaders',
+    date: '2026-05-16',
+    load: () => import('./shaders/1-shaders-introduction/1-shaders-introduction.mdx')
+  },
+  {
     id: 'make-it-exist-first',
     title: 'Make it exist',
     emoji: '🥜',
