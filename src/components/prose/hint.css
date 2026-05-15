@@ -32,7 +32,7 @@
     line-height: var(--font-lineheight-3);
     white-space: normal;
     max-width: min(480px, 80vw);
-    min-width: 160px;
+    min-width: 300px;
 
     padding: var(--size-1) var(--size-2);
     border-style: solid;

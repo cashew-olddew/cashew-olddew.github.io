@@ -5,6 +5,15 @@ import shaderExample1 from './assets/shader-example-gif.webm'
 import shaderExample2 from './assets/shader-example-gif-2.webm'
 import shaderExample3 from './assets/shader-example-gif-3.webm'
 
+import bookOfShadersExample from './assets/book-of-shaders-example.jpg'
+import cloudsShader from './assets/clouds-shader.gif'
+import binbunCard from './assets/binbun-card.gif'
+import binbunPortal from './assets/binbun-portal.gif'
+
+import multiplyEffect from './assets/multiply.jpg'
+import gimpGradient from './assets/gimp-gradient.jpg'
+import gimpLevels from './assets/gimp-levels.jpg'
+
 # Shaders Introduction
 
 It's very hard for me to put into words how much I love shaders, so instead I'm going to tell you how much they made me suffer!
@@ -75,7 +84,9 @@ It is an extraordinarily useful slice of knowledge and it's in GLSL, so it's eas
 However, I don't think it's a good resource to start with for beginners. At least, it wasn't for me. 
 For some reason, once I reached the 5th page of the book, it was pretty hard to continue.
 
--- insert example image with what I mean here --
+<Media label="Book of Shaders - Algorithmic Drawing" width="600px">
+    <img src={bookOfShadersExample} alt="Code example from book of shaders"/>
+</Media>
 
 Maybe it was too much information at once or maybe it was my math debt piling up, I'm not sure.. 
 but I remember clearly that I just couldn't wrap my head around the code examples and their results anymore.
@@ -97,11 +108,20 @@ There are a lot of practical and unbelievable effects you can achieve with reall
 
 Take for example this wonderful [Clouds shader](https://godotshaders.com/shader/pixelated-radial-2d-clouds/) from Miaurin:
 
--- Insert shader gif here --
+<Media label={`"Pixelated, radial 2D - Clouds" by Miaurin`} width="680px">
+    <img src={cloudsShader} alt="Pixelated cloud shader by Miaurin"/>
+</Media>
 
 Or pretty much any of Binbun's amazing VFX Packs:
 
--- Insert gifs with binbun's work --
+<MediaGroup align="center">
+    <Media label={`"Godot Card FX" by Binbun`}>
+        [<img src={binbunCard} alt="Godot Card FX by Binbun"/>](https://binbun3d.itch.io/godot-card-fx)
+    </Media>
+    <Media label={`"Godot Portal VFX" by Binbun`} witdh={"900px"}>
+        [<img src={binbunPortal} alt="Godot Portal VFX by Binbun"/>](https://binbun3d.itch.io/godot-portal-vfx)
+    </Media>
+</MediaGroup>
 
 All of these are not built from arcane rituals, they are built from small ideas layered together:
 - movement
@@ -133,7 +153,9 @@ The return value is computed as x*(1−a)+y*a.
 You probably could digest this definition, try to understand it, memorize it and find its use cases. 
 However, there's a much simpler way to think about this function: a gradient tool!
 
--- insert image of gradient with weight slider --
+<Media label={`Gimp Gradient`}>
+    <img src={gimpGradient} alt="Gimp Gradient"/>
+</Media>
 
 Yup, that tool you have in all image editing programs. That's it! You have two colors and a weight.
 I bet that this representation of the _mix_ function will stay with you for longer than the definition I provided earlier.
@@ -142,11 +164,15 @@ This analogy works so well because it's also true the other way around. Your ima
 
 If you apply a multiply blending mode to a layer, what does that do? It literally multiplies pixel colors with what's below.
 
--- image with multiply blending mode and result --
+<Media label={`Multiply`} width="680px">
+    <img src={multiplyEffect} alt="Color Multiply Effect"/>
+</Media>
 
-If you use levels, you're pretty much using an inverse lerp on that image.
+If you use levels, you're pretty much using an <Hint message={"This is pretty much a re-scaling. When you move the pointers in a levels tab you're telling the program something like: 'Hey, the left pointer is the new black, the right pointer is perfect white. Figure out everything in between."}>inverse lerp</Hint> on that image.
 
--- show image with the 'levels' tab in Photoshop --
+<Media label={`Gimp Levels`}>
+    <img src={gimpLevels} alt="Gimp Levels"/>
+</Media>
 
 And pretty much every little button and slider you see is, most probably, just some math in disguise.
 
