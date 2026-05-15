@@ -10,7 +10,7 @@ import shaderExample3 from './assets/shader-example-gif-3.webm'
 It's very hard for me to put into words how much I love shaders, so instead I'm going to tell you how much they made me suffer!
 
 Alright, '_suffer_' might be too harsh of a word, but I can definitely say that I didn't always have a great time in my shader learning process.
-Here's why:
+
 
 #### Shaders are intimidating
 
@@ -51,7 +51,132 @@ But the real art is the code behind those visuals. They say art is meant to be a
     return s*sqrt( min(dot2(ca),dot2(cb)) );
 ```
 
-Less lucky, though, is that your GPU doesn't have an appreciation for aesthetics, so maybe you do have to understand it a little. 
+Less lucky, though, is that your GPU doesn't have an appreciation for aesthetics and would rather delect itself with the actual code.
 
->If you're tempted to close the tab now, I don't blame you, but I promise shaders are worth it.
+>If you're tempted to close the tab now, I don't blame you, I also had to take a break after looking at that code.
+>But before you do, I'll tell you a secret: **It's not actually as impossible as it looks**.
+>
+>I spent a long time feeling stuck until I realized that shaders are actually much closer to a tool you probably already use every day.
+>We'll get to that in a second, but first, let's talk about the elephant in the room.
+
+
+#### Shaders use lots of math.. which is also intimidating
+
+<Separator />
+
+Now, I am the kind of person that likes math, but even for someone like me, it was pretty hard to get into it,
+especially since you forget a lot when not in contact with a subject. And again, _I like math_, but it still felt that way. 
+It's hard to imagine what someone who dislikes math feels when getting in this position.
+
+It's alright, though, there are probably lots of great resources to learn from. 
+For example, the golden standard most people hear about is [The Book of Shaders](https://thebookofshaders.com/) by Patricio Gonzalez Vivo.
+It is an extraordinarily useful slice of knowledge and it's in GLSL, so it's easily translatable to Godot Shaders.
+
+However, I don't think it's a good resource to start with for beginners. At least, it wasn't for me. 
+For some reason, once I reached the 5th page of the book, it was pretty hard to continue.
+
+-- insert example image with what I mean here --
+
+Maybe it was too much information at once or maybe it was my math debt piling up, I'm not sure.. 
+but I remember clearly that I just couldn't wrap my head around the code examples and their results anymore.
+
+Now that I am more versed with shaders, I've come to appreciate how great of a resource this is, but when I began learning, I almost lost all my motivation because of how hard this seemed to be.
+>This was the _GOLD STANDARD_... everyone was recommending this.. It must've been a problem with me. Maybe I simply didn't have what it takes to learn shaders...
+
+#### So.. what now?
+
+<Separator />
+
+The past section was probably a bit depressing, so let's steer a bit.
+If you found some of yourself in there, a few of your own thoughts, then I have great news. 
+
+There is a way for anyone (yes, that includes you) to learn shaders, and with this blog I'm going to help you find it!
+
+You might be thinking: _"But I'll never be able to do insane things like the ones on Shadertoy"_. Well, you don't have to!
+There are a lot of practical and unbelievable effects you can achieve with really basic shader understanding.
+
+Take for example this wonderful [Clouds shader](https://godotshaders.com/shader/pixelated-radial-2d-clouds/) from Miaurin:
+
+-- Insert shader gif here --
+
+Or pretty much any of Binbun's amazing VFX Packs:
+
+-- Insert gifs with binbun's work --
+
+All of these are not built from arcane rituals, they are built from small ideas layered together:
+- movement
+- masks
+- gradients
+- noise
+- color manipulation
+
+The complexity comes from composition, not individual difficulty. 
+
+<Separator />
+
+You might also think: _"Alright, but even so, I don't know math, just thinking about math makes me want to spin around in my chair"_.
+
+I imagine how this must feel, especially if you don't have a spinning chair. But let me tell you:
+
+<Align align="center"><h2>YOU DO NOT NEED MATH IN ORDER TO WRITE GOOD SHADERS!\*</h2></Align>
+
+Remember how I said shaders are like a tool you already use? If you've ever opened Photoshop, GIMP, or any image editor, you already understand the core principles.
+
+Let me give you a concrete example. Take a look at the mix function's description:
+
+```glsl
+Mix performs a linear interpolation between x and y 
+using a to weight between them. 
+The return value is computed as x*(1−a)+y*a.
+```
+
+You probably could digest this definition, try to understand it, memorize it and find its use cases. 
+However, there's a much simpler way to think about this function: a gradient tool!
+
+-- insert image of gradient with weight slider --
+
+Yup, that tool you have in all image editing programs. That's it! You have two colors and a weight.
+I bet that this representation of the _mix_ function will stay with you for longer than the definition I provided earlier.
+
+This analogy works so well because it's also true the other way around. Your image editing tools have math behind.
+
+If you apply a multiply blending mode to a layer, what does that do? It literally multiplies pixel colors with what's below.
+
+-- image with multiply blending mode and result --
+
+If you use levels, you're pretty much using an inverse lerp on that image.
+
+-- show image with the 'levels' tab in Photoshop --
+
+And pretty much every little button and slider you see is, most probably, just some math in disguise.
+
+So then, if most tools in a drawing app are just math behind the scenes, why not think of math functions inside shaders as just being some tools?
+Following this perspective makes everything easier to understand:
+- The _step()_ function? That's a Layer Mask.
+- The _mix()_ function? That's the gradient tool we were talking about.
+- UV coordinates? That's just your canvas.
+- Mathematical functions? Those are just the brushes you draw with.
+- The guy giving too many examples? That's me!
+
+You get the point!
+
+#### Next steps
+
+<Separator />
+
+In the next posts I want to make you move away from thinking 'shaders are scary math' and toward thinking 'I can do this!'.
+
+The goal of this course will not be to turn you into a human computer, but rather, to make the computer code feel more human.
+I want to teach you to focus on visual intuition, rather than just formulas and calculation, because, at the end of the day, a shader isn't a math problem to be solved, it's a visual effect to be crafted.
+
+#### Support the Journey
+
+<Separator />
+
+Learning shaders changed the way I look at game development and I want to make that transition as smooth as possible for you.
+
+If you find this approach helpful and want to see this series grow, I'd love your support. I'm currently considering making this into a more robust project,
+with shader packages and utilities, learning exercises, shader experiments and more.
+
+Also, seriously, get yourself a spinning chair. You're probably going to need it.
 
