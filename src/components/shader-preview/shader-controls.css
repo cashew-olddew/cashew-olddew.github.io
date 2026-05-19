@@ -1,0 +1,53 @@
+@layer components {
+
+  .shader-preview-controls {
+    display: flex;
+    flex-direction: column;
+    font-size: 1rem;
+  }
+
+  .shader-preview-control {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--size-2, 8px);
+    cursor: default;
+  }
+
+  .shader-preview-control-label {
+    font-family: monospace;
+    min-width: 2ch;
+    user-select: none;
+  }
+
+  .shader-preview-control-comp {
+    font-family: monospace;
+    font-size: 0.75em;
+    color: var(--stone-7);
+    min-width: 1ch;
+    user-select: none;
+  }
+
+  .shader-preview-control input[type="range"] {
+    flex: 1;
+    max-width: 30%;
+    cursor: pointer;
+  }
+
+  .shader-preview-control-color {
+    width: 4rem;
+    height: 2rem;
+    padding: 1px 2px;
+    border: 1px solid var(--stone-5);
+    border-radius: 3px;
+    cursor: pointer;
+    background: none;
+  }
+
+  .shader-preview-control-value {
+    font-family: monospace;
+    min-width: 4ch;
+    text-align: right;
+    user-select: none;
+  }
+}
