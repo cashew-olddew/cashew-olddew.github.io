@@ -55,6 +55,9 @@ export function gdshaderToGLSL(raw: string): string {
   s = s.replace(/shader_type\s+\w+\s*;/g, '')
   s = s.replace(/render_mode\s+[^;]+;/g, '')
 
+  // Strip Godot uniform hints (: source_color, : hint_range(...), etc.) and default values
+  s = s.replace(/(uniform\s+\w+\s+\w+)\s*(?::[^=;\n]+)?(?:=[^;\n]+)?;/g, '$1;')
+
   // If there is no fragment entry point, treat the whole thing as the body
   const hasEntry = /void\s+fragment\s*\(\s*\)/.test(s)
   if (hasEntry) {

@@ -43,7 +43,7 @@
 
   .prose :not(pre) > code {
     background: #fdf6e3; /* from the everforest-light theme - to be adapted for dark mode*/
-    padding: 0.1em 0.35em;
+    padding: 0 0.35em;
     border-radius: 5px;
 
     border-style: solid;
