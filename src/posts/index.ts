@@ -63,6 +63,15 @@ export const items: DesktopItem[] = [
     load: () => import('./shaders/1-shaders-introduction/1-shaders-introduction.mdx')
   },
   {
+    id: 'shaders-2',
+    title: '2. Shader Basics',
+    emoji: '🖼️',
+    type: 'post',
+    parent: 'shaders',
+    date: '2026-05-19',
+    load: () => import('./shaders/2-shader-basics/2-shader-basics.mdx'),
+  },
+  {
     id: 'make-it-exist-first',
     title: 'Make it exist',
     emoji: '🥜',

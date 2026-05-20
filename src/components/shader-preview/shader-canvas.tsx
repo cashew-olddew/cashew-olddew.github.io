@@ -8,13 +8,14 @@ interface ShaderCanvasProps {
   fullShader: string
   sprite: string
   size?: number
+  border?: boolean
   controlsRef: { current: Record<string, UniformControlDef> | undefined }
   controlValuesRef: { current: Record<string, number> }
   colorValuesRef: { current: Record<string, string> }
   vecValuesRef: { current: Record<string, number[]> }
 }
 
-export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, controlValuesRef, colorValuesRef, vecValuesRef }: Readonly<ShaderCanvasProps>) {
+export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, controlsRef, controlValuesRef, colorValuesRef, vecValuesRef }: Readonly<ShaderCanvasProps>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -71,8 +72,9 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
 
     // Uniforms not wired to controls: seed from the shader's own default values
     const controlledNames = new Set(Object.keys(controlsRef.current ?? {}))
+    const shaderUniforms = parseUniformDefaults(fullShader)
     const defaultLocs: [UniformDefault, WebGLUniformLocation | null][] = []
-    for (const [name, def] of Object.entries(parseUniformDefaults(fullShader))) {
+    for (const [name, def] of Object.entries(shaderUniforms)) {
       if (!controlledNames.has(name)) {
         defaultLocs.push([def, gl.getUniformLocation(program, name)])
       }
@@ -125,7 +127,8 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
       for (const [name, loc] of colorLocs) {
         if (loc !== null) {
           const [r, g, b] = hexToRgb(colorValuesRef.current[name] ?? '#ffffff')
-          gl!.uniform3f(loc, r, g, b)
+          if (shaderUniforms[name]?.type === 'vec4') gl!.uniform4f(loc, r, g, b, 1.0)
+          else gl!.uniform3f(loc, r, g, b)
         }
       }
       for (const [name, count, loc] of vecLocs) {
@@ -171,7 +174,7 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
   }, [fullShader, sprite])
 
   return (
-    <div className="shader-preview-canvas-wrap">
+    <div className={`shader-preview-canvas-wrap${border ? '' : ' no-border'}`}>
       <canvas ref={canvasRef} width={size * 2} height={size * 2} className="shader-preview-canvas" style={{ width: size, height: size }} />
     </div>
   )

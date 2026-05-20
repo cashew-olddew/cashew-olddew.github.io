@@ -43,6 +43,10 @@
     border-image: url('../../assets/ui/border.svg') 12 stretch;
   }
 
+  .shader-preview-canvas-wrap.no-border::before {
+    display: none;
+  }
+
   .shader-preview-canvas {
     display: block;
     position: relative;

@@ -51,9 +51,11 @@ interface ShaderPreviewProps {
   controls?: Record<string, UniformControlDef>
   /** Whether to show the syntax-highlighted code block. Default: true. */
   showCode?: boolean
+  /** Whether to show the decorative border around the canvas. Default: true. */
+  border?: boolean
 }
 
-export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, fullShader, children, controls, showCode = true }: Readonly<ShaderPreviewProps>) {
+export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, fullShader, children, controls, showCode = true, border = true }: Readonly<ShaderPreviewProps>) {
   const [controlValues, setControlValues] = useState<Record<string, number>>(() => {
     if (!controls) return {}
     return Object.fromEntries(
@@ -111,18 +113,20 @@ export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, 
   )
 
   useEffect(() => {
+    if (!showCode) return
     const escaped = `<pre><code>${displayCode.replaceAll('<', '&lt;')}</code></pre>`
     setHighlightedCode(escaped)
     codeToHtml(displayCode, { lang: 'glsl', theme: 'everforest-light' })
       .then(html => setHighlightedCode(html))
       .catch(() => { /* keep plain fallback */ })
-  }, [displayCode])
+  }, [displayCode, showCode])
 
   const canvasEl = (
     <ShaderCanvas
       fullShader={fullShader}
       sprite={sprite}
       size={size}
+      border={border}
       controlsRef={controlsRef}
       controlValuesRef={controlValuesRef}
       colorValuesRef={colorValuesRef}
