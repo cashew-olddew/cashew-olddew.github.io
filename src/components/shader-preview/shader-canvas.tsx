@@ -79,8 +79,10 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
+    let destroyed = false
     const img = new Image()
     img.onload = () => {
+      if (destroyed) return
       texW = img.width; texH = img.height
       gl.bindTexture(gl.TEXTURE_2D, texture)
       // WebGL1: no mipmaps for NPOT textures — use LINEAR + CLAMP_TO_EDGE
@@ -94,6 +96,7 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
 
     const start = performance.now()
     let raf = 0
+    let running = false
 
     function render() {
       const t = (performance.now() - start) / 1000
@@ -128,10 +131,21 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
       raf = requestAnimationFrame(render)
     }
 
-    raf = requestAnimationFrame(render)
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !running) {
+        running = true
+        raf = requestAnimationFrame(render)
+      } else if (!entry.isIntersecting && running) {
+        running = false
+        cancelAnimationFrame(raf)
+      }
+    }, { threshold: 0 })
+    observer.observe(canvas)
 
     return () => {
+      destroyed = true
       cancelAnimationFrame(raf)
+      observer.disconnect()
       gl.deleteProgram(program)
       gl.deleteBuffer(buf)
       gl.deleteTexture(texture)
