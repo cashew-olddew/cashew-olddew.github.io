@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import type { UniformControlDef } from './shader-preview'
-import { gdshaderToGLSL, VERT_SRC } from './shader-glsl'
+import { gdshaderToGLSL, VERT_SRC, parseUniformDefaults, type UniformDefault } from './shader-glsl'
 import { buildProgram, hexToRgb } from './shader-webgl'
 import './shader-canvas.css'
 
@@ -69,6 +69,15 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
       else customLocs.push([name, loc])
     }
 
+    // Uniforms not wired to controls: seed from the shader's own default values
+    const controlledNames = new Set(Object.keys(controlsRef.current ?? {}))
+    const defaultLocs: [UniformDefault, WebGLUniformLocation | null][] = []
+    for (const [name, def] of Object.entries(parseUniformDefaults(fullShader))) {
+      if (!controlledNames.has(name)) {
+        defaultLocs.push([def, gl.getUniformLocation(program, name)])
+      }
+    }
+
     // Create texture — start with a 1×1 transparent pixel while the image loads
     const texture = gl.createTexture()!
     let texW = 1, texH = 1
@@ -124,6 +133,15 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, controlsRef, cont
           const vals = vecValuesRef.current[name] ?? Array.from({ length: count }, () => 0)
           if (count === 2) gl!.uniform2f(loc, vals[0] ?? 0, vals[1] ?? 0)
           else gl!.uniform3f(loc, vals[0] ?? 0, vals[1] ?? 0, vals[2] ?? 0)
+        }
+      }
+      for (const [def, loc] of defaultLocs) {
+        if (loc !== null) {
+          const v = def.value
+          if (def.type === 'float') gl!.uniform1f(loc, v[0] ?? 0)
+          else if (def.type === 'vec2') gl!.uniform2f(loc, v[0] ?? 0, v[1] ?? 0)
+          else if (def.type === 'vec3') gl!.uniform3f(loc, v[0] ?? 0, v[1] ?? 0, v[2] ?? 0)
+          else gl!.uniform4f(loc, v[0] ?? 0, v[1] ?? 0, v[2] ?? 0, v[3] ?? 0)
         }
       }
       gl!.bindBuffer(gl!.ARRAY_BUFFER, buf)

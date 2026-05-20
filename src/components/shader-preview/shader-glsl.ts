@@ -74,3 +74,31 @@ export function gdshaderToGLSL(raw: string): string {
 
   return FRAG_PREAMBLE + '\n' + s
 }
+
+export interface UniformDefault {
+  type: 'float' | 'vec2' | 'vec3' | 'vec4'
+  value: number[]
+}
+
+/** Parses uniform declarations from a gdshader source, returning name → type + default value. */
+export function parseUniformDefaults(src: string): Record<string, UniformDefault> {
+  const result: Record<string, UniformDefault> = {}
+  const pattern = /uniform\s+(float|vec[234])\s+(\w+)\s*(?::[^=;\n]+)?(?:=\s*([^;\n]+))?;/g
+  let match: RegExpExecArray | null
+  while ((match = pattern.exec(src)) !== null) {
+    const type = match[1] as UniformDefault['type']
+    const name = match[2]
+    const defaultStr = match[3]?.trim()
+    let value: number[]
+    if (defaultStr) {
+      value = type === 'float'
+        ? [parseFloat(defaultStr)]
+        : (defaultStr.match(/\(([^)]+)\)/)?.[1] ?? '').split(',').map(s => parseFloat(s.trim()))
+    } else {
+      const count = type === 'float' ? 1 : parseInt(type[3])
+      value = Array.from({ length: count }, () => 0)
+    }
+    result[name] = { type, value }
+  }
+  return result
+}

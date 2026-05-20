@@ -49,9 +49,11 @@ interface ShaderPreviewProps {
    * Declare matching uniforms in your shader, e.g. `uniform float uSpeed;`
    */
   controls?: Record<string, UniformControlDef>
+  /** Whether to show the syntax-highlighted code block. Default: true. */
+  showCode?: boolean
 }
 
-export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, fullShader, children, controls }: Readonly<ShaderPreviewProps>) {
+export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, fullShader, children, controls, showCode = true }: Readonly<ShaderPreviewProps>) {
   const [controlValues, setControlValues] = useState<Record<string, number>>(() => {
     if (!controls) return {}
     return Object.fromEntries(
@@ -145,11 +147,13 @@ export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, 
 
   return (
     <div className="shader-preview">
-      <div
-        className="shader-preview-code"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: highlightedCode }}
-      />
+      {showCode && (
+        <div
+          className="shader-preview-code"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: highlightedCode }}
+        />
+      )}
       <div className="shader-preview-canvas-group" style={{ alignSelf }}>
         {canvasEl}
         {controlsEl}
