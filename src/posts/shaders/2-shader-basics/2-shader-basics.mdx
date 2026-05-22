@@ -1,4 +1,4 @@
-import { ShaderPreview, Separator, RevealSection, Media, Align } from '../../../components'
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color } from '../../../components'
 import Hint from '../../../components/prose/hint'
 
 import roll from './assets/Roll.mp4'
@@ -133,7 +133,7 @@ If you squint <Hint message="Please, don't hurt your eyes!">even harder</Hint> y
 
 Let's make a blue thing, then!
 
-A color is generally represented through four channels: @#$ADD COLORS HERE $@#$@# Red, Green, Blue and <Hint message="This one is used to specify the color's transparency">Alpha</Hint>.
+A color is generally represented through four channels: <Color hex="#EE1111">Red</Color>, <Color hex="#11BB11">Green</Color>, <Color hex="#1111EE">Blue</Color> and <Hint message="This one is used to specify the color's transparency">Alpha</Hint>.
 In Godot shaders, these values range between `0-1`, with '0' meaning that a color is fully absent and '1' meaning that it's fully <Hint message="🎁">present</Hint>.
 
 With this in mind, each color amount is a floating point number. We can define these inside a shader like this:
@@ -174,18 +174,20 @@ What do you think Built-in variables are? You're a smart cookie! Write it down i
 <Align align="center"><input type="text"></input></Align>
 
 Alright, the text field <Hint message="Well, it technically does keep you engaged in the learning process, so it's quite valuable. Give it a ':)' as a sign of thanks!">does absolutely nothing</Hint>, 
-but you probably figured out from their name that Built-ins are.. variables that are _built in_, provided to us before we get to write even a single line of code.
+but you probably figured out from their name that Built-ins are, well.. variables that are _built in_, provided to us before we get to write even a single line of code.
 
 These special variables serve two main purposes:
-- **They provide context to us**: Giving us handy information like <Hint message="Tells us the time since the engine started">TIME</Hint>, <Hint message="Gives us a dessert">PI</Hint> or <Hint message="Tells us the current Vertex position in local space">VERTEX</Hint>.
+- **They provide context to us**: Giving us handy information like <Hint message="Tells us the time since the engine started">TIME</Hint>, <Hint message="Tells us the current Vertex position in local space">VERTEX</Hint> or <Hint message="Gives us a sweet dessert!">PI</Hint>
 - **They help us provide context to the GPU**: Giving us places to drop our data, like <Hint message="Lets us tell the GPU what color we want the current pixel to have">COLOR</Hint> or <Hint message="Yes, again! Some built-ins allow us to both read and write to them.">VERTEX (again?)</Hint>.
 
 There are lots of other Built-ins that we're going to unlock as we expand our knowledge through this course, but for now, let's focus on the `COLOR` built-in, so that we can tell the GPU to draw our portal color.
 
-Now, your first instinct (especially if you've done any kind of programming before), might be to write something like this:
+Your first instinct, especially if you've done any kind of traditional programming before, might be to write something like this to fill the portal:
 
+<div className="prose-error-code">
 ```gdshader
 void fragment() {
+  // This is NOT how shaders actually work!
   vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
 
   // Go through each pixel to assign its color
@@ -196,23 +198,47 @@ void fragment() {
   }
 }
 ```
+</div>
 
-But this is **wrong!**
+This is how I thought about it when I first learned shaders.
 
--- below this it's just a draft
+I mean, it makes sense: 
+ - you grab the canvas
+ - loop over its width and height
+ - and then color every single pixel one by one
 
--- here I add the example in which I specify how our brains want shader programming to work (making every pixel blue) --
-``` something like this 
-// --- CRITICAL MISCONCEPTION ---
-// How our brains want shader programming to work:
-for (int x = 0; x < canvas.width; x++) {
-    for (int y = 0; y < canvas.height; y++) {
-        COLOR[x][y] = portal_color;
-    }
+Things are quite different when writing shaders.<br/>
+A key thing to understand is that you're not writing code for the whole image. You're writing code for <Hint message="Or for a single vertex if you're in the vertex() function!">a single pixel</Hint>! That exact same code is run by the GPU **at the same time** for every other pixel.
+
+In the words of Pixel#16152:
+
+> I have never met the pixel next to me.<br/>
+> I do not know their place, or what they do,<br/>
+> For neither they nor I came first to be.<br/>
+>
+> Yet, far beyond my narrow, lonely view,<br/>
+> The selfsame code ignites another light,<br/>
+> We're all in isolation, separate and blue,<br/>
+> Yet painting the same picture, perfectly aligned.<br/>
+
+If sit with that for a moment, everything starts to make sense. 
+Our pixel doesn't need to know what the rest of the canvas looks like. Even if it wanted to, it couldn't.
+All the pixel needs to do is follow its own rulebook, and in this case, it should simply accept its blue fate: 
+
+```gdshader
+void fragment() {
+    vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+    
+    // The current pixel should have the portal color!
+    COLOR = portal_color; 
 }
 ```
 
+And just like that, we have our blue thing!
+
+-- image of the blue canvas --
 </RevealSection>
+
 
 
 {/* 
