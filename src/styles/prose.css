@@ -124,4 +124,26 @@
     border-top: 2px dashed var(--accent-soft);
     margin: var(--size-7) 0;
   }
+
+  .prose input[type="text"] {
+    background: #fdf6e3;
+    color: var(--text);
+
+    margin-bottom: var(--size-4);
+    padding: var(--size-1) var(--size-2);
+    font-size: var(--font-size-1);
+    
+    outline: none;
+    border-style: solid;
+    border-width: 4px;
+    border-image: url('../assets/ui/border.svg') 12 stretch;
+
+    width: 80%;
+    max-width: 400px;
+
+  }
+
+  .prose-error-code pre {
+    border-image: url('../assets/ui/border-error.svg') 12 stretch !important;
+  }
 }
