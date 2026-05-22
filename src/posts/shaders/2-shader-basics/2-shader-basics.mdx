@@ -1,0 +1,363 @@
+import { ShaderPreview, Separator, RevealSection, Media, Align } from '../../../components'
+import Hint from '../../../components/prose/hint'
+
+import roll from './assets/Roll.mp4'
+
+import firstShader from './shaders/first-shader.gdshader?raw'
+// import uvGradientShader from './uv-gradient.glsl?raw'
+// import rippleShader from './ripple.glsl?raw'
+// import tintShader from './tint.glsl?raw'
+// import pixelateShader from './pixelate.glsl?raw'
+// import dissolveShader from './dissolve.glsl?raw'
+
+# Shader Basics
+
+Welcome to the World of Shaders!
+
+Before we get started with any cool visual effects, we have to clear a quick prerequisite.
+Call it a test of faith, or maybe, a rite of passage.
+
+Click this button in order to continue:
+
+<RevealSection label="Show More">
+
+<Media width={420}>
+    <video src={roll} autoPlay loop muted playsInline type="video/mp4"/>
+</Media>
+
+Now that you've been masterfully deceived, we can finally begin.
+And no, I didn't just rickroll you because it's fun, but rather to prepare you for what's to come in this series.
+
+*There will be times when I won't tell you the full truth.*
+
+Shaders are a topic where the full explanation, immediately and all at once, can actually make things harder to understand.
+So, I will occasionally simplify things, I will <Hint message="You might still be able to take a peek at it through hints like this one.">hide complexity</Hint> and I will say things that are technically incomplete.
+
+Still, I promise to keep us as close to the truth as possible, filling in the gaps at the right time, once we really need them.
+
+The important thing is that every simplification will have a purpose:<br/>
+To help you build intuition first, and precision second.
+
+#### Our First Shader
+
+<Separator />
+
+Now, what better way to enter the world of shaders than through a portal.
+
+<ShaderPreview 
+  fullShader={firstShader} 
+  showCode={false}
+  border={false}
+  size={300}
+  />
+
+Sadly, this portal only fits one person, and I forgot my keys in Shader World, so this one's taken.
+If you want to join, you'll first need to learn how to make your own portal.
+
+So, let us get started by making sense of what we're working with. The first question that might pop into your mind is:
+
+#### What is a shader?
+
+<Separator />
+
+A shader is just a program. 
+
+You use it to tell your graphics card how something should appear on the screen.
+In fact, every single object you see on your screen in Godot is already using a default shader and its behavior is exactly what you'd expect: it just draws the texture normally.
+
+To "draw" something, the GPU goes through a **series of predefined steps** which take that 'something' and turns it into real pixels on the screen.
+
+By writing your own shaders, you can change the default behavior of some of those steps. The two you will often hear about are the **vertex** and **fragment** shaders.
+
+#### The Vertex Shader
+
+<Separator />
+
+Everything needs to have a shape.
+Vertices are the points that define that shape. 
+
+Your first thought might be: _"Ah, just like in a 3D model! That has vertices!"_. And you'd be entirely right.
+
+-- image with 3d model --
+
+However, even 2D images need a shape. For example:
+
+-- image of a sprite -- -- image of a polygon --
+
+By default, the GPU just takes all vertices exactly as they are. 
+The vertex shader allows us to <Hint message="And many other things, like changing the way light behaves by adjusting the object's Normals, but we'll talk about that in later chapters">change their position</Hint> and, by extension, the shape of the object itself.
+
+-- example of vertex shader in action --
+
+All the code of a vertex shader goes inside a `vertex()` function:
+
+```gdshader
+void vertex() {
+  // The portal needs to be stable, 
+  // so we won't be wiggling its vertices today
+}
+```
+
+#### The Fragment Shader
+
+<Separator />
+
+Once the shape's settled, we need to color it.
+Fragments are the tiny pieces that <Hint message="For most purposes, consider fragments and pixels being the same thing. We'll delve deeper into the differences in a future post.">will end up being</Hint> the final pixels on your screen.
+
+By default, the GPU is just <Hint message="There are exceptions, such as that cool GPU you got!">as boring as before</Hint>: it takes the object's original texture and places it onto its _shape_.
+The fragment shader allows us to change (quite drastically, if we please) the color of each pixel in our shape.
+
+All the code of a fragment shader goes inside a `fragment()` function:
+
+```gdshader
+void fragment() {
+  // This is where we'll build our portal
+}
+```
+
+#### Back to our portal
+
+<Separator />
+
+We're one step closer. We want our pixels to look like a portal and we can do that in the fragment shader.
+
+We know _where_ to write our code. The remaining question is "_what_ do we write?"
+
+> Before trying to create or re-create a shader it's really good practice to simplify it into more manageable effects
+
+-- here's how the portal looks as a reminder - image --
+
+If you really squint your eyes while looking at the portal you can make out that it's basically a blue circle on a black background.<br/>
+If you squint <Hint message="Please, don't hurt your eyes!">even harder</Hint> you can simplify it even more. The portal is just a blue... thing.
+
+Let's make a blue thing, then!
+
+A color is generally represented through four channels: @#$ADD COLORS HERE $@#$@# Red, Green, Blue and <Hint message="This one is used to specify the color's transparency">Alpha</Hint>.
+In Godot shaders, these values range between `0-1`, with '0' meaning that a color is fully absent and '1' meaning that it's fully <Hint message="🎁">present</Hint>.
+
+With this in mind, each color amount is a floating point number. We can define these inside a shader like this:
+
+```gdshader
+void fragment() {
+  float red = 0.02; // A tiny bit of red
+  float green = 0.05; // Some more green
+  float blue = 0.25; // A larger amount of blue
+  float alpha = 1.0; // The portal is fully opaque
+}
+```
+
+Also, it's generally a good idea to group together related information, so this could be more tightly rewritten as a <Hint message="There are also variants for grouping two and three numbers together with vec2 and vec3">vec4</Hint>:
+
+```gdshader
+void fragment() {
+  // To get the expected color we need to place in order, 
+  // the value for Red(r), Green(g), Blue(b) and Alpha(a)
+
+  vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+}
+```
+
+Alright, this works, but it produces absolutely no visual result. Here's an empty square to prove it:
+
+-- image of a square --
+
+This is because we still need to tell the GPU to use the `portal_color` for each pixel.
+In order to do that, shaders give us access to **Built-ins**.
+
+#### Built-in variables
+
+<Separator />
+
+What do you think Built-in variables are? You're a smart cookie! Write it down in this text field:
+
+<Align align="center"><input type="text"></input></Align>
+
+Alright, the text field <Hint message="Well, it technically does keep you engaged in the learning process, so it's quite valuable. Give it a ':)' as a sign of thanks!">does absolutely nothing</Hint>, 
+but you probably figured out from their name that Built-ins are.. variables that are _built in_, provided to us before we get to write even a single line of code.
+
+These special variables serve two main purposes:
+- **They provide context to us**: Giving us handy information like <Hint message="Tells us the time since the engine started">TIME</Hint>, <Hint message="Gives us a dessert">PI</Hint> or <Hint message="Tells us the current Vertex position in local space">VERTEX</Hint>.
+- **They help us provide context to the GPU**: Giving us places to drop our data, like <Hint message="Lets us tell the GPU what color we want the current pixel to have">COLOR</Hint> or <Hint message="Yes, again! Some built-ins allow us to both read and write to them.">VERTEX (again?)</Hint>.
+
+There are lots of other Built-ins that we're going to unlock as we expand our knowledge through this course, but for now, let's focus on the `COLOR` built-in, so that we can tell the GPU to draw our portal color.
+
+Now, your first instinct (especially if you've done any kind of programming before), might be to write something like this:
+
+```gdshader
+void fragment() {
+  vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+
+  // Go through each pixel to assign its color
+  for(int x = 0; x < object_width; x++) {
+    for(int y = 0; y < object_height; y++) {
+      COLOR[x][y] = portal_color;
+    }
+  }
+}
+```
+
+But this is **wrong!**
+
+-- below this it's just a draft
+
+-- here I add the example in which I specify how our brains want shader programming to work (making every pixel blue) --
+``` something like this 
+// --- CRITICAL MISCONCEPTION ---
+// How our brains want shader programming to work:
+for (int x = 0; x < canvas.width; x++) {
+    for (int y = 0; y < canvas.height; y++) {
+        COLOR[x][y] = portal_color;
+    }
+}
+```
+
+</RevealSection>
+
+
+{/* 
+
+
+
+So, in order to prove that you trust me, you have to press this button:
+
+
+
+# ShaderPreview Showcase
+
+A tour of the ShaderPreview component's configurations.
+Each shader lives in its own .glsl file and is imported as a raw string, so the MDX bundle carries zero shader-compilation overhead.
+
+<Separator />
+
+## Basic usage
+
+The only required prop is fullShader.
+The canvas defaults to *128 px* and centers itself.
+The code block always shows the full shader source unless you override it with children.
+
+<ShaderPreview fullShader={uvGradientShader} />
+
+tsx
+<ShaderPreview fullShader={uvGradientShader} />
+
+<Separator />
+
+## Custom size
+
+Pass size (pixels) to make the canvas bigger or smaller.
+Here the same UV-gradient shader is rendered at *64 px* and *256 px*.
+
+<ShaderPreview fullShader={uvGradientShader} size={64} />
+
+<ShaderPreview fullShader={uvGradientShader} size={256} />
+
+<Separator />
+
+## Alignment
+
+The canvas group (canvas + controls) sits inside a flex column, so align shifts it horizontally.
+Accepted values are 'left', 'center' (default), and 'right'.
+
+<ShaderPreview fullShader={uvGradientShader} size={96} align="left" />
+
+<ShaderPreview fullShader={uvGradientShader} size={96} align="center" />
+
+<ShaderPreview fullShader={uvGradientShader} size={96} align="right" />
+
+<Separator />
+
+## Float controls
+
+Declare uniform float variables in your shader and wire them up through the controls map.
+Each entry renders a labeled range slider. The canvas reads slider values on every frame — no re-mount required.
+
+<ShaderPreview
+  fullShader={rippleShader}
+  size={160}
+  controls={{
+    uFrequency: { label: 'Frequency', min: 1, max: 40, step: 1, default: 12 },
+    uAmplitude: { label: 'Amplitude', min: 0, max: 0.08, step: 0.002, default: 0.025 },
+    uSpeed:     { label: 'Speed',     min: 0, max: 6,    step: 0.1,  default: 2 },
+  }}
+/>
+
+<Separator />
+
+## Color control
+
+Set type: 'color' to render a color picker instead of a slider.
+The picked hex color is converted to a linear RGB vec3 and passed to a uniform vec3.
+
+<ShaderPreview
+  fullShader={tintShader}
+  size={160}
+  controls={{
+    uTint: { label: 'Tint', type: 'color', defaultColor: '#ff8844' },
+  }}
+/>
+
+<Separator />
+
+## Vec2 control
+
+type: 'vec2' renders *two* sliders sharing a uniform vec2.
+Useful for 2-D parameters like offsets, scales, or pivot points.
+
+The ripple shader takes a uFrequency float, but below we restructure it
+as a vec2 (horizontal frequency, vertical frequency) to show the two-slider layout:
+
+<ShaderPreview
+  fullShader={`shader_type canvas_item;
+uniform vec2 uRipple;
+
+void fragment() {
+    float h = sin(UV.x * uRipple.x + TIME * 3.0) * 0.03;
+    float v = sin(UV.y * uRipple.y + TIME * 2.5) * 0.03;
+    COLOR = texture(TEXTURE, clamp(UV + vec2(h, v), 0.0, 1.0));
+}`}
+  size={160}
+  controls={{
+    uRipple: { label: 'Ripple freq', type: 'vec2', min: 0, max: 30, step: 1, defaultVec: [10, 10] },
+  }}
+/>
+
+<Separator />
+
+## Showing a snippet with children
+
+Sometimes the full shader has boilerplate (helper functions, noise, etc.) that you don't want
+to paste into the code block. Pass a shorter snippet as children — it becomes the displayed code
+while fullShader still drives the WebGL canvas.
+
+<ShaderPreview
+  fullShader={pixelateShader}
+  size={160}
+  controls={{
+    uPixelSize: { label: 'Pixel size', min: 1, max: 32, step: 1, default: 4 },
+  }}
+
+  {`// Only the key line — full shader runs in the canvas
+vec2 ps = TEXTURE_PIXEL_SIZE * uPixelSize;
+vec2 uv = floor(UV / ps) * ps + ps * 0.5;
+COLOR  = texture(TEXTURE, uv);`}
+</ShaderPreview>
+
+<Separator />
+
+## Mixed controls (float + color)
+
+Controls of different types can coexist in the same controls map.
+The component renders them in declaration order.
+
+The dissolve shader uses a value-noise function to cut the texture away as uThreshold rises,
+painting the freshly-exposed edge with uEdgeColor.
+
+<ShaderPreview
+  fullShader={dissolveShader}
+  size={192}
+  controls={{
+    uThreshold: { label: 'Threshold',  min: 0, max: 1, step: 0.01, default: 0.4 },
+    uEdgeColor: { label: 'Edge color', type: 'color', defaultColor: '#ff4400' },
+  }}
+/> */}
