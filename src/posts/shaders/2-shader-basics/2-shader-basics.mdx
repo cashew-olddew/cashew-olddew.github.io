@@ -1,7 +1,10 @@
-import { ShaderPreview, Separator, RevealSection, Media, Align, Color } from '../../../components'
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup } from '../../../components'
 import Hint from '../../../components/prose/hint'
 
 import roll from './assets/Roll.mp4'
+import model from './assets/3d-model.jpg'
+import spriteVertices from './assets/sprite-vertices.jpg'
+import polygonVertices from './assets/poly-vertices.jpg'
 
 import firstShader from './shaders/first-shader.gdshader?raw'
 // import uvGradientShader from './uv-gradient.glsl?raw'
@@ -78,11 +81,20 @@ Vertices are the points that define that shape.
 
 Your first thought might be: _"Ah, just like in a 3D model! That has vertices!"_. And you'd be entirely right.
 
--- image with 3d model --
+<Media width={240} label='The vertex of a 3D cube'>
+    <img src={model} alt="The vertex of a 3D cube"/>
+</Media>
 
 However, even 2D images need a shape. For example:
 
--- image of a sprite -- -- image of a polygon --
+<MediaGroup align='center'>
+  <Media width={240} label='The 4 vertices of a Sprite2D'>
+      <img src={spriteVertices} alt="The 4 vertices of a Sprite2D"/>
+  </Media>
+  <Media width={240} label='The many vertices of a Polygon2D'>
+      <img src={polygonVertices} alt="The many vertices of a Polygon2D"/>
+  </Media>
+</MediaGroup>
 
 By default, the GPU just takes all vertices exactly as they are. 
 The vertex shader allows us to <Hint message="And many other things, like changing the way light behaves by adjusting the object's Normals, but we'll talk about that in later chapters">change their position</Hint> and, by extension, the shape of the object itself.
@@ -160,7 +172,12 @@ void fragment() {
 
 Alright, this works, but it produces absolutely no visual result. Here's an empty square to prove it:
 
--- image of a square --
+<ShaderPreview 
+  fullShader={`void fragment() {
+    }`} 
+  showCode={false}
+  size={150}
+  />
 
 This is because we still need to tell the GPU to use the `portal_color` for each pixel.
 In order to do that, shaders give us access to **Built-ins**.
@@ -174,7 +191,7 @@ What do you think Built-in variables are? You're a smart cookie! Write it down i
 <Align align="center"><input type="text"></input></Align>
 
 Alright, the text field <Hint message="Well, it technically does keep you engaged in the learning process, so it's quite valuable. Give it a ':)' as a sign of thanks!">does absolutely nothing</Hint>, 
-but you probably figured out from their name that Built-ins are, well.. variables that are _built in_, provided to us before we get to write even a single line of code.
+but you probably figured out from their name that Built-ins are, well... variables that are _built in_, provided to us before we get to write even a single line of code.
 
 These special variables serve two main purposes:
 - **They provide context to us**: Giving us handy information like <Hint message="Tells us the time since the engine started">TIME</Hint>, <Hint message="Tells us the current Vertex position in local space">VERTEX</Hint> or <Hint message="Gives us a sweet dessert!">PI</Hint>
@@ -214,14 +231,14 @@ In the words of Pixel#16152:
 
 > I have never met the pixel next to me.<br/>
 > I do not know their place, or what they do,<br/>
-> For neither they nor I came first to be.<br/>
+> For neither they, nor I came first to be.<br/>
 >
 > Yet, far beyond my narrow, lonely view,<br/>
 > The selfsame code ignites another light,<br/>
 > We're all in isolation, separate and blue,<br/>
 > Yet painting the same picture, perfectly aligned.<br/>
 
-If sit with that for a moment, everything starts to make sense. 
+If you sit with that for a moment, everything starts to make sense. 
 Our pixel doesn't need to know what the rest of the canvas looks like. Even if it wanted to, it couldn't.
 All the pixel needs to do is follow its own rulebook, and in this case, it should simply accept its blue fate: 
 
@@ -236,7 +253,18 @@ void fragment() {
 
 And just like that, we have our blue thing!
 
--- image of the blue canvas --
+<ShaderPreview 
+  fullShader={`void fragment() {
+    vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+    
+    // The current pixel should have the portal color!
+    COLOR = portal_color; 
+}`} 
+  showCode={false}
+  border={false}
+  size={150}
+  />
+
 </RevealSection>
 
 
