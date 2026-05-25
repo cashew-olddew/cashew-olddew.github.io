@@ -7,25 +7,22 @@ uniform vec4 glow_color : source_color = vec4(0.15, 0.55, 1.00, 1.0);
 uniform vec4 pulse_color : source_color = vec4(0.6, 0.9, 1.0, 1.0);
 uniform vec4 rim_color : source_color = vec4(0.3, 0.75, 1.0, 1.0);
 
-uniform float portal_outer_size : hint_range(0.0, 2.0, 0.01) = 0.82;
-uniform float portal_inner_size : hint_range(0.0, 2.0, 0.01) = 0.75;
+uniform float portal_outer_size : hint_range(0.0, 2.0, 0.01) = 0.41;
+uniform float portal_inner_size : hint_range(0.0, 2.0, 0.01) = 0.37;
 
-uniform float rim_inner_size : hint_range(0.0, 2.0, 0.01) = 0.68;
+uniform float rim_inner_size : hint_range(0.0, 2.0, 0.01) = 0.34;
 
 uniform float gradient_strength : hint_range(0.0, 5.0, 0.01) = 1.3;
 
 uniform float pulse_frequency : hint_range(0.0, 20.0, 0.1) = 6.0;
-uniform float pulse_strength : hint_range(0.0, 1.0, 0.01) = 0.4;
+uniform float pulse_strength : hint_range(0.0, 1.0, 0.01) = 0.6;
 
-uniform float rim_strength : hint_range(0.0, 10.0, 0.1) = 2.5;
+uniform float rim_strength : hint_range(0.0, 10.0, 0.1) = 1.8;
 
 void fragment() {
 
-    // UV coordinates from -1 to 1
-    vec2 uv = UV * 2.0 - 1.0;
-
     // Distance from center
-    float d = length(uv);
+    float d = distance(UV, vec2(0.5));
 
     // Main portal shape
     float circle = smoothstep(

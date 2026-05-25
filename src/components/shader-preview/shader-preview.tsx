@@ -28,8 +28,10 @@ export interface UniformControlDef {
 }
 
 interface ShaderPreviewProps {
-  /** Canvas display size in pixels. Default: 128. */
-  size?: number
+  /** Canvas display width in pixels. If only one dimension is set, the canvas is square. Default: 128. */
+  width?: number
+  /** Canvas display height in pixels. If only one dimension is set, the canvas is square. Default: 128. */
+  height?: number
   /** Horizontal alignment of the canvas+controls group. Default: 'center'. */
   align?: 'left' | 'center' | 'right'
   /** URL of a sprite/image to use as TEXTURE. Defaults to kofi.png. */
@@ -53,9 +55,13 @@ interface ShaderPreviewProps {
   showCode?: boolean
   /** Whether to show the decorative border around the canvas. Default: true. */
   border?: boolean
+  /** Fraction (0–1) to scale the initial quad inward, giving vertex displacements room to move. Default: 0. */
+  vertexPadding?: number
+  /** Texture sampling mode. 'linear' (default) for smooth scaling, 'nearest' for pixel-art. */
+  sampling?: 'linear' | 'nearest'
 }
 
-export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, fullShader, children, controls, showCode = true, border = true }: Readonly<ShaderPreviewProps>) {
+export function ShaderPreview({ width, height, align = 'center', sprite = defaultSprite, fullShader, children, controls, showCode = true, border = true, vertexPadding = 0, sampling = 'linear' }: Readonly<ShaderPreviewProps>) {
   const [controlValues, setControlValues] = useState<Record<string, number>>(() => {
     if (!controls) return {}
     return Object.fromEntries(
@@ -125,8 +131,11 @@ export function ShaderPreview({ size, align = 'center', sprite = defaultSprite, 
     <ShaderCanvas
       fullShader={fullShader}
       sprite={sprite}
-      size={size}
+      width={width}
+      height={height}
       border={border}
+      sampling={sampling}
+      vertexPadding={vertexPadding}
       controlsRef={controlsRef}
       controlValuesRef={controlValuesRef}
       colorValuesRef={colorValuesRef}

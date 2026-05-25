@@ -28,6 +28,77 @@ void main() {
 }
 `
 
+/** Returns true when the source contains a void vertex() function. */
+export function hasVertexFunction(src: string): boolean {
+  return /void\s+vertex\s*\(\s*\)/.test(src)
+}
+
+/**
+ * Translates a gdshader source into a GLSL ES 1.0 vertex shader.
+ * Falls back to the default VERT_SRC passthrough if no vertex() function is found.
+ *
+ * VERTEX is exposed as a mutable global vec2 in local pixel-space (±uVertHalfSize),
+ * where uVertHalfSize is vec2(width/2, height/2) passed from the canvas component.
+ * mirroring Godot's canvas_item vertex built-in.
+ * UV is also a mutable global vec2, so vertex() can remap texture coordinates.
+ *
+ * uVertPadding (0–1) scales the initial quad position inward, giving vertex
+ * displacements room to move without being clipped at the canvas edge.
+ */
+export function gdshaderToVertGLSL(raw: string): string {
+  if (!hasVertexFunction(raw)) return VERT_SRC
+
+  let s = raw
+
+  // Strip Godot-specific top-level declarations
+  s = s.replace(/shader_type\s+\w+\s*;/g, '')
+  s = s.replace(/render_mode\s+[^;]+;/g, '')
+
+  // Strip Godot uniform hints and default values
+  s = s.replace(/(uniform\s+\w+\s+\w+)\s*(?::[^=;\n]+)?(?:=[^;\n]+)?;/g, '$1;')
+
+  // Rename vertex() → _gdshader_vertex() so we can wrap it in our own main()
+  s = s.replace(/void\s+vertex\s*\(\s*\)/, 'void _gdshader_vertex()')
+
+  // Strip fragment() — it can't compile in the vertex shader context
+  s = stripFunction(s, 'fragment')
+
+  // GLSL ES 1.0 uses texture2D()
+  s = s.replace(/\btexture\s*\(/g, 'texture2D(')
+
+  const preamble = `attribute vec2 aPosition;
+attribute vec2 aUV;
+varying vec2 vUV;
+
+uniform float uTime;
+uniform vec2 uVertHalfSize;
+uniform float uVertPadding;
+uniform vec2 uTexturePixelSize;
+uniform vec2 uScreenPixelSize;
+
+#define TIME uTime
+#define TEXTURE_PIXEL_SIZE uTexturePixelSize
+#define SCREEN_PIXEL_SIZE uScreenPixelSize
+
+// Mutable built-ins — read and write these inside vertex()
+vec2 VERTEX;
+vec2 UV;
+`
+
+  const mainFn = `
+void main() {
+  vec2 _half = uVertHalfSize;
+  VERTEX = aPosition * _half * (1.0 - uVertPadding);
+  UV = aUV;
+  _gdshader_vertex();
+  vUV = UV;
+  gl_Position = vec4(VERTEX / _half, 0.0, 1.0);
+}
+`
+
+  return preamble + '\n' + s + mainFn
+}
+
 /** Removes a top-level `void <name>() { ... }` function, handling nested braces. */
 export function stripFunction(src: string, name: string): string {
   const pattern = new RegExp(String.raw`void\s+${name}\s*\(\s*\)\s*\{`)

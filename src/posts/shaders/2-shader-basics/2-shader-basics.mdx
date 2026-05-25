@@ -6,6 +6,7 @@ import model from './assets/3d-model.jpg'
 import spriteVertices from './assets/sprite-vertices.jpg'
 import polygonVertices from './assets/poly-vertices.jpg'
 
+import flowerSprite from './assets/kenney-flower.svg'
 import firstShader from './shaders/first-shader.gdshader?raw'
 // import uvGradientShader from './uv-gradient.glsl?raw'
 // import rippleShader from './ripple.glsl?raw'
@@ -51,7 +52,7 @@ Now, what better way to enter the world of shaders than through a portal.
   fullShader={firstShader} 
   showCode={false}
   border={false}
-  size={300}
+  width={300}
   />
 
 Sadly, this portal only fits one person, and I forgot my keys in Shader World, so this one's taken.
@@ -99,8 +100,28 @@ However, even 2D images need a shape. For example:
 By default, the GPU just takes all vertices exactly as they are. 
 The vertex shader allows us to <Hint message="And many other things, like changing the way light behaves by adjusting the object's Normals, but we'll talk about that in later chapters">change their position</Hint> and, by extension, the shape of the object itself.
 
--- example of vertex shader in action --
+<Media label="Shader moving top vertices of Kenney's blue flower." plain>
+<ShaderPreview
+  fullShader={`shader_type canvas_item;
 
+void vertex() {
+  // UV.y is 0 at the top of the sprite and 1 at the base of the stem.
+  // This gives us a mask that is 1 at the flower and 0 at the roots.
+  float sway_mask = 1.0 - UV.y;
+
+  VERTEX.x += sin(TIME * 1.8) * 10.0 * sway_mask;
+}
+
+void fragment() {
+  COLOR = texture(TEXTURE, UV);
+}`}
+  sprite={flowerSprite}
+  showCode={false}
+  width={80} height={120}
+  sampling='nearest'
+  vertexPadding={0.2}
+/>
+</Media>
 All the code of a vertex shader goes inside a `vertex()` function:
 
 ```gdshader
@@ -138,7 +159,14 @@ We know _where_ to write our code. The remaining question is "_what_ do we write
 
 > Before trying to create or re-create a shader it's really good practice to simplify it into more manageable effects
 
--- here's how the portal looks as a reminder - image --
+<Media label="As a reminder, this is how our portal looks" plain>
+  <ShaderPreview 
+    fullShader={firstShader} 
+    showCode={false}
+    border={false}
+    width={150}
+    />
+</Media>
 
 If you really squint your eyes while looking at the portal you can make out that it's basically a blue circle on a black background.<br/>
 If you squint <Hint message="Please, don't hurt your eyes!">even harder</Hint> you can simplify it even more. The portal is just a blue... thing.
@@ -146,15 +174,20 @@ If you squint <Hint message="Please, don't hurt your eyes!">even harder</Hint> y
 Let's make a blue thing, then!
 
 A color is generally represented through four channels: <Color hex="#EE1111">Red</Color>, <Color hex="#11BB11">Green</Color>, <Color hex="#1111EE">Blue</Color> and <Hint message="This one is used to specify the color's transparency">Alpha</Hint>.
-In Godot shaders, these values range between `0-1`, with '0' meaning that a color is fully absent and '1' meaning that it's fully <Hint message="🎁">present</Hint>.
+In Godot shaders, these values range between 0 and 1, with '0.0' meaning that a color is fully absent and '1.0' meaning that it's fully <Hint message="🎁">present</Hint>.
 
 With this in mind, each color amount is a floating point number. We can define these inside a shader like this:
 
 ```gdshader
+// Each shader also needs to specify its type
+// `canvas_item` is for 2D and `spatial` is for 3D
+// For brevity I won't mention it again in future code snippets
+shader_type canvas_item;
+
 void fragment() {
-  float red = 0.02; // A tiny bit of red
-  float green = 0.05; // Some more green
-  float blue = 0.25; // A larger amount of blue
+  float red = 0.15; // A tiny bit of red
+  float green = 0.55; // Some more green
+  float blue = 1.00; // A larger amount of blue
   float alpha = 1.0; // The portal is fully opaque
 }
 ```
@@ -166,7 +199,7 @@ void fragment() {
   // To get the expected color we need to place in order, 
   // the value for Red(r), Green(g), Blue(b) and Alpha(a)
 
-  vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+  vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
 }
 ```
 
@@ -176,7 +209,7 @@ Alright, this works, but it produces absolutely no visual result. Here's an empt
   fullShader={`void fragment() {
     }`} 
   showCode={false}
-  size={150}
+  width={150}
   />
 
 This is because we still need to tell the GPU to use the `portal_color` for each pixel.
@@ -186,7 +219,7 @@ In order to do that, shaders give us access to **Built-ins**.
 
 <Separator />
 
-What do you think Built-in variables are? You're a smart cookie! Write it down in this text field:
+What do you think Built-in variables are? You're a smart peanut! Write it down in this text field:
 
 <Align align="center"><input type="text"></input></Align>
 
@@ -194,8 +227,8 @@ Alright, the text field <Hint message="Well, it technically does keep you engage
 but you probably figured out from their name that Built-ins are, well... variables that are _built in_, provided to us before we get to write even a single line of code.
 
 These special variables serve two main purposes:
-- **They provide context to us**: Giving us handy information like <Hint message="Tells us the time since the engine started">TIME</Hint>, <Hint message="Tells us the current Vertex position in local space">VERTEX</Hint> or <Hint message="Gives us a sweet dessert!">PI</Hint>
-- **They help us provide context to the GPU**: Giving us places to drop our data, like <Hint message="Lets us tell the GPU what color we want the current pixel to have">COLOR</Hint> or <Hint message="Yes, again! Some built-ins allow us to both read and write to them.">VERTEX (again?)</Hint>.
+- **They provide context to us**: Giving us handy information like <Hint message="Tells us the time since the engine started">TIME</Hint>, <Hint message="Tells us the current Vertex position relative to the object (in local space)">VERTEX</Hint> or <Hint message="Gives us a sweet dessert!">PI</Hint>
+- **They help us provide context to the GPU**: Giving us places to drop our data, like <Hint message="Lets us tell the GPU what color we want the current pixel to have">COLOR</Hint> or <Hint message="Yes, again! Some built-ins allow us to both read and write to them">VERTEX (again?)</Hint>.
 
 There are lots of other Built-ins that we're going to unlock as we expand our knowledge through this course, but for now, let's focus on the `COLOR` built-in, so that we can tell the GPU to draw our portal color.
 
@@ -203,9 +236,9 @@ Your first instinct, especially if you've done any kind of traditional programmi
 
 <div className="prose-error-code">
 ```gdshader
+// This is NOT how shaders actually work!
 void fragment() {
-  // This is NOT how shaders actually work!
-  vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+  vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
 
   // Go through each pixel to assign its color
   for(int x = 0; x < object_width; x++) {
@@ -227,24 +260,24 @@ I mean, it makes sense:
 Things are quite different when writing shaders.<br/>
 A key thing to understand is that you're not writing code for the whole image. You're writing code for <Hint message="Or for a single vertex if you're in the vertex() function!">a single pixel</Hint>! That exact same code is run by the GPU **at the same time** for every other pixel.
 
-In the words of Pixel#16152:
+In the words of Pixel #16152:
 
 > I have never met the pixel next to me.<br/>
 > I do not know their place, or what they do,<br/>
 > For neither they, nor I came first to be.<br/>
 >
-> Yet, far beyond my narrow, lonely view,<br/>
+> Yet far beyond my narrow, lonely view,<br/>
 > The selfsame code ignites another light,<br/>
 > We're all in isolation, separate and blue,<br/>
 > Yet painting the same picture, perfectly aligned.<br/>
 
 If you sit with that for a moment, everything starts to make sense. 
-Our pixel doesn't need to know what the rest of the canvas looks like. Even if it wanted to, it couldn't.
-All the pixel needs to do is follow its own rulebook, and in this case, it should simply accept its blue fate: 
+Our pixel doesn't need to know what the rest of the canvas looks like, and even if it wanted to, it couldn't.
+All it needs to do is follow its own rulebook. In our case, it should simply accept its blue fate: 
 
 ```gdshader
 void fragment() {
-    vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+    vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
     
     // The current pixel should have the portal color!
     COLOR = portal_color; 
@@ -255,163 +288,558 @@ And just like that, we have our blue thing!
 
 <ShaderPreview 
   fullShader={`void fragment() {
-    vec4 portal_color = vec4(0.02, 0.05, 0.25, 1.0);
+    vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
     
     // The current pixel should have the portal color!
     COLOR = portal_color; 
 }`} 
   showCode={false}
   border={false}
-  size={150}
+  width={150}
   />
 
-</RevealSection>
+Alright, by now your eyes must be hurting from squinting so hard, so let's relax our focus a bit to reveal the circular shape of our portal.
 
+But wait, if the same code runs for each pixel, then how can we make two pixels look different?
 
+Well, a pixel doesn't know anything about other pixels, but it definitely knows _itself_.
+We can tap into that knowledge through the Built-ins we just talked about.<br/>
+For example, what's the difference between a pixel inside the portal and one outside it?
 
-{/* 
+It has to be the pixel's position. To get the position of the current pixel, Godot provides us with the `UV` Built-in!
 
-
-
-So, in order to prove that you trust me, you have to press this button:
-
-
-
-# ShaderPreview Showcase
-
-A tour of the ShaderPreview component's configurations.
-Each shader lives in its own .glsl file and is imported as a raw string, so the MDX bundle carries zero shader-compilation overhead.
+#### UV
 
 <Separator />
 
-## Basic usage
+I pretty much spoiled it in the last paragraph that UV tells us where a pixel is. Specifically, it gives us its horizontal and vertical coordinates.
+Since we get two of these coordinates, naturally, the UV will be a `vec2`.
 
-The only required prop is fullShader.
-The canvas defaults to *128 px* and centers itself.
-The code block always shows the full shader source unless you override it with children.
+Now, what's interesting about these coordinates is that they do not provide exact pixel counts like `x: 32, y: 64`.
+Instead, the UV coordinates are <Hint message="You might be getting a sense of Deja Vu, as for the colors we similarly had percentage based properties. You'll see this pattern make its appearance quite often. Shaders really love percentages!">percentage based</Hint>, with the value '0.0' meaning "the start"  and the value '1.0' meaning "the end".<br/>
 
-<ShaderPreview fullShader={uvGradientShader} />
+There is a method to this madness, though. Percentage-based coordinates mean the shader doesn't care about the object's size. 
+Whether the object is as small as a peanut or as large as a coconut, if the UVs of the current pixel are `vec2(0.3, 0.6)`, it still means the pixel is positioned 30% horizontally and 60% vertically.
 
-tsx
-<ShaderPreview fullShader={uvGradientShader} />
+Okay, but how could we visualize these coordinates to understand what the intentionally abstract "start" and "end" mean?<br/>
+If you've ever debugged a program before, you've probably used the obviously superior form of printing out values to the console.
+Shaders do not allow that. Since the code is run for every single pixel in a fragment, you'd probably flood your terminal with <Hint message="Also printed in random order, as the GPU does everything in parallel.">thousands of coordinates</Hint>, anyway.
 
-<Separator />
+However, shaders have a charming way of debugging:<br/> 
 
-## Custom size
-
-Pass size (pixels) to make the canvas bigger or smaller.
-Here the same UV-gradient shader is rendered at *64 px* and *256 px*.
-
-<ShaderPreview fullShader={uvGradientShader} size={64} />
-
-<ShaderPreview fullShader={uvGradientShader} size={256} />
+<Align align='center'><h5>By visualizing values</h5></Align>
 
 <Separator />
 
-## Alignment
+We can take the `x` coordinate of our `UV` and apply it to the <Color hex="#EE1111">red</Color> channel of our result.<br/>
+Then, we do the same with the `y` coordinate, but apply it to the <Color hex="#11BB11">green</Color> channel.
 
-The canvas group (canvas + controls) sits inside a flex column, so align shifts it horizontally.
-Accepted values are 'left', 'center' (default), and 'right'.
+The result is going to be a beautiful, mango-colored square:
 
-<ShaderPreview fullShader={uvGradientShader} size={96} align="left" />
+<ShaderPreview 
+  fullShader={`void fragment() {
+    COLOR = vec4(UV.x, UV.y, 0.0, 1.0);
+  }`} 
+  width={150}
+  />
 
-<ShaderPreview fullShader={uvGradientShader} size={96} align="center" />
+If you look closely at the mango square, you'll notice a few things:
+- The top-left corner is fully **black**
+  - This is where both x and y _start_, so both coordinates are 0.0.
+- The top-right corner is fully <Color hex="#EE1111">red</Color>
+  - This means <Hint message="Remember, we assigned x to the red channel">x</Hint> is 1.0.
+- Similarly, the bottom-left corner is fully <Color hex="#11BB11">green</Color>
+  - This means <Hint message="You don't need a reminder for y as well, I made this hint to tell you you're doing great!">y</Hint> is 1.0.
+- Finally, the bottom-right corner is <Color hex="#FACA00">yellow</Color>
+  - This is what happens when red and green combine, when both x and y reached their _end_ value, 1.0.
 
-<ShaderPreview fullShader={uvGradientShader} size={96} align="right" />
+You just learned a fact about the UV coordinates by looking at a fruit-colored square!<br/>
+
+The UV coordinates use the top-left corner as their origin `(0.0, 0.0)`:
+- x increases towards the right
+- y increases towards the bottom
+
+#### Built-in functions
 
 <Separator />
 
-## Float controls
+Since our UV coordinates map the top-left corner to `(0.0, 0.0)` and the bottom-right corner to `(1.0, 1.0)`, then the exact center of our canvas sits at `(0.5, 0.5)`.
 
-Declare uniform float variables in your shader and wire them up through the controls map.
-Each entry renders a labeled range slider. The canvas reads slider values on every frame — no re-mount required.
+So, say we have a maximum radius of 0.1 for our portal. Then, every pixel needs to ask itself:<br/>
+"How far away am I from that center point?".<br/>
+**If** it is further than 0.1, it's outside the circle. **Otherwise**, it's inside.
 
-<ShaderPreview
-  fullShader={rippleShader}
-  size={160}
-  controls={{
-    uFrequency: { label: 'Frequency', min: 1, max: 40, step: 1, default: 12 },
-    uAmplitude: { label: 'Amplitude', min: 0, max: 0.08, step: 0.002, default: 0.025 },
-    uSpeed:     { label: 'Speed',     min: 0, max: 6,    step: 0.1,  default: 2 },
-  }}
+We already know exactly **where** the pixel is thanks to our UV coordinates. Now we just need a way to find the size of the gap to the center.
+
+Luckily, variables are not the only tools Godot gives us. We also have a bunch of built-in functions designed to answer these exact kinds of questions.
+
+For example, the `distance(thing, other_thing)` does exactly what it sounds like: gets the distance between two things.
+
+Let's use it:
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    if (dist > 0.1) {
+      COLOR = vec4(0.0, 0.0, 0.0, 1.0); // Black
+    } else {
+      COLOR = portal_color;
+    }
+  }`} 
+  width={150}
+  />
+
+"What is this, a portal for ants?"
+
+Fair question! Right now, our portal is so tiny that not even your left foot could fit through it. 
+
+To change the radius, you *could* manually open up the code, change that `0.1` to a `0.4`, and save it. But doing that constantly gets exhausting, especially as our shader grows more complex.<br/>
+It's even worse when a <Hint message="That teammate could be future you!">teammate</Hint> needs to use your shader, as they'd have to dig through the raw code just to make a circle a little bigger.
+
+There's a better way:
+
+#### Uniforms
+
+<Separator />
+
+Godot allows us to declare variables that are accessible to the outside world.<br/>
+This means you can tweak these directly in the Inspector, without touching the code.
+
+To use this power, just add `uniform` in front of the variable declaration, placing it outside the `fragment()` function, usually near the top of the shader.
+For our portal radius, it looks like this: `uniform float portal_radius;`.
+
+We can also give Godot a _hint_ about a uniform's possible values. Let's set a reasonable range for our <Hint message="Different variable types can have different hints. We'll see more of them soon!">float</Hint> with `hint_range(start, end)`!<br/>
+
+<ShaderPreview 
+  fullShader={`uniform float portal_radius : hint_range(0.0, 1.0) = 0.1;
+
+  void fragment() {
+    vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    // We compare to the uniform instead of the plain 0.1 value!
+    if (dist > portal_radius) {
+      COLOR = vec4(0.0, 0.0, 0.0, 1.0); // Black
+    } else {
+      COLOR = portal_color;
+    }
+  }`} 
+  width={150}
+  controls={
+    { "portal_radius": {label: "Portal Radius", type: "float", min: 0.0, max: 1.0, default: 0.1}}
+  }
 />
 
+<Align align='center'>Drag the slider to make the portal human-sized!</Align>
+
+Also, let me <Hint message="&elephant. Phew, that was easy!">address the elephant</Hint> in the room.<br/>
+If you've spent any time reading shader tips online, you might have heard a scary rumor:<br/>
+"Never, under any circumstance, use IF statements! It ruins performance! Every time you do that a puppy will cry!"
+
+This, is mostly [an outdated myth](https://iquilezles.org/articles/gpuconditionals/).
+
+For simple choices like the one in our example, modern GPUs are incredibly smart and have ways of avoiding slowdowns.<br/>
+Especially while learning, do not be afraid to write if statements if you need them!
+
+#### The Crossroads
+
 <Separator />
 
-## Color control
+Look at the portal grow. It feels amazing to have that control, doesn't it?
 
-Set type: 'color' to render a color picker instead of a slider.
-The picked hex color is converted to a linear RGB vec3 and passed to a uniform vec3.
+...
 
-<ShaderPreview
-  fullShader={tintShader}
-  size={160}
-  controls={{
-    uTint: { label: 'Tint', type: 'color', defaultColor: '#ff8844' },
-  }}
+I have a confession to make. You do not actually need to finish this portal in order to get inside Shader World.
+You already _are_ inside Shader World.
+
+Following this guide, you might have picked up a thought like this:<br/>
+"This is a tutorial showing me how to make a portal with shaders.".
+
+Let's hit the brakes for a second and look back at that thought.<br/>
+Think about how many times you've followed a tutorial on how to build something.<br/>
+While following along, you feel unstoppable. The code works, the visuals look great, and for a brief moment you are convinced that you mastered the craft.
+
+But when you close the tab and try to create something of your own... 
+
+The illusion **shatters**. 
+
+You realize you only learned how to build that _exact_ thing.<br/>
+The moment you need a different style, a different mood, or a brand new effect, you feel stranded at the keyboard.
+
+I do not want to drag you into that same trap.
+
+I will not give you a static recipe for a cosmic blue portal.
+I want to teach you how to cook.
+
+We will go much deeper into things like color blending, shape masking, time-based effects in later posts.
+You do not need to memorize every function on your first day.
+You just need to know the toolbox exists.
+
+Right now, what I want us to internalize is the _process_.
+
+The portal shader we looked at earlier was not built through some sort of revelation, it was just the result of a dance between the technical artist and the GPU.<br/>
+
+As a technical artist, your job is usually to:
+- find the next smallest problem,
+- figure out what question to ask to solve it,
+- find a tool that helps you answer it,
+- visualize the result,
+- and repeat the process
+
+So, let's step onto the dance floor.
+
+#### The dance with the GPU!
+
+<Separator />
+
+Where did we leave our shader? Ah, right here:
+
+<ShaderPreview 
+  fullShader={`uniform float portal_radius : hint_range(0.0, 1.0) = 0.1;
+
+  void fragment() {
+    vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    if (dist > portal_radius) { 
+      COLOR = vec4(0.0, 0.0, 0.0, 1.0);
+    } else {
+      COLOR = portal_color;
+    }
+  }`} 
+  width={150}
+  controls={
+    { "portal_radius": {label: "Portal Radius", type: "float", min: 0.0, max: 1.0, default: 0.1}}
+  }
 />
 
-<Separator />
+Our **problem** is that the edge of our portal is quite hard.<br/>
+Hmm, then the **question** would be: How can we smoothly transition from blue to black instead of jumping instantly?<br/>
+The **tool** <Hint message="Again, very important is that you don't need to really understand how smoothstep or any function works for now. We need to learn the process, we'll get into the specifics later! Imagine you're for the first time in an image editor. You can still do fun things with random, unknown tools without fully understanding them.">we can use</Hint> is `smoothstep(edge0, edge1, x)`.
 
-## Vec2 control
+If we experiment a bit with the function, it seems to create a smooth transition between two values. 
+Anything smaller than the first edge stays fixed at 0.0, while anything larger than the second edge stays fixed at 1.0.
 
-type: 'vec2' renders *two* sliders sharing a uniform vec2.
-Useful for 2-D parameters like offsets, scales, or pivot points.
+Try it yourself!
 
-The ripple shader takes a uFrequency float, but below we restructure it
-as a vec2 (horizontal frequency, vertical frequency) to show the two-slider layout:
+<ShaderPreview 
+  fullShader={`uniform float edge0 : hint_range(0.0, 1.0) = 0.3;
+  uniform float edge1 : hint_range(0.0, 1.0) = 0.7;
 
-<ShaderPreview
-  fullShader={`shader_type canvas_item;
-uniform vec2 uRipple;
+  void fragment() {
+    float result = smoothstep(edge0, edge1, UV.x);
 
-void fragment() {
-    float h = sin(UV.x * uRipple.x + TIME * 3.0) * 0.03;
-    float v = sin(UV.y * uRipple.y + TIME * 2.5) * 0.03;
-    COLOR = texture(TEXTURE, clamp(UV + vec2(h, v), 0.0, 1.0));
-}`}
-  size={160}
-  controls={{
-    uRipple: { label: 'Ripple freq', type: 'vec2', min: 0, max: 30, step: 1, defaultVec: [10, 10] },
-  }}
+    // vec3(result) is shorthand for vec3(result, result, result);
+    // A color with all 3 channels equal will result in a gray hue!
+    COLOR = vec4(vec3(result), 1.0 );
+  }`} 
+  width={150}
+  controls={
+    { 
+      "edge0": {label: "Edge 0", type: "float", min: 0.0, max: 1.0, default: 0.3},
+      "edge1": {label: "Edge 1", type: "float", min: 0.0, max: 1.0, default: 0.7}
+    }
+  }
 />
 
-<Separator />
+<Align align='center'>Try getting edge0 really close to edge1 to make a slim, yet soft edge!</Align>
 
-## Showing a snippet with children
+We can replace our if statement with `smoothstep()`. Our new shader is:
 
-Sometimes the full shader has boilerplate (helper functions, noise, etc.) that you don't want
-to paste into the code block. Pass a shorter snippet as children — it becomes the displayed code
-while fullShader still drives the WebGL canvas.
+<ShaderPreview 
+  fullShader={`uniform float portal_radius_edge0 : hint_range(0.0, 1.0) = 0.30;
+  uniform float portal_radius_edge1 : hint_range(0.0, 1.0) = 0.33;
 
-<ShaderPreview
-  fullShader={pixelateShader}
-  size={160}
-  controls={{
-    uPixelSize: { label: 'Pixel size', min: 1, max: 32, step: 1, default: 4 },
-  }}
+  void fragment() {
+    vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
+    float dist = distance(UV, vec2(0.5, 0.5));
 
-  {`// Only the key line — full shader runs in the canvas
-vec2 ps = TEXTURE_PIXEL_SIZE * uPixelSize;
-vec2 uv = floor(UV / ps) * ps + ps * 0.5;
-COLOR  = texture(TEXTURE, uv);`}
+    float circle_shape = smoothstep(
+      portal_radius_edge0,
+      portal_radius_edge1,
+      dist
+    );
+
+    COLOR = vec4(vec3(circle_shape), 1.0);
+  }`} 
+  width={150}
+  controls={
+    { 
+      "portal_radius_edge0": {label: "Portal Radius 0", type: "float", min: 0.0, max: 1.0, default: 0.30},
+      "portal_radius_edge1": {label: "Portal Radius 1", type: "float", min: 0.0, max: 1.0, default: 0.33}
+    }
+  }
+/>
+
+That's a much better circle!<br/>
+
+But the **problem** now is that it has lost all its color.
+Let's ask another **question**: How can we make our prettier, black and white image of a circle take the portal's color?
+The **tool** is multiplication.
+
+No kidding! We simply have to multiply the obtained `circle_shape` with the `portal_color`. But why does that work?<br/>
+Remember how we represent colors: 0.0 is the absence of a color and 1.0 means the color is fully there.
+When all three RGB channels are 0.0, we get black. When they're 1.0, we get white.
+
+So then, the black and white image can act as a _mask_ for our color. Where there's white, the color is multiplied by '1.0', so it just stays.
+Over the black zones, however, each color channel is multiplied by 0.0, so we're simply not going to have any color there.
+
+Another thing you might've noticed is that the circle we've generated is black when `Radius 0` is smaller than `Radius 1`. 
+We should flip the smoothstep radius edges to have it the other way around.
+
+<ShaderPreview 
+  fullShader={`uniform float portal_radius_edge0 : hint_range(0.0, 1.0) = 0.30;
+  uniform float portal_radius_edge1 : hint_range(0.0, 1.0) = 0.33;
+
+  void fragment() {
+    vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    float circle_shape = smoothstep(
+      portal_radius_edge1, // Edge 1 is now first!
+      portal_radius_edge0,
+      dist
+    );
+
+    // '.rgb' gives us only the red, green and blue channels
+    // You could even write '.brg' to get them in a different order
+    // That's called *vector swizzling*
+    vec3 circle_color = portal_color.rgb * circle_shape;
+    COLOR = vec4(circle_color, 1.0);
+  }`} 
+  width={150}
+  controls={
+    { 
+      "portal_radius_edge0": {label: "Portal Radius 0", type: "float", min: 0.0, max: 1.0, default: 0.30},
+      "portal_radius_edge1": {label: "Portal Radius 1", type: "float", min: 0.0, max: 1.0, default: 0.33}
+    }
+  }
+/>
+
+The portal's definitely blue now!
+However, it looks like something the Coyote would draw on a wall to fool the Road Runner.
+
+We need to give it some depth. How can we blend two colors to achieve that?
+
+Remember the "gradient tool" I mentioned in the previous post? That was the `mix(color1, color2, bias)` function!
+
+Instead of looking at it through the analogy of a gradient, though, let's see it in practice:
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    vec3 light_blue = vec3(0.15, 0.55, 1.0);
+    vec3 dark_blue = vec3(0.02, 0.05, 0.25);
+
+    vec3 gradient = mix(dark_blue, light_blue, UV.x);
+
+    COLOR = vec4(gradient, 1.0 );
+  }`} 
+  width={150}
+/>
+
+If, instead of `UV.x` we use the distance from the center we previously calculated, we get:
+
+<ShaderPreview 
+  fullShader={`uniform float portal_radius_edge0 : hint_range(0.0, 1.0) = 0.30;
+  uniform float portal_radius_edge1 : hint_range(0.0, 1.0) = 0.33;
+
+  void fragment() {
+    vec4 dark_color = vec4(0.02, 0.05, 0.25, 1.0);
+    vec4 bright_color = vec4(0.15, 0.55, 1.00, 1.0);
+
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    float circle_shape = smoothstep(
+      portal_radius_edge1, // Edge 1 is now first!
+      portal_radius_edge0,
+      dist
+    );
+
+    vec4 mixed_color = mix(dark_color, bright_color, dist);
+
+    vec3 circle_color = mixed_color.rgb * circle_shape;
+    COLOR = vec4(circle_color, 1.0);
+  }`}
+
+  width={150}
+  controls={
+    { 
+      "portal_radius_edge0": {label: "Portal Radius 0", type: "float", min: 0.0, max: 1.0, default: 0.30},
+      "portal_radius_edge1": {label: "Portal Radius 1", type: "float", min: 0.0, max: 1.0, default: 0.33}
+    }
+  }
+>
+{`uniform float portal_radius_edge0 : hint_range(0.0, 1.0) = 0.30;
+  uniform float portal_radius_edge1 : hint_range(0.0, 1.0) = 0.33;
+
+  void fragment() {
+    vec4 dark_color = vec4(0.02, 0.05, 0.25, 1.0);
+    vec4 bright_color = vec4(0.15, 0.55, 1.00, 1.0);
+
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    // float circle_shape = ...
+
+    vec4 mixed_color = mix(dark_color, bright_color, dist);
+
+    vec3 circle_color = mixed_color.rgb * circle_shape;
+    COLOR = vec4(circle_color, 1.0);
+  }`}
 </ShaderPreview>
 
+That gives our portal some depth!
+
+But the **problem** now is that it's completely frozen.<br/>
+The **question**: How can we make it feel alive?<br/>
+The **tool**: `TIME` and `sin`.
+
+We mentioned `TIME` before. Since time only moves forward, though, it isn't very useful for animation.<br/>
+`sin` is a function that takes any number and keeps bouncing its output back and forth in a fixed range, no matter how large the input gets.<br/>
+If we combine them, we get an animation!
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    float pulse = sin(TIME);
+    COLOR = vec4(vec3(pulse), 1.0);
+  }`}
+  width={150}
+/>
+
+Don't look now, but I think that square is winking at you!
+
+Don't get too excited, though! You might want to know each other a bit better before moving forward to anything serious.
+For example, you probably didn't notice yet that its winks are not even. Black lingers way longer than white does.
+
+The issue is that `sin` is a function returning values between -1 and 1. But a color with the value '-1' doesn't make sense, so in shaders, it gets clamped to black, even if its value is less than that.
+
+To keep the `sin` between 0 and 1, we can nudge the initial range with some operations, in this case, for example: `* 0.5 + 0.5`.
+How I got to those numbers <Hint message="Though, they can be easily checked by applying them over both edges of the [-1,1] interval.">doesn't really matter</Hint>. We'll figure a way to intuitively find those later.
+
+Here's a cleaner pulsing pattern!
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    float pulse = sin(TIME);
+    pulse = pulse * 0.5 + 0.5;
+    COLOR = vec4(vec3(pulse), 1.0);
+  }`}
+  width={150}
+/>
+
+A flat pulse is okay, but our portal should ripple outward from its center. Let's also (quite literally) add the distance from the center into the equation!
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    float dist = distance(UV, vec2(0.5));
+
+    // Literally adding the distance
+    float pulse = sin(dist + TIME);
+
+    pulse = pulse * 0.5 + 0.5;
+    COLOR = vec4(vec3(pulse), 1.0);
+  }`}
+  width={150}
+/>
+
+It looks closer to what we want, but the **problem** is that the pulse is moving inward, not outward.<br/>
+The **question** is, then: How can we reverse our animation?<br/>
+The **tool**: **time travel**!
+
+Time travel is quite easy in Shader World. To reverse time we just have to negate its sign!
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    float dist = distance(UV, vec2(0.5));
+
+    float pulse = sin(dist - TIME);
+
+    pulse = pulse * 0.5 + 0.5;
+    COLOR = vec4(vec3(pulse), 1.0);
+  }`}
+  width={150}
+>
+{`// ...
+float pulse = sin(dist - TIME);
+// ...`}
+</ShaderPreview>
+
+Before tying it all together, let's also make the effect more visible. By increasing the speed at which the input of `sin` changes, its result will also change faster:
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    float dist = distance(UV, vec2(0.5));
+
+    float pulse = sin(dist * 5.0 - TIME);
+
+    pulse = pulse * 0.5 + 0.5;
+    COLOR = vec4(vec3(pulse), 1.0);
+  }`}
+  width={150}
+>
+{`// ...
+float pulse = sin(dist * 5.0 - TIME);
+// ...`}
+</ShaderPreview>
+
+Now let's `mix` the pulsing with our portal:
+
+<ShaderPreview 
+  fullShader={`uniform float portal_radius_edge0 : hint_range(0.0, 1.0) = 0.30;
+  uniform float portal_radius_edge1 : hint_range(0.0, 1.0) = 0.33;
+
+  void fragment() {
+    vec4 dark_color = vec4(0.02, 0.05, 0.25, 1.0);
+    vec4 bright_color = vec4(0.15, 0.55, 1.00, 1.0);
+
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    float circle_shape = smoothstep(
+      portal_radius_edge1, // Edge 1 is now first!
+      portal_radius_edge0,
+      dist
+    );
+
+    vec4 mixed_color = mix(dark_color, bright_color, dist);
+
+    // Portal animation
+    float pulse = sin(dist * 5.0 - TIME);
+    pulse = pulse * 0.5 + 0.5;
+
+    vec4 pulse_color = vec4(0.4, 0.6, 1.0, 1.0);
+    vec4 animated_color = mix(mixed_color, pulse_color, pulse);
+
+    vec3 circle_color = animated_color.rgb * circle_shape;
+    COLOR = vec4(circle_color, 1.0);
+  }`}
+  width={150}
+  controls={{
+    "portal_radius_edge0": {label: "Portal Radius 0", type: "float", min: 0.0, max: 1.0, default: 0.30},
+    "portal_radius_edge1": {label: "Portal Radius 1", type: "float", min: 0.0, max: 1.0, default: 0.33}
+  }}
+>
+{`void fragment() {
+    // ...
+
+    vec4 mixed_color = mix(dark_color, bright_color, dist);
+
+    // Portal animation
+    float pulse = sin(dist * 5.0 - TIME);
+    pulse = pulse * 0.5 + 0.5;
+
+    // Some random pretty color
+    vec4 pulse_color = vec4(0.4, 0.6, 1.0, 1.0);
+    vec4 animated_color = mix(mixed_color, pulse_color, pulse);
+
+    vec3 circle_color = animated_color.rgb * circle_shape;
+    COLOR = vec4(circle_color, 1.0);
+  }
+`}
+</ShaderPreview>
+
+The portal is pulsing with energy!
+
 <Separator />
 
-## Mixed controls (float + color)
-
-Controls of different types can coexist in the same controls map.
-The component renders them in declaration order.
-
-The dissolve shader uses a value-noise function to cut the texture away as uThreshold rises,
-painting the freshly-exposed edge with uEdgeColor.
-
-<ShaderPreview
-  fullShader={dissolveShader}
-  size={192}
-  controls={{
-    uThreshold: { label: 'Threshold',  min: 0, max: 1, step: 0.01, default: 0.4 },
-    uEdgeColor: { label: 'Edge color', type: 'color', defaultColor: '#ff4400' },
-  }}
-/> */}
+</RevealSection>

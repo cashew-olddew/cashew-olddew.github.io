@@ -1,22 +1,35 @@
 import { useRef, useEffect } from 'react'
 import type { UniformControlDef } from './shader-preview'
-import { gdshaderToGLSL, VERT_SRC, parseUniformDefaults, type UniformDefault } from './shader-glsl'
+import { gdshaderToGLSL, gdshaderToVertGLSL, parseUniformDefaults, type UniformDefault } from './shader-glsl'
 import { buildProgram, hexToRgb } from './shader-webgl'
 import './shader-canvas.css'
 
 interface ShaderCanvasProps {
   fullShader: string
   sprite: string
-  size?: number
+  width?: number
+  height?: number
   border?: boolean
+  /** 'linear' (default) or 'nearest' for pixel-art textures. */
+  sampling?: 'linear' | 'nearest'
+  /** Fraction (0–1) to scale the initial quad inward, giving vertex displacements room to move. Default: 0. */
+  vertexPadding?: number
   controlsRef: { current: Record<string, UniformControlDef> | undefined }
   controlValuesRef: { current: Record<string, number> }
   colorValuesRef: { current: Record<string, string> }
   vecValuesRef: { current: Record<string, number[]> }
 }
 
-export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, controlsRef, controlValuesRef, colorValuesRef, vecValuesRef }: Readonly<ShaderCanvasProps>) {
+export function ShaderCanvas({ fullShader, sprite, width, height, border = true, sampling = 'linear', vertexPadding = 0, controlsRef, controlValuesRef, colorValuesRef, vecValuesRef }: Readonly<ShaderCanvasProps>) {
+  const w = width ?? height ?? 128
+  const h = height ?? width ?? 128
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const vertexPaddingRef = useRef(vertexPadding)
+  vertexPaddingRef.current = vertexPadding
+  const widthRef = useRef(w)
+  widthRef.current = w
+  const heightRef = useRef(h)
+  heightRef.current = h
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -26,10 +39,11 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, co
     if (!gl) return
 
     const fragSrc = gdshaderToGLSL(fullShader)
+    const vertSrc = gdshaderToVertGLSL(fullShader)
 
     let program: WebGLProgram
     try {
-      program = buildProgram(gl, VERT_SRC, fragSrc)
+      program = buildProgram(gl, vertSrc, fragSrc)
     } catch (e) {
       console.log(String(e))
       return
@@ -58,6 +72,8 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, co
     const uTexLoc       = gl.getUniformLocation(program, 'uTexture')
     const uTexPixelSize = gl.getUniformLocation(program, 'uTexturePixelSize')
     const uScreenPixSz  = gl.getUniformLocation(program, 'uScreenPixelSize')
+    const uVertHalfSizeLoc = gl.getUniformLocation(program, 'uVertHalfSize')
+    const uVertPadLoc   = gl.getUniformLocation(program, 'uVertPadding')
 
     const customLocs: [string, WebGLUniformLocation | null][] = []
     const colorLocs:  [string, WebGLUniformLocation | null][] = []
@@ -83,10 +99,11 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, co
     // Create texture — start with a 1×1 transparent pixel while the image loads
     const texture = gl.createTexture()!
     let texW = 1, texH = 1
+    const filter = sampling === 'nearest' ? gl.NEAREST : gl.LINEAR
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]))
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
@@ -98,8 +115,8 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, co
       gl.bindTexture(gl.TEXTURE_2D, texture)
       // WebGL1: no mipmaps for NPOT textures — use LINEAR + CLAMP_TO_EDGE
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
     }
@@ -121,6 +138,8 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, co
       gl!.uniform1f(uTimeLoc, t)
       gl!.uniform2f(uTexPixelSize, 1 / texW, 1 / texH)
       gl!.uniform2f(uScreenPixSz,  1 / canvas!.width, 1 / canvas!.height)
+      if (uVertHalfSizeLoc !== null) gl!.uniform2f(uVertHalfSizeLoc, widthRef.current / 2, heightRef.current / 2)
+      if (uVertPadLoc !== null) gl!.uniform1f(uVertPadLoc, vertexPaddingRef.current)
       for (const [name, loc] of customLocs) {
         if (loc !== null) gl!.uniform1f(loc, controlValuesRef.current[name] ?? 0)
       }
@@ -171,11 +190,11 @@ export function ShaderCanvas({ fullShader, sprite, size = 128, border = true, co
       gl.deleteBuffer(buf)
       gl.deleteTexture(texture)
     }
-  }, [fullShader, sprite])
+  }, [fullShader, sprite, sampling])
 
   return (
     <div className={`shader-preview-canvas-wrap${border ? '' : ' no-border'}`}>
-      <canvas ref={canvasRef} width={size * 2} height={size * 2} className="shader-preview-canvas" style={{ width: size, height: size }} />
+      <canvas ref={canvasRef} width={w * 2} height={h * 2} className="shader-preview-canvas" style={{ width: w, height: h }} />
     </div>
   )
 }
