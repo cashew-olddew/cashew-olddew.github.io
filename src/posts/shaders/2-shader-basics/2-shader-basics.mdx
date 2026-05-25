@@ -16,7 +16,7 @@ Welcome to the World of Shaders!
 Before we get started with any cool visual effects, we have to clear a quick prerequisite.
 Call it a test of faith, or maybe, a rite of passage.
 
-Click this button in order to continue:
+Click this button in order to continue. Nothing bad will happen:
 
 <RevealSection label="Show More">
 
@@ -437,7 +437,7 @@ If you've spent any time reading shader tips online, you might have heard a scar
 This, is mostly [an outdated myth](https://iquilezles.org/articles/gpuconditionals/).
 
 For simple choices like the one in our example, modern GPUs are incredibly smart and have ways of avoiding slowdowns.<br/>
-Especially while learning, do not be afraid to write if statements if you need them!
+Especially while learning, do not be afraid to write if statements if you need them! We'll definitely discuss the cases in which this really _does_ matter!
 
 #### The Crossroads
 
@@ -626,7 +626,7 @@ Instead of looking at it through the analogy of a gradient, though, let's see it
     vec4 dark_blue = vec4(0.02, 0.05, 0.25, 1.0);
 
     // Mix works with vec3 values as well!
-    vec4 gradient = mix(dark_blue.rgb, light_blue.rgb, UV.x);
+    vec3 gradient = mix(dark_blue.rgb, light_blue.rgb, UV.x);
 
     COLOR = vec4(gradient, 1.0 );
   }`} 
@@ -689,7 +689,7 @@ But the **problem** now is that it's completely frozen.<br/>
 The **question**: How can we make it feel alive?<br/>
 The **tool**: `TIME` and `sin`.
 
-We mentioned `TIME` before. But TIME alone is useful for continuous motion. Not so great for creating repeating one needed for our portal.<br/>
+We mentioned `TIME` before. But TIME alone is useful for continuous motion. Not so great for creating the repeated motion needed for our portal.<br/>
 `sin` is a function that takes any number and keeps bouncing its output back and forth in a fixed range, no matter how large the input gets.<br/>
 If we combine them, we get an animation!
 
@@ -706,10 +706,10 @@ Don't look now, but I think that square is winking at you!
 Don't get too excited, though! You might want to know each other a bit better before moving forward to anything serious.
 For example, you probably didn't notice yet that its winks are not even. Black lingers way longer than white does.
 
-The issue is that `sin` is a function returning values between -1 and 1. But your screen can't display <Hint message="What would that even look like?">a color value below 0.0</Hint>, so anything negative is painted as a pure black.
+The issue is that `sin` returns values between -1 and 1. But your screen can't display <Hint message="What would that even look like?">a color value below 0.0</Hint>, so anything negative is painted as a pure black.
 
 To keep the `sin` between 0 and 1, we can nudge the initial range with some operations, in this case, for example: `* 0.5 + 0.5`.
-How I got to those numbers <Hint message="Though, they can be easily checked by applying them over both edges of the [-1,1] interval.">doesn't really matter</Hint>. We'll figure a way to intuitively find those later.
+How we arrived at those numbers <Hint message="Though, they can be easily verified by applying them over both edges of the [-1,1] interval.">doesn't really matter for now</Hint>. We'll figure a way to intuitively find those later.
 
 Here's a cleaner pulsing pattern!
 
@@ -950,9 +950,9 @@ float rim = circle_shape - inner_circle;`}
 It's worth noticing that our previous uniform names no longer make as much sense as they did before, and that's okay, we were just experimenting.
 It's good practice to change their names to something suggestive once you decide to settle with a solution.
 
-For example try setting `Portal Radius 1` to 0.5, `Portal Radius Inner` to 0.1 and then, try moving the `Portal Radius 0` slider back and forth between them.
+For example try setting _'Portal Radius 1'_ to 0.5, _'Portal Radius Inner'_ to 0.1 and then, try moving the _'Portal Radius 0'_ slider back and forth between them.
 
-You'll notice that `Portal Radius Inner` acts like the inner radius, `Portal Radius 1` acts as the outer radius and `Portal Radius 0` acts like point at which the ring has the highest color intensity.
+You'll notice that _'Portal Radius Inner'_ acts like the inner radius, _'Portal Radius 1'_ acts as the outer radius and _'Portal Radius 0'_ acts like point at which the ring has the highest color intensity.
 
 We could maybe rename them to make it easier for us to understand our changes later:
 
@@ -996,7 +996,7 @@ Alright, now let's add this rim to our portal using our new variables:
 <ShaderPreview 
   fullShader={`uniform float rim_outer_radius : hint_range(0.0, 1.0) = 0.33;
   uniform float rim_peak_radius : hint_range(0.0, 1.0) = 0.30;
-  uniform float rim_inner_size : hint_range(0.0, 1.0) = 0.27;
+  uniform float rim_inner_radius : hint_range(0.0, 1.0) = 0.27;
 
   void fragment() {
     vec4 dark_color = vec4(0.02, 0.05, 0.25, 1.0);
@@ -1025,7 +1025,7 @@ Alright, now let's add this rim to our portal using our new variables:
     // Rim
     float inner_circle = smoothstep(
       rim_peak_radius,
-      rim_inner_size,
+      rim_inner_radius,
       dist
     );
 
@@ -1036,9 +1036,9 @@ Alright, now let's add this rim to our portal using our new variables:
   }`}
   width={150}
   controls={{
-    "rim_outer_radius": {label: "Rim Outer", type: "float", min: 0.0, max: 1.0, default: 0.33},
+    "rim_outer_radius": {label: "Rim Outer Radius", type: "float", min: 0.0, max: 1.0, default: 0.33},
     "rim_peak_radius": {label: "Rim Peak", type: "float", min: 0.0, max: 1.0, default: 0.30},
-    "rim_inner_size": {label: "Rim Inner Size", type: "float", min: 0.0, max: 1.0, default: 0.27}
+    "rim_inner_radius": {label: "Rim Inner Radius", type: "float", min: 0.0, max: 1.0, default: 0.27}
   }}
 >
 {`void fragment() {
@@ -1049,7 +1049,7 @@ Alright, now let's add this rim to our portal using our new variables:
     // Rim
     float inner_circle = smoothstep(
       rim_peak_radius,
-      rim_inner_size,
+      rim_inner_radius,
       dist
     );
 
@@ -1101,9 +1101,9 @@ Let's expose our hard-coded colors and an intensity multiplier for the rim as `u
   }`}
   width={250}
   controls={{
-    "rim_outer_radius": {label: "Outer Radius", type: "float", min: 0.0, max: 1.0, default: 0.33},
+    "rim_outer_radius": {label: "Rim Outer Radius", type: "float", min: 0.0, max: 1.0, default: 0.33},
     "rim_peak_radius": {label: "Peak Radius", type: "float", min: 0.0, max: 1.0, default: 0.30},
-    "rim_inner_radius": {label: "Inner Radius", type: "float", min: 0.0, max: 1.0, default: 0.27},
+    "rim_inner_radius": {label: "Rim Inner Radius", type: "float", min: 0.0, max: 1.0, default: 0.27},
     "rim_strength": {label: "Rim Glow", type: "float", min: 0.0, max: 5.0, default: 1.8},
     "dark_color": {label: "Core Color", type: "color", defaultColor: "#050D40"},
     "bright_color": {label: "Edge Color", type: "color", defaultColor: "#268CFF"},
@@ -1143,13 +1143,14 @@ Happy Shading!
 
 <Separator />
 
-Writing this course, building shaders and interactive previews for them is really fun, but requires a large chunk of time and an even larger amount of coffee.<br/>
-Fun cannot buy coffee, but YOU CAN!
+Writing this course, building shaders and interactive previews for them is really fun, but requires a large chunk of time and an even larger amount of peanuts. 🥜<br/>
+Fun cannot buy peanuts, but YOU CAN!
 
 If you genuinely feel like this guide helped you and you want it to continue, consider supporting my work!<br/>
 This entire series will stay entirely free, independent and clear of ads, but its completion and development speed will be greatly influenced by your help!
 
-You can find all the ways to keep the portal alive down below. Thank you so much!
+You can find all the ways to keep the portal alive down below.<br/>
+Thank you so much!
 
 <SupportMe />
 
