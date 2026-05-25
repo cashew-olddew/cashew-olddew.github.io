@@ -1,4 +1,4 @@
-import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe } from '../../../components'
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput } from '../../../components'
 import Hint from '../../../components/prose/hint'
 
 import roll from './assets/Roll.mp4'
@@ -217,7 +217,7 @@ In order to do that, shaders give us access to **Built-ins**.
 
 What do you think Built-in variables are? You're a smart peanut! Write it down in this text field:
 
-<Align align="center"><input type="text"></input></Align>
+<Align align="center"><TalkingInput /></Align>
 
 Alright, the text field <Hint message="Well, it technically does keep you engaged in the learning process, so it's quite valuable. Give it a ':)' as a sign of thanks!">does absolutely nothing</Hint>, 
 but you probably figured out from their name that Built-ins are, well... variables that are _built in_, provided to us before we get to write even a single line of code.
@@ -692,7 +692,7 @@ But the **problem** now is that it's completely frozen.<br/>
 The **question**: How can we make it feel alive?<br/>
 The **tool**: `TIME` and `sin`.
 
-We mentioned `TIME` before. Since time only moves forward, though, it isn't very useful for animation.<br/>
+We mentioned `TIME` before. But TIME alone is useful for continuous motion. Not so great for creating repeating one needed for our portal.<br/>
 `sin` is a function that takes any number and keeps bouncing its output back and forth in a fixed range, no matter how large the input gets.<br/>
 If we combine them, we get an animation!
 

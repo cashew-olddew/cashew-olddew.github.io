@@ -1,0 +1,15 @@
+@layer components {
+  .talking-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--size-2);
+  }
+
+  .talking-input-message {
+    font-style: italic;
+    color: var(--sand-8);
+    margin: 0;
+    text-align: center;
+  }
+}
