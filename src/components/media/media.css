@@ -20,6 +20,11 @@
   }
   
 
+  .media-content--plain {
+    border: none;
+    background-color: transparent;
+  }
+
   .media-label {
     font-family: var(--font-hand);
     font-size: var(--font-size-2);

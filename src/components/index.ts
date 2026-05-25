@@ -1,4 +1,7 @@
 export { Media, MediaGroup } from './media/media'
 export { Separator, Align } from './prose/prose-components'
+export { RevealSection } from './prose/reveal-section'
+export { Color } from './prose/color'
 export { ShaderPreview } from './shader-preview/shader-preview'
 export { SupportMe } from './support-me/support-me'
+export { TalkingInput } from './prose/talking-input'

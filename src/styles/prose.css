@@ -41,10 +41,20 @@
     font-size: var(--font-size-1);
   }
 
+  .prose :not(pre) > code {
+    background: #fdf6e3; /* from the everforest-light theme - to be adapted for dark mode*/
+    padding: 0 0.35em;
+    border-radius: 5px;
+
+    border-style: solid;
+    border-width: 5px;
+    border-image: url('../assets/ui/border.svg') 12 stretch;
+  }
+
   .prose pre {
     width: 100%;
 
-    padding: var(--size-4);
+    padding: var(--size-1);
     overflow-x: auto;
     margin-bottom: var(--size-5);
 
@@ -96,6 +106,9 @@
     color: var(--stone-9);
     margin: var(--size-5) 0;
     font-style: italic;
+
+    p:first-child { margin-top: 0; }
+    p:last-child { margin-bottom: 0; }
   }
 
   .prose ul,
@@ -113,5 +126,27 @@
     border: none;
     border-top: 2px dashed var(--accent-soft);
     margin: var(--size-7) 0;
+  }
+
+  .prose input[type="text"] {
+    background: #fdf6e3;
+    color: var(--text);
+
+    margin-bottom: var(--size-4);
+    padding: var(--size-1) var(--size-2);
+    font-size: var(--font-size-1);
+    
+    outline: none;
+    border-style: solid;
+    border-width: 4px;
+    border-image: url('../assets/ui/border.svg') 12 stretch;
+
+    width: 80%;
+    max-width: 400px;
+
+  }
+
+  .prose-error-code pre {
+    border-image: url('../assets/ui/border-error.svg') 12 stretch !important;
   }
 }
