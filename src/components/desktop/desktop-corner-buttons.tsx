@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './desktop-corner-buttons.css'
+import rssIcon from '../../assets/ui/rss.png'
 
 interface DesktopCornerButtonsProps {
   readonly webMode: boolean
@@ -29,6 +30,15 @@ export function DesktopCornerButtons({ webMode, onToggleWebMode }: DesktopCorner
       >
         {webMode ? '🖥️' : '🌐'}
       </button>
+      <a
+        className="desktop-rss-link"
+        href="/rss.xml"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="RSS feed"
+      >
+        <img src={rssIcon} alt="RSS" width="20" height="20" />
+      </a>
     </div>
   )
 }

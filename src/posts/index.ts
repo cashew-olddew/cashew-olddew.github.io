@@ -68,7 +68,7 @@ export const items: DesktopItem[] = [
     emoji: '🖼️',
     type: 'post',
     parent: 'shaders',
-    date: '2026-05-19',
+    date: '2026-05-25',
     load: () => import('./shaders/2-shader-basics/2-shader-basics.mdx'),
   },
   {
