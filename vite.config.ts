@@ -10,7 +10,7 @@ import { postsMeta, SITE_URL } from './src/posts/posts-meta'
 function generateRss(): string {
   const sorted = [...postsMeta].sort((a, b) => b.date.localeCompare(a.date))
   const items = sorted.map(p => {
-    const url = `${SITE_URL}/?view=web&open=${p.id}`
+    const url = `${SITE_URL}/?view=web&amp;open=${p.id}`
     const pubDate = new Date(p.date).toUTCString()
     return `    <item>
       <title><![CDATA[${p.emoji} ${p.title}]]></title>
