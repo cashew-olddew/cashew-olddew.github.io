@@ -8,22 +8,22 @@
     <atom:link href="https://cashew-olddew.github.io/rss.xml" rel="self" type="application/rss+xml" />
     <item>
       <title><![CDATA[🖼️ 2. Shader Basics]]></title>
-      <link>https://cashew-olddew.github.io/?view=web&open=shaders-2</link>
-      <guid>https://cashew-olddew.github.io/?view=web&open=shaders-2</guid>
+      <link>https://cashew-olddew.github.io/?view=web&amp;open=shaders-2</link>
+      <guid>https://cashew-olddew.github.io/?view=web&amp;open=shaders-2</guid>
       <pubDate>Mon, 25 May 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[How to dance with the GPU]]></description>
     </item>
     <item>
       <title><![CDATA[🎨 1. Shaders Introduction]]></title>
-      <link>https://cashew-olddew.github.io/?view=web&open=shaders-1</link>
-      <guid>https://cashew-olddew.github.io/?view=web&open=shaders-1</guid>
+      <link>https://cashew-olddew.github.io/?view=web&amp;open=shaders-1</link>
+      <guid>https://cashew-olddew.github.io/?view=web&amp;open=shaders-1</guid>
       <pubDate>Sat, 16 May 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[What are shaders, and why should you care? Exploring Godot shaders without any Math knowledge!]]></description>
     </item>
     <item>
       <title><![CDATA[🥜 Make it exist]]></title>
-      <link>https://cashew-olddew.github.io/?view=web&open=make-it-exist-first</link>
-      <guid>https://cashew-olddew.github.io/?view=web&open=make-it-exist-first</guid>
+      <link>https://cashew-olddew.github.io/?view=web&amp;open=make-it-exist-first</link>
+      <guid>https://cashew-olddew.github.io/?view=web&amp;open=make-it-exist-first</guid>
       <pubDate>Sun, 03 May 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A personal take on just starting. Make things exist before making them perfect.]]></description>
     </item>
