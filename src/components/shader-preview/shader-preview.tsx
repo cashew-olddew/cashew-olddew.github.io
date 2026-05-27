@@ -122,7 +122,7 @@ export function ShaderPreview({ width, height, align = 'center', sprite = defaul
     if (!showCode) return
     const escaped = `<pre><code>${displayCode.replaceAll('<', '&lt;')}</code></pre>`
     setHighlightedCode(escaped)
-    codeToHtml(displayCode, { lang: 'glsl', theme: 'everforest-light' })
+    codeToHtml(displayCode, { lang: 'glsl', themes: { light: 'everforest-light', dark: 'material-theme-darker' }, defaultColor: false })
       .then(html => setHighlightedCode(html))
       .catch(() => { /* keep plain fallback */ })
   }, [displayCode, showCode])

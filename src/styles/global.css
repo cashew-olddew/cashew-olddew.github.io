@@ -75,6 +75,8 @@
     --progress-bar: var(--orange-5);
 
     --text-decorative: var(--sand-4);
+
+    --code-bg: #212121;
   }
 
   :root.accessible-fonts {
@@ -100,6 +102,12 @@
 }
 
 @layer components {
+  /* Shiki syntax highlighting — covers ShaderPreview (.shiki) and MDX blocks (data-theme) */
+  .shiki, pre[data-theme*=" "] { background-color: var(--shiki-light-bg); }
+  .shiki span, code[data-theme*=" "] span { color: var(--shiki-light); }
+  :root.dark .shiki, :root.dark pre[data-theme*=" "] { background-color: var(--shiki-dark-bg); }
+  :root.dark .shiki span, :root.dark code[data-theme*=" "] span { color: var(--shiki-dark); }
+
   /* Shared scrollable content body used by .window-body and .web-view-content */
   .content-body {
     padding: var(--size-2);
