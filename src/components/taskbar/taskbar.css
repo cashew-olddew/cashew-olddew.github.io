@@ -4,7 +4,7 @@
     position: relative;
     height: var(--size-9);
 
-    background: var(--sand-2);
+    background: var(--taskbar-bg);
     font-family: var(--font-hand);
 
     display: flex;

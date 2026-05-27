@@ -41,6 +41,10 @@
     height: 100%;
   }
 
+  .web-view-back svg path {
+    fill: var(--text);
+  }
+
   .web-view-breadcrumbs {
     display: flex;
     align-items: center;

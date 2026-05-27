@@ -11,8 +11,11 @@
     --bg: var(--stone-2);
     --surface: var(--stone-0);
     --surface-hover: var(--sand-2);
+    --surface-secondary: var(--sand-3);
 
     --text: var(--stone-12);
+    --text-muted: var(--stone-9);
+    --text-subtle: var(--stone-4);
     --border: var(--stone-8);
 
     --accent: var(--yellow-7);
@@ -23,10 +26,55 @@
     --link: var(--yellow-9);
     --danger: var(--red-7);
 
+    --code-bg: #fdf6e3;
+    --code-mark: var(--jungle-2);
+
+    --button-bg: var(--sand-1);
+    --taskbar-bg: var(--sand-2);
+
+    --hint-color: var(--orange-6);
+    --hint-hover: var(--orange-8);
+    --hint-hover-bg: var(--orange-1);
+
+    --progress-bar: var(--orange-6);
+
+    --text-decorative: var(--sand-8);
+
     /* fonts */
     --font-display: "Caveat", cursive;
     --font-hand: "Short Stack", cursive;
     --font-mono: var(--font-mono);
+  }
+
+  :root.dark {
+    color-scheme: dark;
+
+    --bg: var(--stone-10);
+    --surface: var(--stone-10);
+    --surface-hover: var(--stone-8);
+    --surface-secondary: var(--sand-7);
+
+    --text: var(--stone-1);
+    --text-muted: var(--stone-5);
+    --text-subtle: var(--stone-7);
+    --border: var(--stone-6);
+
+    --accent: var(--yellow-5);
+    --accent-soft: var(--yellow-7);
+
+    --link: var(--yellow-4);
+    --danger: var(--red-4);
+
+    --button-bg: var(--stone-9);
+    --taskbar-bg: var(--stone-9);
+
+    --hint-color: var(--orange-4);
+    --hint-hover: var(--orange-3);
+    --hint-hover-bg: var(--orange-11);
+
+    --progress-bar: var(--orange-5);
+
+    --text-decorative: var(--sand-4);
   }
 
   :root.accessible-fonts {
@@ -58,6 +106,7 @@
     overflow-y: auto;
     touch-action: auto;
     flex: 1;
+    min-width: 0;
 
     .prose {
       padding: var(--size-2);
@@ -72,5 +121,57 @@
       width: 100%;
       max-width: 100%;
     }
+  }
+
+  :root.dark .prose .prose-separator {
+    background-image: url('../assets/ui/hr-dark.svg');
+  }
+
+  /* Dark mode: invert border pseudo-elements (no content to affect) */
+  :root.dark .window::before,
+  :root.dark .taskbar::before,
+  :root.dark .shader-preview-canvas-wrap::before {
+    filter: invert(1);
+  }
+
+  /* Dark mode: swap border-image to light-stroke SVG for content elements */
+  :root.dark .window-titlebar {
+    border-image: url('../assets/ui/border-dark.svg') 10 stretch;
+  }
+  :root.dark .web-view-header {
+    border-image: url('../assets/ui/border-dark.svg') 10 stretch;
+  }
+  :root.dark .taskbar-item {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .media-content {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .icons-group {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .hint-tooltip {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .shader-preview-control-color {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .desktop-mode-toggle,
+  :root.dark .desktop-accessibility-toggle,
+  :root.dark .desktop-dark-toggle,
+  :root.dark .desktop-rss-link {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .prose :not(pre) > code {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .prose pre {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .prose input[type="text"] {
+    border-image: url('../assets/ui/border-dark.svg') 12 stretch;
+  }
+  :root.dark .prose-error-code pre {
+    border-image: url('../assets/ui/border-error-dark.svg') 12 stretch !important;
   }
 }

@@ -42,7 +42,7 @@
   }
 
   .prose :not(pre) > code {
-    background: #fdf6e3; /* from the everforest-light theme - to be adapted for dark mode*/
+    background: var(--code-bg);
     padding: 0 0.35em;
     border-radius: 5px;
 
@@ -57,13 +57,14 @@
     padding: var(--size-1);
     overflow-x: auto;
     margin-bottom: var(--size-5);
+    border-radius: 14px;
 
     border-style: solid;
     border-width: 12px;
     border-image: url('../assets/ui/border.svg') 12 stretch;
 
     mark {
-      background: var(--jungle-2);
+      background: var(--code-mark);
     }
   }
 
@@ -85,7 +86,7 @@
     width: 0.75rem;
     margin-right: 1rem;
     text-align: right;
-    color: var(--stone-4);
+    color: var(--text-subtle);
   }
 
   .prose pre code[data-line-numbers-max-digits="2"] > [data-line]::before {
@@ -103,7 +104,7 @@
   .prose blockquote {
     border-left: 4px solid var(--accent);
     padding-left: var(--size-4);
-    color: var(--stone-9);
+    color: var(--text-muted);
     margin: var(--size-5) 0;
     font-style: italic;
 
@@ -129,7 +130,7 @@
   }
 
   .prose input[type="text"] {
-    background: #fdf6e3;
+    background: var(--code-bg);
     color: var(--text);
 
     margin-bottom: var(--size-4);
