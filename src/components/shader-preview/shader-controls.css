@@ -39,7 +39,7 @@
     height: 2rem;
     padding: 1px 2px;
     cursor: pointer;
-    background: var(--sand-1);
+    background: var(--button-bg);
     border-width: 4px;
     border-image: url('../../assets/ui/border.svg') 12 stretch;
   }

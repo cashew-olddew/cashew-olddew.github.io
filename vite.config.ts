@@ -52,7 +52,10 @@ export default defineConfig({
           [
             rehypePrettyCode,
             {
-              theme: 'everforest-light',
+              theme: {
+                light: 'everforest-light',
+                dark: 'material-theme-darker',
+              },
             }
           ]
         ]

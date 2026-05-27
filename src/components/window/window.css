@@ -85,12 +85,20 @@
       justify-content: center;
 
       transition: all 0.15s var(--ease-2);
+
+      svg path {
+        fill: var(--text);
+      }
     }
 
     button:hover {
       transform: scale(1.5) rotate(-5deg);
 
       svg {
+        fill: var(--danger);
+      }
+
+      svg path {
         fill: var(--danger);
       }
     }

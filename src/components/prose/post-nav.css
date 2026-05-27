@@ -1,0 +1,54 @@
+@layer components {
+  .post-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--size-8);
+    gap: var(--size-4);
+  }
+
+  .post-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--size-2);
+    padding: var(--size-1) var(--size-3);
+    cursor: pointer;
+
+    color: var(--link);
+    font-family: var(--font-hand);
+    font-size: var(--font-size-1);
+
+    background: var(--button-bg);
+    border-style: solid;
+    border-radius: 10px;
+    border-width: 8px;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
+    transition: color 0.15s;
+  }
+
+  .post-nav-btn:hover {
+    color: var(--accent);
+  }
+
+  .post-nav-btn--next {
+    margin-left: auto;
+  }
+
+  .post-nav-icon {
+    width: 1.2em;
+    height: 1.2em;
+    flex-shrink: 0;
+  }
+
+  .post-nav-icon path {
+    fill: var(--text);
+  }
+
+  .post-nav-icon--flipped {
+    transform: scaleX(-1);
+  }
+
+  :root.dark .post-nav-btn {
+    border-image: url('../../assets/ui/border-dark.svg') 12 stretch;
+  }
+}

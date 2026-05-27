@@ -1,4 +1,4 @@
-import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput } from '../../../components'
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput, PostNav } from '../../../components'
 import Hint from '../../../components/prose/hint'
 
 import roll from './assets/roll.mp4'
@@ -119,7 +119,7 @@ void fragment() {
 </Media>
 All the code of a vertex shader goes inside a `vertex()` function:
 
-```gdshader
+```glsl
 void vertex() {
   // The portal needs to be stable, 
   // so we won't be wiggling its vertices today
@@ -138,7 +138,7 @@ The fragment shader allows us to change (quite drastically, if we please) the co
 
 All the code of a fragment shader goes inside a `fragment()` function:
 
-```gdshader
+```glsl
 void fragment() {
   // This is where we'll build our portal
 }
@@ -168,12 +168,12 @@ If you squint <Hint message="Please, don't hurt your eyes!">even harder</Hint> y
 
 Let's make a blue thing, then!
 
-A color is generally represented through four channels: <Color hex="#EE1111">Red</Color>, <Color hex="#11BB11">Green</Color>, <Color hex="#1111EE">Blue</Color> and <Hint message="This one is used to specify the color's transparency">Alpha</Hint>.
+A color is generally represented through four channels: <Color hex="#FC7F7F">Red</Color>, <Color hex="#61C258">Green</Color>, <Color hex="#4D8BFF">Blue</Color> and <Hint message="This one is used to specify the color's transparency">Alpha</Hint>.
 In Godot shaders, these values range between 0 and 1, with '0.0' meaning that a color is fully absent and '1.0' meaning that it's fully <Hint message="🎁">present</Hint>.
 
 With this in mind, each color amount is a floating point number. We can define these inside a shader like this:
 
-```gdshader
+```glsl
 // Each shader also needs to specify its type
 // `canvas_item` is for 2D and `spatial` is for 3D
 // For brevity I won't mention it again in future code snippets
@@ -189,7 +189,7 @@ void fragment() {
 
 Also, it's generally a good idea to group together related information, so this could be more tightly rewritten as a <Hint message="There are also variants for grouping two and three numbers together with vec2 and vec3">vec4</Hint>:
 
-```gdshader
+```glsl
 void fragment() {
   // To get the expected color we need to place in order, 
   // the value for Red(r), Green(g), Blue(b) and Alpha(a)
@@ -231,7 +231,7 @@ There are lots of other Built-ins that we're going to unlock as we expand our kn
 Your first instinct, especially if you've done any kind of traditional programming before, might be to write something like this to fill the portal:
 
 <div className="prose-error-code">
-```gdshader
+```glsl
 // This is NOT how shaders actually work!
 void fragment() {
   vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
@@ -271,7 +271,7 @@ If you sit with that for a moment, everything starts to make sense.
 Our pixel doesn't need to know what the rest of the canvas looks like, and even if it wanted to, it couldn't.
 All it needs to do is follow its own rulebook. In our case, it should simply accept its blue fate: 
 
-```gdshader
+```glsl
 void fragment() {
     vec4 portal_color = vec4(0.15, 0.55, 1.00, 1.0);
     
@@ -327,8 +327,8 @@ However, shaders have a charming way of debugging:<br/>
 
 <Separator />
 
-We can take the `x` coordinate of our `UV` and apply it to the <Color hex="#EE1111">red</Color> channel of our result.<br/>
-Then, we do the same with the `y` coordinate, but apply it to the <Color hex="#11BB11">green</Color> channel.
+We can take the `x` coordinate of our `UV` and apply it to the <Color hex="#FC7F7F">red</Color> channel of our result.<br/>
+Then, we do the same with the `y` coordinate, but apply it to the <Color hex="#61C258">green</Color> channel.
 
 The result is going to be a beautiful, mango-colored square:
 
@@ -342,9 +342,9 @@ The result is going to be a beautiful, mango-colored square:
 If you look closely at the mango square, you'll notice a few things:
 - The top-left corner is fully **black**
   - This is where both x and y _start_, so both coordinates are 0.0.
-- The top-right corner is fully <Color hex="#EE1111">red</Color>
+- The top-right corner is fully <Color hex="#FC7F7F">red</Color>
   - This means <Hint message="Remember, we assigned x to the red channel">x</Hint> is 1.0.
-- Similarly, the bottom-left corner is fully <Color hex="#11BB11">green</Color>
+- Similarly, the bottom-left corner is fully <Color hex="#61C258">green</Color>
   - This means <Hint message="You don't need a reminder for y as well, I made this hint to tell you you're doing great!">y</Hint> is 1.0.
 - Finally, the bottom-right corner is <Color hex="#FACA00">yellow</Color>
   - This is what happens when red and green combine, when both x and y reached their _end_ value, 1.0.
@@ -1155,3 +1155,5 @@ Thank you so much!
 <SupportMe />
 
 </RevealSection>
+
+<PostNav postId="shaders-2" />

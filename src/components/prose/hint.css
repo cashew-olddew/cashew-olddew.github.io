@@ -1,7 +1,7 @@
 @layer components {
   .hint {
-    color: var(--orange-6);
-    text-decoration: underline dotted var(--orange-6);
+    color: var(--hint-color);
+    text-decoration: underline dotted var(--hint-color);
     text-underline-offset: 3px;
     cursor: help;
     transition: color var(--transition-1), background-color var(--transition-1);
@@ -11,8 +11,8 @@
   }
 
   .hint:hover {
-    color: var(--orange-8);
-    background-color: var(--orange-1);
+    color: var(--hint-hover);
+    background-color: var(--hint-hover-bg);
   }
 
   .hint-tooltip {
@@ -25,7 +25,7 @@
     translate: calc(-50% + var(--offset-x, 0px)) 0;
     z-index: 100;
 
-    background: var(--sand-1);
+    background: var(--button-bg);
     color: var(--text);
     font-family: var(--font-hand);
     font-size: var(--font-size-0);

@@ -8,7 +8,7 @@
 
   .talking-input-message {
     font-style: italic;
-    color: var(--sand-8);
+    color: var(--text-decorative);
     margin: 0;
     text-align: center;
   }

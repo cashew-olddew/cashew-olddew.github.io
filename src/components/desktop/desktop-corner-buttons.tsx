@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './desktop-corner-buttons.css'
 import rssIcon from '../../assets/ui/rss.png'
 
@@ -9,6 +9,13 @@ interface DesktopCornerButtonsProps {
 
 export function DesktopCornerButtons({ webMode, onToggleWebMode }: DesktopCornerButtonsProps) {
   const [accessibleFonts, setAccessibleFonts] = useState(false)
+  const [isDark, setIsDark] = useState(
+    () => globalThis.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark)
+  }, [isDark])
 
   return (
     <div className={`desktop-corner-buttons${webMode ? ' desktop-corner-buttons--web' : ''}`}>
@@ -22,6 +29,13 @@ export function DesktopCornerButtons({ webMode, onToggleWebMode }: DesktopCorner
         title={accessibleFonts ? 'Switch to decorative fonts' : 'Switch to readable fonts'}
       >
         {accessibleFonts ? '🔤' : '🔡'}
+      </button>
+      <button
+        className="desktop-dark-toggle"
+        onClick={() => setIsDark(prev => !prev)}
+        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        {isDark ? '☀️' : '🌙'}
       </button>
       <button
         className="desktop-mode-toggle"
