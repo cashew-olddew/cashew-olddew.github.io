@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Window, type WindowPosition } from '../window/window'
 import { Taskbar } from '../taskbar/taskbar'
@@ -9,6 +9,7 @@ import { DesktopCornerButtons } from './desktop-corner-buttons'
 import { getChildren, items, getAncestorPath, type DesktopItem } from '../../posts'
 import { useSound } from '../../hooks/useSound'
 import { readFromURL, pushURL, replaceURL } from '../../utils/desktopURL'
+import { PostNavContext } from '../prose/post-nav-context'
 import './desktop.css'
 
 interface OpenWindow {
@@ -67,7 +68,7 @@ export function Desktop() {
     openWindowIds.current.add(item.id)
     play('open')
     setWindows(prev => {
-      const newWindow: OpenWindow = {
+      const newWindow: OpenWindow = { 
         id: item.id,
         title: `${'emoji' in item ? item.emoji : ''} ${item.title}`,
         content,
@@ -87,6 +88,34 @@ export function Desktop() {
       return next
     })
   }
+
+  const navigateToPost = useCallback(async (fromId: string, toId: string) => {
+    const target = items.find(i => i.id === toId)
+    if (target?.type !== 'post') return
+    const { default: MDXContent } = await target.load()
+    const content = <div className="prose"><MDXContent /></div>
+    openWindowIds.current.delete(fromId)
+    openWindowIds.current.add(toId)
+    setWindows(prev => {
+      const fromWindow = prev.find(w => w.id === fromId)
+      const newWindow: OpenWindow = {
+        id: toId,
+        title: `${target.emoji} ${target.title}`,
+        content,
+        variant: 'post',
+        date: target.date,
+        maximized: false,
+        windowPosition: fromWindow?.windowPosition ?? {
+          zIndex: topZRef.current,
+          defaultPosition: { x: 80, y: 60 },
+          constraintsRef: workspaceRef
+        }
+      }
+      const next = prev.map(w => w.id === fromId ? newWindow : w)
+      replaceURL(next.map(w => w.id), toId, null)
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     restoreFromURL()
@@ -159,6 +188,7 @@ export function Desktop() {
   }
 
   return (
+    <PostNavContext.Provider value={navigateToPost}>
     <div className="desktop">
       <DesktopCornerButtons
         webMode={webMode}
@@ -236,5 +266,6 @@ export function Desktop() {
           </>
       }
     </div>
+    </PostNavContext.Provider>
   )
 }

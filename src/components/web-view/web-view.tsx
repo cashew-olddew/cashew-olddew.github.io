@@ -1,9 +1,10 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { useScrollProgress } from '../../hooks/useScrollProgress'
 import { getChildren, items, type DesktopItem } from '../../posts'
 import { IconsGrid } from '../icons-grid/icons-grid'
 import { pushURL, replaceURL } from '../../utils/desktopURL'
 import { formatDate } from '../../utils/dateUtils'
+import { PostNavContext } from '../prose/post-nav-context'
 import ArrowLeft from '../../assets/ui/arrow-left.svg?react'
 import '../../styles/prose.css'
 import '../../styles/shared-components.css'
@@ -71,6 +72,18 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
 
   const goBack = () => goToIndex(stack.length - 1)
 
+  const navigateToPost = useCallback(async (_fromId: string, toId: string) => {
+    const target = items.find(i => i.id === toId)
+    if (!target) return
+    const page = await loadPage(target)
+    resetScroll()
+    setStack(prev => {
+      const next = [...prev.slice(0, -1), page]
+      replaceURL(next.map(p => p.item.id), null, null, 'web')
+      return next
+    })
+  }, [resetScroll])
+
   const current = stack.at(-1)
 
   function renderContent() {
@@ -79,7 +92,11 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
       return <IconsGrid items={getChildren(current.item.id)} onOpen={openItem} />
     }
     const Post = current.PostContent!
-    return <div className="prose"><Post /></div>
+    return (
+      <PostNavContext.Provider value={navigateToPost}>
+        <div className="prose"><Post /></div>
+      </PostNavContext.Provider>
+    )
   }
 
   return (
