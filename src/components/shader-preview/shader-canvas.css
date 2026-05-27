@@ -50,5 +50,6 @@
   .shader-preview-canvas {
     display: block;
     position: relative;
+    touch-action: pan-y;
   }
 }

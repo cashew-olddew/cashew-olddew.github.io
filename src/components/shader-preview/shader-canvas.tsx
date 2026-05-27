@@ -252,7 +252,7 @@ export function ShaderCanvas({ fullShader, sprite, width, height, border = true,
       } else {
         releaseGPU()
       }
-    }, { threshold: 0, rootMargin: '300px 0px' })
+    }, { threshold: 0, rootMargin: '0px 0px' })
     observer.observe(canvas)
 
     return () => {
