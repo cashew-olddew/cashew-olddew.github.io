@@ -2,7 +2,8 @@ import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGrou
 import Hint from '../../../components/prose/hint'
 
 import cashew from './assets/cashew.jpg'
-import overlay from '../1-shaders-introduction/assets/multiply.jpg'
+import sampleOffset from './assets/sample-right.png'
+import regionOutside from './assets/region-outside-2.png'
 
 # The UV Canvas
 
@@ -82,10 +83,10 @@ Except this time, instead of calculating the answer ourselves... we make sure no
 
 That's <Hint message="The next time you get caught, just tell the teacher you were texture sampling. Works every time!">**texture sampling**</Hint>!
 
-To do that we use a shader built-in function, unsurprisingly called texture(). 
-With it, each fragment uses its *UV* coordinate to find the corresponding point in the image.
+To do that we use a shader built-in function, unsurprisingly called `texture()`. 
+With it, each fragment uses its *UV* coordinates to find the corresponding point in the image.
 
-For example, a fragment at (0.2, 0.3) looks 20% across and 30% down the texture and picks the color it <Hint message="Sometimes, that percentage might not perfectly align with a pixel's coordinate. In such cases, Godot relies on the object's filter mode to 'guess' the color of the pixel. This leads to the canon event we all went through where pixel art looks blurry, it happens with the 'linear' filter mode, because we're mixing large sprites with small textures!">landed on</Hint>.
+For example, a fragment at (0.2, 0.3) looks 20% across and 30% down the texture and picks the color it <Hint message="Sometimes, that percentage might not perfectly align with a pixel's coordinate. In such cases, Godot relies on the object's filter mode to 'guess' the color of the pixel. This leads to the canon event we all went through where pixel art looks blurry, which happens with the 'linear' filter mode, because we're mixing large sprites with small textures!">landed on</Hint>.
 
 -- image with percentages --
 
@@ -93,40 +94,69 @@ And again, remember that the UVs are just percentages.
 The scale of either the object or the texture does not matter at all. 
 A UV value of 0.2 will always sample a value 20% inside the texture.
 
-"But wait, how does the shader even know we want to sample Cashew?"
+_"But wait, how does the shader even know we want to sample Cashew?"_
 
-Most nodes you'd likely apply shaders on will have a texture property. Godot gives us that property through the TEXTURE built-in. How convenient!
+Most nodes you'd likely apply shaders on will have a texture property. Godot gives us that property through the `TEXTURE` built-in. How convenient!
 
-So now, putting it all together, my dear assistant is going to 🪄 appear in Shader World!
+So now, putting it all together, my dear assistant is going to... <h4>🪄</h4> Appear in Shader World!
 
 <ShaderPreview
   sprite={cashew}
   fullShader={`shader_type canvas_item;
 
 void fragment() {
-  COLOR = texture(TEXTURE, UV);
+    COLOR = texture(TEXTURE, UV);
 }`}
   width={200}
   showCode={true}
 />
 
-test
+We just wrote the shader Godot is applying by default to all 2D nodes using textures.
+
+This is great progress, but Cashew still isn't moving. How could we slove this?
+
+Well, we can't tell a pixel to move, a pixel is a pixel, it's just a small light glowing with color.
+Though, what we can do is to tell the pixel to sample a different color, one that's offset from its initial position.
+
+For example, let's see what happens if we tell our pixels to sample with a `0.5` offset to the right:
 
 <ShaderPreview
   sprite={cashew}
-  textures={{ overlay_tex: overlay }}
-  fullShader={`shader_type canvas_item;
+  fullShader={`void fragment() {
+    // We can access parts of a vec with
+    // either (x,y,z,w) or (r,g,b,a)
+    // we already did this for colors
+    vec2 new_uv = vec2(UV.x + 0.5, UV.y);
 
-uniform sampler2D overlay_tex;
-
-void fragment() {
-  vec4 base = texture(TEXTURE, UV);
-  vec4 second = texture(overlay_tex, UV);
-  COLOR = mix(base, second, 0.5);
+    COLOR = texture(TEXTURE, new_uv);
 }`}
   width={200}
   showCode={true}
 />
+
+No, your screen is not broken. This is actually what we expect to see, but there are so.. many.. questions!
+
+First of all, didn't we say we're going to have an offset to the _right_? We just added `0.5` to our coordinates. Why did the image move left?
+
+Let's take an example: 
+The pixel at the top-left corner has the coordinates `(0.0, 0.0)`, so by adding the horizontal offset, it samples the color at `(0.5, 0.0)`, which is the highest point at the middle of our texture.
+If we apply the same rule for each pixel, we end up with a sampling that looks something like this:
+
+<Media label='Texture sampling with a 0.5 horizontal offset' width={360}>
+  <img src={sampleOffset} alt="Texture sampling with a 0.5 horizontal offset" />
+</Media>
+
+Okay, but that still doesn't explain the weird glitch effect that's happening to the other half.
+
+Let's take another example: 
+The pixel at the top-right corner has the coordinates `(1.0, 0.0)`. This time, the horizontal offset takes us to `(1.5, 0,0)`, which lands outside the <Hint message="Remember! We get the texture pixels, or texels, for short, only with UV values ranging between (0.0, 0.0) and (1.0, 1.0).">texture's bounds</Hint>.
+Similarly, all pixels with the x coordinate larger than 0.5 land in this same region. So, what happens when a shader tries to sample outside of a texture?
+
+<Media label='The sampled region outside the texture' width={360}>
+  <img src={regionOutside} alt="The sampled region outside the texture" />
+</Media>
+
+Well, it depends. 
 
 
 {/* We can do that through a process called *texture sampling*.
