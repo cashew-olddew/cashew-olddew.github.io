@@ -1,0 +1,237 @@
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput, PostNav, AchievementList } from '../../../components'
+import Hint from '../../../components/prose/hint'
+
+import cashew from './assets/cashew.jpg'
+import overlay from '../1-shaders-introduction/assets/multiply.jpg'
+
+# The UV Canvas
+
+Welcome back! How was your dance with the GPU?
+
+Last time, we had quite the journey, but we ended up building a portal to Shader World.
+That is no small feat! It would probably take me over a minute to enumerate all of it.
+
+Actually, why not, I'll set a timer and write as fast as I can. Here's a list of your achievements:
+
+<AchievementList>
+
+- Survived your first encounter with a shader
+- Know the difference between a vertex and a fragment shader
+- Know almost all data types used in shaders
+- Created an especially cute empty square
+- Understood that a shader is written for a singular element, not the whole canvas
+- Made the square blue
+- Debugged by visualizing the UV coordinates
+- Customized shaders with uniforms
+- Made a textfield happy 🙂
+- Were the star of the night by dancing with the GPU
+- Used sharp intuition, not math, to figure out the dance steps
+  - distance
+  - smoothstep
+  - mix
+  - masking
+  - animating with sin and TIME
+  - drawing complex shapes
+- Assembled all of the above into a portal. A real one. With a rim and everything.
+</AchievementList>
+
+Okay, that took longer than I had thought.. <Hint message="In my defense, my shift key was acting up because I dropped some coffee on my laptop yesterday.">1:52 minutes.</Hint>
+That's a lot of ground covered by someone who just touched a shader for the first time.
+Take a second to look at that. 
+You earned every single one of those stars!
+
+Hopefully, you took some time to experiment after the last post. 
+If you didn't... well, I am technically just a voice in your head reading text on the screen, so I'll wait for as long as you need! 
+Click the button when you're done!
+
+<RevealSection label="I'm ready!">
+
+<Align align='center'> <h5>No rickrolls... this time</h5></Align>
+
+Alright, but up until now, all our shaders could do was sit there and be pretty 🎀.
+
+But let's be real, if you wanted to look at something pretty, you'd just check a mirror. Seriously, 
+<Hint message="If you're among the 5% of readers sitting in a dark room with a bright light somewhere close, you're probably impressed.">take a look</Hint>:
+
+<ShaderPreview 
+  fullShader={`void fragment() {
+    COLOR = vec4(0.0, 0.0, 0.0, 1.0);
+  }`} 
+  width={400}
+  showCode={false}
+/>
+
+To make a shader truly interesting, though, we need to add one more ingredient.
+
+#### Movement
+
+<Separator />
+
+Let's create a moving shader! Meet Cashew, my assistant!
+
+<Media width={200} label='Cashew'>
+  <img src={cashew} alt="Cashew OldDew" />
+</Media>
+
+Right now, Cashew is just an image. A flat grid of colored pixels, unable to show his unending excitement.
+To bring him into Shader World, our fragment shader needs to answer the same question it always does: 
+
+"What color should the current pixel be?"
+
+Except this time, instead of calculating the answer ourselves... we make sure no one's looking and copy it from the texture.
+
+That's <Hint message="The next time you get caught, just tell the teacher you were texture sampling. Works every time!">**texture sampling**</Hint>!
+
+To do that we use a shader built-in function, unsurprisingly called texture(). 
+With it, each fragment uses its *UV* coordinate to find the corresponding point in the image.
+
+For example, a fragment at (0.2, 0.3) looks 20% across and 30% down the texture and picks the color it <Hint message="Sometimes, that percentage might not perfectly align with a pixel's coordinate. In such cases, Godot relies on the object's filter mode to 'guess' the color of the pixel. This leads to the canon event we all went through where pixel art looks blurry, it happens with the 'linear' filter mode, because we're mixing large sprites with small textures!">landed on</Hint>.
+
+-- image with percentages --
+
+And again, remember that the UVs are just percentages. 
+The scale of either the object or the texture does not matter at all. 
+A UV value of 0.2 will always sample a value 20% inside the texture.
+
+"But wait, how does the shader even know we want to sample Cashew?"
+
+Most nodes you'd likely apply shaders on will have a texture property. Godot gives us that property through the TEXTURE built-in. How convenient!
+
+So now, putting it all together, my dear assistant is going to 🪄 appear in Shader World!
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`shader_type canvas_item;
+
+void fragment() {
+  COLOR = texture(TEXTURE, UV);
+}`}
+  width={200}
+  showCode={true}
+/>
+
+test
+
+<ShaderPreview
+  sprite={cashew}
+  textures={{ overlay_tex: overlay }}
+  fullShader={`shader_type canvas_item;
+
+uniform sampler2D overlay_tex;
+
+void fragment() {
+  vec4 base = texture(TEXTURE, UV);
+  vec4 second = texture(overlay_tex, UV);
+  COLOR = mix(base, second, 0.5);
+}`}
+  width={200}
+  showCode={true}
+/>
+
+
+{/* We can do that through a process called *texture sampling*.
+
+To sample a texture, Godot has a special built-in, unsurprisingly called texture(). It takes two parameters:
+ - *the texture to be sampled*. This is our Cashew!
+ - *the UV coordinates*. 
+
+The way it works is by looking at our current fragment's UV value and taking the corresponding pixel in the texture at those coordinates.
+For example, a fragment with the coordinates (0.2, 0.3) will pick a pixel inside the texture that's situated 20% horizontally and 30% vertically.
+
+-- drawing here with arrows towards pixel and similar arrow over texture --
+
+And yes, because we're working with percentages, it doesn't matter if the object containing this texture has a different size, the sampling will work.
+
+-- show same example as before but with stretched texture, with uvs still ranging between 0 an 1 --
+
+-- also it'd be nice to describe the way sampling works if a percentage doesn't perfectly land on a pixel (linear/nearest interpolation)
+...
+
+To move a pixel we need to know its position and the next position in which it needs to arrive.
+Last time we were able to get that position with the *UV* builtin. 
+
+Let's take a look at our humble circle. 
+
+<ShaderPreview 
+  fullShader={`uniform float radius : hint_range(0.0, 1.0) = 0.25;
+
+  void fragment() {
+    float dist = distance(UV, vec2(0.5, 0.5));
+
+    // you know how smoothstep had two edges
+    // and between them we had a gradient
+    // step acts as if those edges were overlapping
+    // so basically, no more smoothness.
+    float circle_shape = step(
+      radius,
+      dist
+    );
+
+    COLOR = vec4(vec3(circle_shape), 1.0);
+  }`} 
+  width={150}
+  controls={
+    { 
+      "radius": {label: "Circle Radius", type: "float", min: 0.0, max: 1.0, default: 0.30},
+    }
+  }
+/>
+
+Currently, with the distance between the UVs and (0.5, 0.5), our circle sits bored in the center of our screen.
+Let's see what happens if we add 0.5 to the x coordinate of each pixel.
+
+<ShaderPreview 
+  fullShader={`uniform float radius : hint_range(0.0, 1.0) = 0.25;
+
+  void fragment() {
+
+    vec2 new_uv = vec2(UV.x + 0.5, UV.y);
+    float dist = distance(new_uv, vec2(0.5, 0.5));
+
+    // you know how smoothstep had two edges
+    // and between them we had a gradient
+    // step acts as if those edges were overlapping
+    // so basically, no more smoothness.
+    float circle_shape = step(
+      radius,
+      dist
+    );
+
+    COLOR = vec4(vec3(circle_shape), 1.0);
+  }`} 
+  width={150}
+  controls={
+    { 
+      "radius": {label: "Circle Radius", type: "float", min: 0.0, max: 1.0, default: 0.30},
+    }
+  }
+/>
+
+(Maybe look at the sampling first)
+
+Would you look at that! Our circle is no longer in the center of the screen. 
+
+Still, something feels wrong...
+
+We added something to our UVs and the image moved left instead of right as I would've expected.
+I double checked and we didn't download the arabic version of Godot. 
+
+So.. what is going on? */}
+
+
+</RevealSection>
+
+<Separator />
+
+Writing this course, building shaders and interactive previews for them is really fun, but requires a large chunk of time and an even larger amount of peanuts. 🥜<br/>
+Fun cannot buy peanuts, but YOU CAN!
+
+If you genuinely feel like this guide helped you and you want it to continue, consider supporting my work!<br/>
+This entire series will stay entirely free, independent and clear of ads, but its completion and development speed will be greatly influenced by your help!
+
+You can find all the ways to keep the portal alive down below.<br/>
+Thank you so much!
+
+<SupportMe />
+
+<PostNav postId="shaders-3" />

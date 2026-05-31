@@ -72,6 +72,15 @@ export const items: DesktopItem[] = [
     load: () => import('./shaders/2-shader-basics/2-shader-basics.mdx'),
   },
   {
+    id: 'shaders-3',
+    title: '3. The UV Canvas',
+    emoji: '🥭',
+    type: 'post',
+    parent: 'shaders',
+    date: '2026-05-29',
+    load: () => import('./shaders/3-the-uv-canvas/3-the-uv-canvas.mdx'),
+  },
+  {
     id: 'make-it-exist-first',
     title: 'Make it exist',
     emoji: '🥜',

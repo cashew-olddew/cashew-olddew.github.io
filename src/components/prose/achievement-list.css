@@ -1,0 +1,91 @@
+@layer components {
+  .achievement-list {
+    position: relative;
+    margin: var(--size-6) auto;
+    padding: var(--size-5) var(--size-6);
+    max-width: 520px;
+
+    background: var(--surface);
+    border-style: solid;
+    border-width: 12px;
+    border-image: url('../../assets/ui/border.svg') 12 stretch;
+  }
+
+  .achievement-list-title {
+    display: block;
+    text-align: center;
+    font-family: var(--font-hand);
+    font-size: var(--font-size-4);
+    font-weight: var(--font-weight-7);
+    color: var(--accent);
+    margin-bottom: var(--size-1);
+    letter-spacing: 0.02em;
+  }
+
+  /* Flourishes could be prettier than simple lines */
+  .achievement-flourish {
+    display: block;
+    margin: 0 auto var(--size-3) auto;
+    height: 10px;
+    width: 60%;
+    background: url('../../assets/ui/hr.svg') center center / 100% 100% no-repeat;
+    opacity: 0.6;
+  }
+
+  .achievement-flourish--bottom {
+    margin: var(--size-3) auto 0 auto;
+  }
+
+  :root.dark .achievement-list {
+    border-image: url('../../assets/ui/border-dark.svg') 12 stretch;
+  }
+
+  :root.dark .achievement-flourish {
+    background-image: url('../../assets/ui/hr-dark.svg');
+  }
+
+  .achievement-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .achievement-list li {
+    position: relative;
+    padding-left: var(--size-5);
+    margin-bottom: var(--size-2);
+    font-family: var(--font-hand);
+    font-size: var(--font-size-1);
+    line-height: var(--font-lineheight-3);
+    color: var(--text);
+  }
+
+  .achievement-list li::before {
+    content: '★';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--accent);
+    font-size: var(--font-size-2);
+    line-height: var(--font-lineheight-3);
+  }
+
+  /* Nested achievements (sub-items) */
+  .achievement-list li li {
+    padding-left: var(--size-4);
+    margin-bottom: var(--size-1);
+    font-size: var(--font-size-0);
+  }
+
+  .achievement-list li li::before {
+    content: '✦';
+    font-size: var(--font-size-1);
+    color: var(--accent-soft);
+  }
+
+  .achievement-list ul ul {
+    margin-top: var(--size-1);
+    padding-left: var(--size-2);
+  }
+
+}

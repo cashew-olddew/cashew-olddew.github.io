@@ -129,6 +129,11 @@
     margin: var(--size-7) 0;
   }
 
+  .prose del {
+    background: none;
+    color: var(--text);
+  }
+
   .prose input[type="text"] {
     background: var(--code-bg);
     color: var(--text);

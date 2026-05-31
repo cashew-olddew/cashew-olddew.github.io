@@ -59,9 +59,11 @@ interface ShaderPreviewProps {
   vertexPadding?: number
   /** Texture sampling mode. 'linear' (default) for smooth scaling, 'nearest' for pixel-art. */
   sampling?: 'linear' | 'nearest'
+  /** Additional textures bound as sampler2D uniforms. Key = uniform name, value = image URL. */
+  textures?: Record<string, string>
 }
 
-export function ShaderPreview({ width, height, align = 'center', sprite = defaultSprite, fullShader, children, controls, showCode = true, border = true, vertexPadding = 0, sampling = 'linear' }: Readonly<ShaderPreviewProps>) {
+export function ShaderPreview({ width, height, align = 'center', sprite = defaultSprite, fullShader, children, controls, textures, showCode = true, border = true, vertexPadding = 0, sampling = 'linear' }: Readonly<ShaderPreviewProps>) {
   const [controlValues, setControlValues] = useState<Record<string, number>>(() => {
     if (!controls) return {}
     return Object.fromEntries(
@@ -136,6 +138,7 @@ export function ShaderPreview({ width, height, align = 'center', sprite = defaul
       border={border}
       sampling={sampling}
       vertexPadding={vertexPadding}
+      textures={textures}
       controlsRef={controlsRef}
       controlValuesRef={controlValuesRef}
       colorValuesRef={colorValuesRef}
