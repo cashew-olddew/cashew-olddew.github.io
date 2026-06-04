@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback, useRef } from 'react'
 import { useScrollProgress } from '../../hooks/useScrollProgress'
 import { getChildren, items, type DesktopItem } from '../../posts'
 import { IconsGrid } from '../icons-grid/icons-grid'
@@ -30,6 +30,7 @@ async function loadPage(item: DesktopItem): Promise<MobilePage> {
 export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewProps>) {
   const [stack, setStack] = useState<MobilePage[]>([])
   const { progress: scrollProgress, onScroll, reset: resetScroll } = useScrollProgress()
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!initialStackIds?.length) { setStack([]); return }
@@ -59,6 +60,7 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
       pushURL(next.map(p => p.item.id), null, null, 'web')
       return next
     })
+    contentRef.current?.scrollTo(0, 0)
   }
 
   const goToIndex = (index: number) => {
@@ -82,6 +84,7 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
       replaceURL(next.map(p => p.item.id), null, null, 'web')
       return next
     })
+    contentRef.current?.scrollTo(0, 0)
   }, [resetScroll])
 
   const current = stack.at(-1)
@@ -135,6 +138,7 @@ export function MobileView({ rootItems, initialStackIds }: Readonly<MobileViewPr
         </div>
       )}
       <div
+        ref={contentRef}
         className="web-view-content content-body"
         onScroll={onScroll}
       >

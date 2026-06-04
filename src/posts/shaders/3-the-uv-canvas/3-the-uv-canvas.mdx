@@ -1,0 +1,616 @@
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput, PostNav, AchievementList } from '../../../components'
+import Hint from '../../../components/prose/hint'
+
+import cashew from './assets/cashew.jpg'
+import cashewSample from './assets/cashew-sample.jpg'
+import sampleOffset from './assets/sample-right.png'
+import regionOutside from './assets/region-outside-2.png'
+import repeatModes from './assets/repeat-modes.png'
+import repeatEnabled from './assets/repeat-enabled.png'
+import mirrorEnabled from './assets/mirror-enabled.png'
+import canvasMove from './assets/canvas-move.mp4'
+import cspCanvasShift from './assets/csp-canvas-shift.jpg'
+import canvasResize from './assets/canvas-resize.mp4'
+import cspCanvasScale from './assets/csp-canvas-resize.jpg'
+import crumple from './assets/crumple.mp4'
+
+# The UV Canvas
+
+Welcome back! How was your dance with the GPU?
+
+Last time, we had quite the journey, but we ended up building a portal to Shader World.
+That is no small feat! It would probably take me over a minute to enumerate all of it.
+
+Actually, why not, I'll set a timer and write as fast as I can. Here's a list of your achievements:
+
+<AchievementList>
+
+- Survived your first encounter with a shader
+- Know the difference between a vertex and a fragment shader
+- Know almost all data types used in shaders
+- Created an especially cute empty square
+- Understood that a shader is written for a singular element, not the whole canvas
+- Made the square blue
+- Debugged by visualizing the UV coordinates
+- Customized shaders with uniforms
+- Made a textfield happy 🙂
+- Were the star of the night by dancing with the GPU
+- Used sharp intuition, not math, to figure out the dance steps
+  - distance
+  - smoothstep
+  - mix
+  - masking
+  - animating with sin and TIME
+  - drawing complex shapes
+- Assembled all of the above into a portal. A real one. With a rim and everything.
+- Read the whole achievement list
+</AchievementList>
+
+Okay, that took longer than I had thought.. <Hint message="In my defense, my shift key was acting up because I dropped some coffee on my laptop yesterday.">1:52 minutes.</Hint>
+That's a lot of ground covered by someone who just touched a shader for the first time.
+Take a second to look at that. 
+You earned every single one of those stars!
+
+Hopefully, you took some time to experiment after the last post. 
+If you didn't... well, I am technically just a voice in your head reading text on the screen, so I'll wait for as long as you need! 
+Click the button when you're done!
+
+<RevealSection label="I'm ready!">
+
+<Align align='center'> <h5>No rickrolls... this time</h5></Align>
+
+Alright, but up until now, all our shaders could do was sit there and be pretty 🎀.<br/>
+But let's be real, if you wanted to look at something pretty, you'd just check a mirror.
+
+To make a shader truly interesting, though, we need to add one more ingredient.
+
+#### Movement
+
+<Separator />
+
+Let's create a moving shader! Meet Cashew, my assistant!
+
+<Media width={200} label='Cashew'>
+  <img src={cashew} alt="Cashew OldDew" />
+</Media>
+
+Right now, Cashew is just an image. A flat grid of colored pixels, unable to show his unending excitement.
+To bring him into Shader World, our fragment shader needs to answer the same question it always does: 
+
+"What color should the current pixel be?"
+
+Except this time, instead of calculating the answer ourselves... we make sure no one's looking and copy it from the texture.
+
+That's <Hint message="The next time you get caught, just tell the teacher you were texture sampling. Works every time!">**texture sampling**</Hint>!
+
+To do that we use a shader built-in function, unsurprisingly called `texture()`. 
+With it, each fragment uses its *UV* coordinates to find the corresponding point in the image.
+
+For example, a fragment at (0.2, 0.3) looks 20% across and 30% down the texture and picks the color it <Hint message="Sometimes, that percentage might not perfectly align with a pixel's coordinate. In such cases, Godot relies on the object's filter mode to 'guess' the color of the pixel. This leads to the canon event we all went through where pixel art looks blurry, which happens with the 'linear' filter mode, because we're mixing large sprites with small textures!">landed on</Hint>.
+
+<Media width={360} label='Pixel Sampled from Cashew'>
+  <img src={cashewSample} alt="Pixel Sampled from Cashew" />
+</Media>
+
+And again, remember that the UVs are just percentages. 
+The scale of either the object or the texture does not matter in this case. 
+A UV value of 0.2 will always sample a value 20% inside the texture.
+
+_"But wait, how does the shader even know we want to sample Cashew?"_
+
+Most nodes you'd likely apply shaders on will have a texture property. Godot gives us that property through the `TEXTURE` built-in. How convenient!
+
+So now, putting it all together, my dear assistant is going to... 
+
+<Hint message="There was supposed to be a magic wand here, but it doesn't work on all systems. Cashew appeared, but the wand is gone. The universe gives, the universe takes.">Appear in Shader World!</Hint>
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`shader_type canvas_item;
+
+void fragment() {
+    COLOR = texture(TEXTURE, UV);
+}`}
+  width={200}
+  showCode={true}
+/>
+
+We just wrote the shader Godot is applying by default to all 2D nodes using textures.
+
+This is great progress, but Cashew still isn't moving. How could we solve this?
+
+Well, we can't tell a pixel to move, a pixel is a pixel, it's just a small light glowing with color.
+What we _can_ do is to tell the pixel to sample a different color, one that comes from somewhere else in the texture.
+
+For example, let's see what happens if we tell our pixels to sample with a `0.5` offset to the right:
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    // We can access parts of a vec with
+    // either (x,y,z,w) or (r,g,b,a)
+    // we already did this for colors
+    vec2 new_uv = vec2(UV.x + 0.5, UV.y);
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+  width={200}
+  showCode={true}
+/>
+
+No, your screen is not broken. This is actually what we expect to see, but there are <Hint message="Okay, more like two questions, but they're big questions!">so.. many.. questions</Hint>!
+
+First of all, didn't we say we're going to have an offset to the _right_? We literally added `0.5` to our coordinates. Why did the image move left?
+
+Let's take an example: 
+The top-left corner has the UV coordinates `(0.0, 0.0)`, so by adding the horizontal offset, it samples the color at `(0.5, 0.0)`, which is the highest point at the middle of our texture.
+If we apply the same rule for each pixel, we end up with a sampling that looks something like this:
+
+<Media label='Texture sampling with a 0.5 horizontal offset' width={360}>
+  <img src={sampleOffset} alt="Texture sampling with a 0.5 horizontal offset" />
+</Media>
+
+Okay, but that still doesn't explain the weird glitch effect that's happening to the other half.
+
+Let's take another example: 
+The pixel at the top-right corner has the coordinates `(1.0, 0.0)`. This time, the horizontal offset takes us to `(1.5, 0.0)`, which lands outside the <Hint message="Remember! We get the texture pixels, or texels, for short, only with UV values ranging between (0.0, 0.0) and (1.0, 1.0).">texture's bounds</Hint>.
+Similarly, all pixels with the x coordinate larger than 0.5 land in this same region. So, what happens when a shader tries to sample outside of a texture?
+
+<Media label='The sampled region outside the texture' width={360}>
+  <img src={regionOutside} alt="The sampled region outside the texture" />
+</Media>
+
+Well, it depends. Similarly to how there's a filter mode property for every <Hint message="Found in Inspector > CanvasItem > Texture.">texture</Hint>, there's also a repeat mode property which tells the shader how to behave when sampling values _outside_ the texture's range.
+
+<Media label='Filter and Repeat mode texture settings'>
+  <img src={repeatModes} alt='Filter and Repeat mode texture settings' />
+</Media>
+
+By default, the texture doesn't repeat. Because of that, Godot effectively clamps the coordinates to the edge of the texture.
+So, for our example, when our coordinates became `(1.5, 0.0)`, the shader treated them as (`1.0, 0.0)`. Applying that to all other pixels in this region leads to the striped glitchy image we see.
+
+The other repeat modes do pretty much what you'd expect:
+
+<MediaGroup align='center'>
+  <Media label='Repeat Mode: Enabled' width={260}>
+    <img src={repeatEnabled} alt='Repeat Mode: Enabled' />
+  </Media>
+  <Media label='Repeat Mode: Mirror' width={260}>
+    <img src={mirrorEnabled} alt='Repeat Mode: Mirror' />
+  </Media>
+</MediaGroup>
+
+But getting back to our non-repeating texture, we can easily get rid of the weird lines by discarding pixels with coordinates that would sample outside the texture.
+And yes, this follows the same obvious naming pattern, as we just have to write `discard`.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    vec2 new_uv = vec2(UV.x + 0.5, UV.y);
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    // I won't add this code block 
+    // in future examples for brevity
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={200}
+  showCode={true}
+/>
+
+Finally, movement can't really be called "movement" if we just teleport Cashew to a different position. 
+To properly see it in action, let's add a vec2 uniform for our offset.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 offset = vec2(0.0);
+  
+  void fragment() {
+    vec2 new_uv = vec2(UV.x + offset.x, UV.y + offset.y);
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={200}
+  showCode={true}
+  controls={
+    { "offset": {label: "Offset", type: "vec2", min: -1.0, max: 1.0, defaultVec: [0.0, 0.0]}}
+  }
+>
+{`uniform vec2 offset = vec2(0.0);
+  
+  void fragment() {
+    vec2 new_uv = vec2(UV.x + offset.x, UV.y + offset.y);
+
+    COLOR = texture(TEXTURE, new_uv);
+    
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+Now, I don't know about you, but despite seeing a result and understanding _why_ we reach that result, I'm not very satisfied.
+
+> I mean, sure, I get it. I take a pixel, add a value, calculate the new coordinate, and if I do that enough times, I can eventually guess what the result looks like.
+
+That way of thinking is precise, yes, but it is not very human. 
+If an image editing tutorial told you to zoom in, apply an effect on a single pixel, and predict how the final image looks... you'd rightfully scroll to the comment section to write something mean.
+
+So let's think more like humans and appreciate what happens in the big picture. Let's see why...
+
+#### UV is our Canvas
+
+<Separator />
+
+Moving away from shaders for a minute, let's say you wanted to draw something.
+Minutes or hours later, your masterpiece has grown far beyond what you originally planned, and you're running out of canvas space.
+If you're doing digital art, you're in luck! Most art programs allow you to resize, move or even rotate your canvas.
+
+Look, for example, at how the canvas can be moved in <Hint message="Throughout this series I'll occasionally use different image editing programs when they make for a good example. These mentions are purely for illustration purposes and shouldn't be taken as recommendations. Feel free to mentally replace them with whichever editor you prefer.">Clip Studio Paint</Hint>: 
+
+<Media width={420} label='Canvas Size Tool in CSP'>
+    <video src={canvasMove} autoPlay loop muted playsInline type="video/mp4"/>
+</Media>
+
+After applying the change, the result is surprisingly similar to what we saw when we added 0.5 to the shader UVs.
+
+<Media label='Cashew Image with Canvas Offset' width={260}>
+  <img src={cspCanvasShift} alt='Cashew Image with Canvas Offset' />
+</Media>
+
+This is no coincidence! Let's try it the other way around. Let's make the canvas twice as large in our image editor, and then to do the same in our shader:
+
+<Media width={420} label='Canvas Size Tool in CSP'>
+    <video src={canvasResize} autoPlay loop muted playsInline type="video/mp4"/>
+</Media>
+
+Cashew looks smaller now! Please take note of the fact that this doesn't confuse you at all and you totally expected this result:
+
+<Media label='Cashew Image with Canvas Scaling' width={260}>
+  <img src={cspCanvasScale} alt='Cashew Image with Canvas Scaling' />
+</Media>
+
+Now look at the result of this shader which multiplies the UV by `2.0`:
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    vec2 new_uv = UV * 2.0;
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    vec2 new_uv = UV * 2.0;
+
+    COLOR = texture(TEXTURE, new_uv);
+    
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+<Align align='center'><h4>The result is exactly the same!</h4></Align>
+
+This time, however, because we looked at UVs from a different lens it was so much easier to understand why changing it behaves the way it does. 
+
+It's true that UVs are the coordinates of a fragment, and yes, if we apply some change and calculate it, the math checks out, but you can generally verify with math only after you've come to a solution.
+When building shaders, you don't have the solution ahead of time. So instead, what we need to know is:<br/>What does changing these UVs **mean** for the overall shader?
+
+Changing the UVs is like changing the _canvas_ of your shader artwork. 
+
+UVs are your canvas!
+
+#### But there's more!
+
+<Separator />
+
+Unlike the canvas in an image editor, ours isn't limited to being moved around or resized.
+
+We can flip it, spin it, tile it, bend it, twist it, pull it, bop it!
+
+We've already seen **translation** and **scaling**. Actually, here's a shader for you to play around with them together:
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 offset = vec2(0.0);
+  uniform vec2 scale = vec2(1.0);
+  
+  void fragment() {
+    vec2 new_uv = vec2(UV.x + offset.x, UV.y + offset.y);
+    new_uv *= scale;
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={200}
+  showCode={true}
+  controls={
+    { 
+      "offset": {label: "Offset", type: "vec2", min: -1.0, max: 1.0, defaultVec: [0.0, 0.0]},
+      "scale": {label: "Scale", type: "vec2", min: -2.0, max: 2.0, defaultVec: [1.0, 1.0]}
+    }
+  }
+>
+{`uniform vec2 offset = vec2(0.0);
+  uniform vec2 scale = vec2(1.0);
+  
+  void fragment() {
+    vec2 new_uv = vec2(UV.x + offset.x, UV.y + offset.y);
+    new_uv *= scale;
+
+    COLOR = texture(TEXTURE, new_uv);
+    
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+But let's take a look at <Hint message="Don't worry about memorizing them. In future lessons we'll look at these in more detail to fully understand them. What's cool, though, is that you don't need to always fully understand how a tool works in order to use it. Until we learn more, if you wanted to improve your shaders with any of these effects, you could just copy them!">some of the other things</Hint> our canvas can do.
+
+##### 1. Flip
+
+If we take either of the UV coordinates and subtract it from 1.0, it reverses that direction.
+That's it. Canvas flipped.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    vec2 new_uv = vec2(1.0 - UV.x, UV.y);
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    vec2 new_uv = vec2(1.0 - UV.x, UV.y);
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+</ShaderPreview>
+
+##### 2. Repeat
+
+Who ordered 9 canvases? I'm not paying for that!
+
+You know how our texture gets sampled when coordinates land between _0.0_ and _1.0_?
+Well, who's to say you can't land there multiple times? What if every time we reached the edge of our interval, we started from the beginning?
+
+That's exactly what the `fract()` function does. It keeps only the decimal part of the number, so values like _0.5_, _1.5_ and _2.5_, all become _0.5_.
+
+In the next example, scaling the UVs by `3.0` and wrapping with `fract()` tiles the canvas into a 3x3 grid of repeating copies.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 repeat = vec2(3.0);
+
+void fragment() {
+    vec2 new_uv = fract(UV * repeat);
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+  width={260}
+  showCode={true}
+  controls={{
+    "repeat": {label: "Repeat", type: "vec2", min: 0.0, max: 10.0, defaultVec: [3.0, 3.0]}
+  }}
+>
+{`uniform vec2 repeat = vec2(3.0);
+
+void fragment() {
+    vec2 new_uv = fract(UV * repeat);
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+</ShaderPreview>
+
+##### 3. Skew
+
+If we give each axis a little push based on how far along the other axis the current fragment is, we get a slant or a skew effect.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 skew = vec2(0.0);
+
+void fragment() {
+    vec2 new_uv = vec2(
+        UV.x + UV.y * skew.x,
+        UV.y + UV.x * skew.y
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+  controls={{
+    "skew": {label: "Skew", type: "vec2", min: -1.0, max: 1.0, defaultVec: [0.5, 0.0]}
+  }}
+>
+{`uniform vec2 skew = vec2(0.0);
+
+void fragment() {
+    vec2 new_uv = vec2(
+        UV.x + UV.y * skew.x,
+        UV.y + UV.x * skew.y
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+##### 4. Distort
+
+However, nobody's telling us to push by the same amount or in the same direction. Let's exercise some free will by giving each pixel its own nudge in a <Hint message="Any repeating pattern reasonably sitting between the [0.0, 1.0] interval would work. Here I picked a sine and a cosine because together they make for a nice wavy effect, but you can pick anything. Also, we'll see soon, in a future chapter, how to pick the proper numbers.">different pattern</Hint>.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    vec2 new_uv = vec2(
+        // Notice how only what's after "UV.x +"
+        // changed from the previous example
+        UV.x + sin(UV.y * 20.0) * 0.03,
+        UV.y + cos(UV.x * 20.0) * 0.03
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    vec2 new_uv = vec2(
+        // Notice how only what's after "UV.x +"
+        // changed from the previous example
+        UV.x + sin(UV.y * 20.0) * 0.03,
+        UV.y + cos(UV.x * 20.0) * 0.03
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+</ShaderPreview>
+
+Add `TIME` and suddenly Cashew is <Hint message="I also had to tweak some numbers, otherwise he would've looked like he was submerged in a blender">submerged underwater</Hint>.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    vec2 new_uv = vec2(
+        UV.x + sin(UV.y * 10.0 + TIME) * 0.01,
+        UV.y + cos(UV.x * 10.0 + TIME) * 0.01
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    vec2 new_uv = vec2(
+        
+        UV.x + sin(UV.y * 10.0 + TIME) * 0.01,
+        UV.y + cos(UV.x * 10.0 + TIME) * 0.01
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+}`}
+</ShaderPreview>
+
+> What I especially love about these kind of distortions is that they give us the power to treat our canvas like paper we could crumple
+
+<Media width={420} label='Crumpled paper is just a random distortion'>
+    <video src={crumple} autoPlay loop muted playsInline type="video/mp4"/>
+</Media>
+
+##### 5. Rotate
+
+When rotating, every point in the image traces its own circular path.
+What the <Hint message="We'll see later how to intuitively find it.">formula</Hint> does is to get the x and y coordinates that land on that circle of rotation.
+For now we don't need to worry about _how it works_. All that matters is that we have something like:
+
+```glsl
+vec2 new_uv = vec2(some_circle_coordinate.x, some_circle_coordinate.y);
+```
+
+Let's make the angle of rotation vary with TIME as well, so that our movement dedicated chapter has at least three shaders actually moving.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    float angle = TIME;
+    vec2 new_uv = vec2(
+        UV.x * cos(angle) - UV.y * sin(angle),
+        UV.x * sin(angle) + UV.y * cos(angle)
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    float angle = TIME;
+    vec2 new_uv = vec2(
+        UV.x * cos(angle) - UV.y * sin(angle),
+        UV.x * sin(angle) + UV.y * cos(angle)
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+No need to worry, the shader is not broken. We just have to wait for Cashew to spin around the `(0.0, 0.0)` coordinate.
+
+You probably expected the rotation to happen from the center of the canvas, around `(0.5, 0.5)`, and of course, with some hard work, we could find a formula that gives us that.
+If my plan was to make you leave the course as fast as possible, that would've been an effective strategy.
+
+It's true that there's some math in our shaders, but we can at least keep it clean and pretty.
+We'll see that the more our parameters are <Hint message="I mean this quite literally! If a parameter is 0, it doesn't exist!">zeroes and ones</Hint>, the easier it becomes to wrap our heads around what's going on in an example. 
+That's why I like keeping the center `(0.0, 0.0)` in this case.
+
+But how, then, can we rotate around the center of our canvas? How do we choose a _pivot_ around which we can apply the transformations we learned?
+
+In the next post we're going to learn, not how to change a formula to fit our canvas, but how to change our canvas to fit a simpler formula.
+
+Until then, the most important thing you can do is keep experimenting. Take what you've learned today and make some textures feel alive by adding movement to them!
+I'd love to see you join the [Discord Server](https://discord.gg/3jkTF9FgWJ) and share them with me and the community.
+
+Thank you so much for reading! Until next time, happy shading!
+
+<Separator />
+
+Writing this course, building shaders and interactive previews for them is really fun, but requires a large chunk of time and an even larger amount of peanuts. 🥜<br/>
+Fun cannot buy peanuts, but YOU CAN!
+
+If you genuinely feel like this guide helped you and you want it to continue, consider supporting my work!<br/>
+This series will stay entirely free, independent and clear of ads, but its completion and development speed will be greatly influenced by your help!
+
+You can find all the ways to keep the portal alive down below.<br/>
+Thank you so much!
+
+<SupportMe />
+
+</RevealSection>
+
+<PostNav postId="shaders-3" />

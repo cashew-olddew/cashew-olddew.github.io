@@ -2,6 +2,8 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import remarkGfm from 'remark-gfm'
 import rehypePrettyCode from 'rehype-pretty-code'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import mdx from '@mdx-js/rollup'
 import svgr from "vite-plugin-svgr"
 import { writeFileSync } from 'fs'
@@ -49,6 +51,8 @@ export default defineConfig({
       ...mdx({
         remarkPlugins: [remarkGfm],
         rehypePlugins: [
+          rehypeSlug,
+          [rehypeAutolinkHeadings, { behavior: 'wrap' }],
           [
             rehypePrettyCode,
             {

@@ -34,4 +34,11 @@ export const postsMeta: PostMeta[] = [
     date: '2026-05-25',
     description: 'How to dance with the GPU',
   },
+  {
+    id: 'shaders-3',
+    title: '3. The UV Canvas',
+    emoji: '🎨',
+    date: '2026-06-04',
+    description: "UVs are your Canvas",
+  },
 ]

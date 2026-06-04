@@ -14,13 +14,15 @@ interface ShaderCanvasProps {
   sampling?: 'linear' | 'nearest'
   /** Fraction (0–1) to scale the initial quad inward, giving vertex displacements room to move. Default: 0. */
   vertexPadding?: number
+  /** Additional textures bound as sampler2D uniforms. Key = uniform name, value = image URL. */
+  textures?: Record<string, string>
   controlsRef: { current: Record<string, UniformControlDef> | undefined }
   controlValuesRef: { current: Record<string, number> }
   colorValuesRef: { current: Record<string, string> }
   vecValuesRef: { current: Record<string, number[]> }
 }
 
-export function ShaderCanvas({ fullShader, sprite, width, height, border = true, sampling = 'linear', vertexPadding = 0, controlsRef, controlValuesRef, colorValuesRef, vecValuesRef }: Readonly<ShaderCanvasProps>) {
+export function ShaderCanvas({ fullShader, sprite, width, height, border = true, sampling = 'linear', vertexPadding = 0, textures, controlsRef, controlValuesRef, colorValuesRef, vecValuesRef }: Readonly<ShaderCanvasProps>) {
   const w = width ?? height ?? 128
   const h = height ?? width ?? 128
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -30,6 +32,7 @@ export function ShaderCanvas({ fullShader, sprite, width, height, border = true,
   widthRef.current = w
   const heightRef = useRef(h)
   heightRef.current = h
+  const textureKey = JSON.stringify(textures ?? {})
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -49,6 +52,29 @@ export function ShaderCanvas({ fullShader, sprite, width, height, border = true,
     let running = false
     let destroyed = false
     let imgEl: HTMLImageElement | null = null
+
+    type ExtraSlot = { name: string; imgEl: HTMLImageElement | null; tex: WebGLTexture | null; loc: WebGLUniformLocation | null }
+    const extraSlots: ExtraSlot[] = Object.entries(textures ?? {}).map(([name, src]) => {
+      const slot: ExtraSlot = { name, imgEl: null, tex: null, loc: null }
+      const extraImg = new Image()
+      extraImg.onload = () => {
+        if (destroyed) return
+        slot.imgEl = extraImg
+        if (gl && slot.tex && !gl.isContextLost()) uploadExtraImg(gl, slot)
+      }
+      extraImg.src = src
+      return slot
+    })
+
+    function uploadExtraImg(g: WebGLRenderingContext, slot: ExtraSlot) {
+      if (!slot.imgEl || !slot.tex) return
+      g.bindTexture(g.TEXTURE_2D, slot.tex)
+      g.texImage2D(g.TEXTURE_2D, 0, g.RGBA, g.RGBA, g.UNSIGNED_BYTE, slot.imgEl)
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MIN_FILTER, g.LINEAR)
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MAG_FILTER, g.LINEAR)
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_S, g.REPEAT)
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_T, g.REPEAT)
+    }
 
     // Uniform locations — rebuilt whenever GPU resources are recreated
     let uTimeLoc: WebGLUniformLocation | null = null
@@ -153,6 +179,18 @@ export function ShaderCanvas({ fullShader, sprite, width, height, border = true,
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
       if (imgEl) uploadImg(gl, texture)
 
+      for (const slot of extraSlots) {
+        slot.tex = gl.createTexture()!
+        slot.loc = gl.getUniformLocation(program, slot.name)
+        gl.bindTexture(gl.TEXTURE_2D, slot.tex)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([128, 128, 128, 255]))
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+        if (slot.imgEl) uploadExtraImg(gl, slot)
+      }
+
       return true
     }
 
@@ -167,6 +205,14 @@ export function ShaderCanvas({ fullShader, sprite, width, height, border = true,
       g.activeTexture(g.TEXTURE0)
       g.bindTexture(g.TEXTURE_2D, texture)
       g.uniform1i(uTexLoc, 0)
+      for (let i = 0; i < extraSlots.length; i++) {
+        const slot = extraSlots[i]
+        if (slot.tex && slot.loc !== null) {
+          g.activeTexture(g.TEXTURE0 + 1 + i)
+          g.bindTexture(g.TEXTURE_2D, slot.tex)
+          g.uniform1i(slot.loc, 1 + i)
+        }
+      }
       g.uniform1f(uTimeLoc, t)
       g.uniform2f(uTexPixelSize, 1 / texW, 1 / texH)
       g.uniform2f(uScreenPixSz,  1 / canvas!.width, 1 / canvas!.height)
@@ -221,6 +267,9 @@ export function ShaderCanvas({ fullShader, sprite, width, height, border = true,
       if (program) { gl.deleteProgram(program); program = null }
       if (buf)     { gl.deleteBuffer(buf);      buf     = null }
       if (texture) { gl.deleteTexture(texture); texture = null }
+      for (const slot of extraSlots) {
+        if (slot.tex) { gl.deleteTexture(slot.tex); slot.tex = null }
+      }
       loseExt?.loseContext()
     }
 
@@ -263,10 +312,13 @@ export function ShaderCanvas({ fullShader, sprite, width, height, border = true,
         if (program) gl.deleteProgram(program)
         if (buf)     gl.deleteBuffer(buf)
         if (texture) gl.deleteTexture(texture)
+        for (const slot of extraSlots) {
+          if (slot.tex) gl.deleteTexture(slot.tex)
+        }
         loseExt?.loseContext()
       }
     }
-  }, [fullShader, sprite, sampling])
+  }, [fullShader, sprite, sampling, textureKey])
 
   return (
     <div className={`shader-preview-canvas-wrap${border ? '' : ' no-border'}`}>

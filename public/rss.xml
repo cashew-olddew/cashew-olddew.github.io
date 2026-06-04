@@ -7,6 +7,13 @@
     <language>en-us</language>
     <atom:link href="https://cashew-olddew.github.io/rss.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title><![CDATA[🎨 3. The UV Canvas]]></title>
+      <link>https://cashew-olddew.github.io/?view=web&amp;open=shaders-3</link>
+      <guid>https://cashew-olddew.github.io/?view=web&amp;open=shaders-3</guid>
+      <pubDate>Thu, 04 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[UVs are your Canvas]]></description>
+    </item>
+    <item>
       <title><![CDATA[🖼️ 2. Shader Basics]]></title>
       <link>https://cashew-olddew.github.io/?view=web&amp;open=shaders-2</link>
       <guid>https://cashew-olddew.github.io/?view=web&amp;open=shaders-2</guid>

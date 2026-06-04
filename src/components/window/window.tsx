@@ -1,5 +1,5 @@
 import { motion, type Variants, useDragControls, useMotionValue } from "framer-motion";
-import { type RefObject, useRef } from "react";
+import { type RefObject, useRef, useEffect } from "react";
 import { useScrollProgress } from "../../hooks/useScrollProgress";
 import { formatDate } from "../../utils/dateUtils";
 import "./window.css";
@@ -25,7 +25,7 @@ interface WindowProps {
   minimized?: boolean
   variant?: 'folder' | 'post'
   date?: string
-
+  scrollKey?: string
   windowPosition: WindowPosition;
 }
 
@@ -69,6 +69,7 @@ export function Window({
   minimized,
   variant = 'post',
   date,
+  scrollKey,
   windowPosition,
 }: Readonly<WindowProps>) {
   const { progress: scrollProgress, onScroll } = useScrollProgress()
@@ -76,6 +77,11 @@ export function Window({
   const x = useMotionValue(windowPosition.defaultPosition.x);
   const y = useMotionValue(windowPosition.defaultPosition.y);
   const savedPosition = useRef<{ x: number; y: number } | null>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bodyRef.current?.scrollTo(0, 0)
+  }, [scrollKey])
 
   const handleMaximize = () => {
     if (!maximized) {
@@ -137,6 +143,7 @@ export function Window({
         </div>
       )}
       <div
+        ref={bodyRef}
         className="window-body content-body"
         onScroll={onScroll}
       >

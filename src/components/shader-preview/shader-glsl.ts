@@ -97,6 +97,7 @@ export function gdshaderToVertGLSL(raw: string, gl2 = false): string {
   if (!gl2) s = s.replace(/\btexture\s*\(/g, 'texture2D(')
 
   const preamble = gl2 ? `#version 300 es
+precision mediump float;
 in vec2 aPosition;
 in vec2 aUV;
 out vec2 vUV;
@@ -114,7 +115,8 @@ uniform vec2 uScreenPixelSize;
 // Mutable built-ins — read and write these inside vertex()
 vec2 VERTEX;
 vec2 UV;
-` : `attribute vec2 aPosition;
+` : `precision mediump float;
+attribute vec2 aPosition;
 attribute vec2 aUV;
 varying vec2 vUV;
 
