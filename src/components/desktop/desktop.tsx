@@ -21,6 +21,7 @@ interface OpenWindow {
   date?: string
   maximized?: boolean
   minimized?: boolean
+  scrollKey?: string
 }
 
 
@@ -105,6 +106,7 @@ export function Desktop() {
         variant: 'post',
         date: target.date,
         maximized: false,
+        scrollKey: toId,
         windowPosition: fromWindow?.windowPosition ?? {
           zIndex: topZRef.current,
           defaultPosition: { x: 80, y: 60 },
@@ -249,6 +251,7 @@ export function Desktop() {
                       minimized={w.minimized}
                       variant={w.variant}
                       date={w.date}
+                      scrollKey={w.scrollKey}
                     >
                       {w.content}
                     </Window>

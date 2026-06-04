@@ -23,6 +23,16 @@
     line-height: var(--font-lineheight-1);
   }
 
+  .prose :is(h1, h2, h3, h4, h5, h6) > a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover::after {
+      content: ' #';
+      opacity: 0.35;
+    }
+  }
+
   .prose p {
     margin-bottom: var(--size-4);
     line-height: var(--font-lineheight-4);
