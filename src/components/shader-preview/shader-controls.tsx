@@ -21,6 +21,7 @@ export function ShaderControls({ controls, controlValues, colorValues, vecValues
         const max = def.max ?? 1
         const step = def.step ?? 0.01
         const decimals = step >= 1 ? 0 : 2
+        const maxValLen = Math.max(min.toFixed(decimals).length, max.toFixed(decimals).length)
 
         if (def.type === 'color') {
           const value = colorValues[name] ?? def.defaultColor ?? '#ffffff'
@@ -53,7 +54,7 @@ export function ShaderControls({ controls, controlValues, colorValues, vecValues
                 value={vals[i] ?? mid}
                 onChange={e => updateVecValue(name, i, Number.parseFloat(e.target.value))}
               />
-              <span className="shader-preview-control-value">{(vals[i] ?? mid).toFixed(decimals)}</span>
+              <span className="shader-preview-control-value" style={{ width: `${maxValLen}ch` }}>{(vals[i] ?? mid).toFixed(decimals)}</span>
             </label>
           ))
         }
@@ -70,7 +71,7 @@ export function ShaderControls({ controls, controlValues, colorValues, vecValues
               value={value}
               onChange={e => setControlValues(prev => ({ ...prev, [name]: Number.parseFloat(e.target.value) }))}
             />
-            <span className="shader-preview-control-value">{value.toFixed(decimals)}</span>
+            <span className="shader-preview-control-value" style={{ width: `${maxValLen}ch` }}>{value.toFixed(decimals)}</span>
           </label>
         ]
       })}
