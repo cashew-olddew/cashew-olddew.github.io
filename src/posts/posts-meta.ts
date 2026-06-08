@@ -41,4 +41,11 @@ export const postsMeta: PostMeta[] = [
     date: '2026-06-04',
     description: "UVs are your Canvas",
   },
+  {
+    id: 'shaders-4',
+    title: '4. The Pivot',
+    emoji: '📌',
+    date: '2026-06-06',
+    description: "How to be there in the right place, at the right time!"
+  }
 ]

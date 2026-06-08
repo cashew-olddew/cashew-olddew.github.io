@@ -1,0 +1,145 @@
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput, PostNav, AchievementList } from '../../../components'
+import Hint from '../../../components/prose/hint'
+
+import cashew from '../common-assets/cashew.jpg'
+
+# The Pivot
+
+The last guide left us on a bit of a cliffhanger. In the rotation shader Cashew quite literally looked like he was hanging off a cliff. Someone needs to be held accountable for this!
+
+-- shader with cashew hanging. Just like rotation but a bit zoomed out to show a cliff image with cashew hanging from that spot --
+
+**Let's investigate!🔍**
+
+<Separator />
+
+First of all, here's how Cashew got into this situation:
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    float angle = TIME;
+    vec2 new_uv = vec2(
+        UV.x * cos(angle) - UV.y * sin(angle),
+        UV.x * sin(angle) + UV.y * cos(angle)
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    float angle = TIME;
+    vec2 new_uv = vec2(
+        UV.x * cos(angle) - UV.y * sin(angle),
+        UV.x * sin(angle) + UV.y * cos(angle)
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+Most of the time we can't even see Cashew, since he's spinning around the top-left corner.
+But who would do such a thing?
+
+We don't have to do much detective work to figure out the culprit. 
+Our <Hint message="After all, that's the only thing our shader does!">main suspect</Hint> is _the rotation function_!
+
+```glsl
+vec2 new_uv = vec2(
+    //🏃‍♀️💨 You'll never catch me alive! 
+    UV.x * cos(angle) - UV.y * sin(angle),
+    UV.x * sin(angle) + UV.y * cos(angle)
+);
+```
+
+Everyone leaves a trace, and in our case, the top-left corner is awfully suspicious!
+I think it's time for some questioning.
+
+#### Why is the top-left corner not moving?
+
+<Separator />
+
+At that point our UVs have the value `(0, 0)`. 
+There's nothing inherently special about these coordinates, but for our function, something interesting happens if we replace the UVs with them:
+
+```glsl
+vec2 new_uv = vec2(
+    0.0 * cos(angle) - 0.0 * sin(angle),
+    0.0 * sin(angle) + 0.0 * cos(angle)
+);
+
+// Let's hear this point's confession:
+
+vec2 new_uv = vec2(0.0, 0.0);
+```
+
+From whatever <Hint message="Pun, very much, intended!">angle</Hint> you look at it, in the corner, the new UVs remain the same as the initial UVs: `(0.0, 0.0)`.
+
+Visually, a UV value that stays the same, that doesn't change, is a value that will show no movement, which is exactly what we see when we try <Hint message="I'd show the shader again, but I don't want him to get dizzy.">rotating our Cashew</Hint>. 
+
+Hmm.. so if we could find a different function, one that stays fixed at `(0.5, 0.5)`, the rotation _pivot_ would be in the center.
+<Align align='center'><h5>Case Solved!</h5></Align>
+
+Now, what remains is to find that function to help Cashew rotate from the center, as initially intended.
+
+#### We can do it the hard way...
+
+<Separator />
+
+In the previous post I had briefly mentioned that there was a method to make you leave the course as fast as possible. This is exactly that moment!
+
+Of course, I still don't want you to leave, but we need to look this one in the eyes to fully appreciate the elegance of the solution coming up next.
+
+```glsl
+vec2 new_uv = vec2(
+    (UV.x - 0.5) * cos(angle) - (UV.y - 0.5) * sin(angle) + 0.5,
+    (UV.x - 0.5) * sin(angle) + (UV.y - 0.5) * cos(angle) + 0.5
+);
+```
+
+First of all, if I were to give you an <Hint message="Okay, if you're really curious, the key is to rewrite the rotation in a way that makes the point we want to rotate around cancels out the angle-dependent terms, so that you can easily add a constant equal to the result you want for each coordinate. For UV.x, we replace it with UV.x - 0.5, as that would equal 0 when UV.x is 0.5. We do the same with UV.y and both angle-dependent terms become 0. Lastly, since we want the result to be equal to the initial value, we add 0.5.">explanation</Hint> for how I got to this, I'd have to break my _no math_ vow.
+
+Second of all, even if we did crack that shell and you perfectly understood it, this formula buries all intuition.
+Our little detective game was fun for finding the fixed point, but it quickly gets old if you have to interrogate your own code every time you open a project.
+
+> The code we write should tell us what it does at a single glance
+
+Fortunately, we're not the first ones to solve this problem.
+
+#### ...or the easy way
+
+<Separator />
+
+Let us, again, move away from shaders for a moment. Pick up a small piece of paper and pinch its top-left corner. If you spin the paper, it rotates around that pinched point.
+
+-- gif showcasing that --
+
+Now, keep your hand exactly where it is, but slide the paper over so that your fingers are pinching it right from the middle. This time, it rotates around its center!
+
+-- gif showcasing that
+
+By pinching at a different location, you just picked a new _pivot point_.
+
+But you probably noticed something a bit unnatural about that second step. Instead of moving my hand to the middle of the paper like a normal person, I _moved the paper to my hand_. Why?
+
+Because my hand was sitting perfectly comfortably, and I didn't want to move it.
+
+In shaders, we like to be as comfortable as possible. 
+Our rotation formula feels so much better when it doesn't have a bunch of numbers scattered around. Why ruin its zen? 
+
+We already know how to move the canvas around from the previous lesson. Why don't we use that to shift it so its center lands in (0.0, 0.0)?
+
+The only caveat is that contrary to real life, the canvas we have in shaders is limited. If we were to move the whole canvas this way, the image would no longer be fully in frame. That's why, after rotating it, we have to take it back into frame.
+
+<PostNav postId="shaders-4" />
