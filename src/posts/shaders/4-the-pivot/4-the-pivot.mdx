@@ -102,36 +102,41 @@ In the previous post I had briefly mentioned that there was a method to make you
 Of course, I still don't want you to leave, but we need to look this one in the eyes to fully appreciate the elegance of the solution coming up next.
 
 ```glsl
+// This rotates Cashew around (0.5, 0.5)
 vec2 new_uv = vec2(
     (UV.x - 0.5) * cos(angle) - (UV.y - 0.5) * sin(angle) + 0.5,
     (UV.x - 0.5) * sin(angle) + (UV.y - 0.5) * cos(angle) + 0.5
 );
 ```
 
-First of all, if I were to give you an <Hint message="Okay, if you're really curious, the key is to rewrite the rotation in a way that makes the point we want to rotate around cancels out the angle-dependent terms, so that you can easily add a constant equal to the result you want for each coordinate. For UV.x, we replace it with UV.x - 0.5, as that would equal 0 when UV.x is 0.5. We do the same with UV.y and both angle-dependent terms become 0. Lastly, since we want the result to be equal to the initial value, we add 0.5.">explanation</Hint> for how I got to this, I'd have to break my _no math_ vow.
+First of all, if I were to give you an <Hint message="Okay, if you're really curious, the key is to rewrite the rotation so that the point we want to rotate around cancels out the angle-dependent terms. Afterwards, we can easily add a constant equal to the result we want for each coordinate. For UV.x, we replace it with UV.x - 0.5, as that would equal 0 when UV.x is 0.5. We do the same with UV.y and both angle-dependent terms become 0. Lastly, since we want the result to be equal to the initial value, we add 0.5.">explanation</Hint> for how I got to this, I'd have to break my _'no math'_ vow.
 
 Second of all, even if we did crack that shell and you perfectly understood it, this formula buries all intuition.
 Our little detective game was fun for finding the fixed point, but it quickly gets old if you have to interrogate your own code every time you open a project.
 
 > The code we write should tell us what it does at a single glance
 
-Fortunately, we're not the first ones to solve this problem.
+Fortunately, there's another way to do this.
 
 #### ...or the easy way
 
 <Separator />
 
-Let us, again, move away from shaders for a moment. Pick up a small piece of paper and pinch its top-left corner. If you spin the paper, it rotates around that pinched point.
+Let us, again, move away from shaders for a moment. 
+Pick up a small piece of paper and pinch its top-left corner. 
+If you spin the paper, it rotates around that pinched point.
 
 -- gif showcasing that --
 
-Now, keep your hand exactly where it is, but slide the paper over so that your fingers are pinching it right from the middle. This time, it rotates around its center!
+Now, keep your hand exactly where it is, but slide the ~~canvas~~ paper over so that your fingers are pinching it right from the middle. 
+This time, it rotates around its center!
 
 -- gif showcasing that
 
-By pinching at a different location, you just picked a new _pivot point_.
+By pinching at a different location, you just picked a new **pivot point**.
 
-But you probably noticed something a bit unnatural about that second step. Instead of moving my hand to the middle of the paper like a normal person, I _moved the paper to my hand_. Why?
+But you probably noticed something a bit unnatural about that second step. 
+Instead of moving my hand to the middle of the paper like a normal person, I _moved the paper to my hand_. Why?
 
 Because my hand was sitting perfectly comfortably, and I didn't want to move it.
 
@@ -140,6 +145,139 @@ Our rotation formula feels so much better when it doesn't have a bunch of number
 
 We already know how to move the canvas around from the previous lesson. Why don't we use that to shift it so its center lands in (0.0, 0.0)?
 
-The only caveat is that contrary to real life, the canvas we have in shaders is limited. If we were to move the whole canvas this way, the image would no longer be fully in frame. That's why, after rotating it, we have to take it back into frame.
+The only caveat is that in real life, if you move the paper slightly, you still see it. Like.. it's in your hand.
+In shaders, though, we can only see a limited region of our canvas. So when we move it, the image is no longer fully in frame.
+
+-- showcase gif with limited view region --
+
+That's why, after rotating it, we have to take the image back into frame.
+
+Let's get back to Shader World and <Hint message="I've accidentally created an optical illusion. While Cashew rotates, look for a few seconds at its center. If you quickly look somewhere else there's a cool twisting effect. Fun!">see this</Hint> in practice:
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    float angle = TIME;
+
+    vec2 centered_uv = UV - vec2(0.5);
+
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    vec2 new_uv = rotated_uv + vec2(0.5);
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    float angle = TIME;
+
+    // We already know how to translate our canvas
+    // Slide the UV from [0, 1] to [-0.5, 0.5]
+    // The UV is now centered in (0, 0)
+    vec2 centered_uv = UV - vec2(0.5, 0.5);
+
+    // Rotate using the simpler formula
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    // Move back the UV to keep the sampled texture in view
+    // UV goes from [-0.5, 0.5] back to [0, 1]
+    vec2 new_uv = rotated_uv + vec2(0.5, 0.5);
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+I'm much happier with our code now:
+- It's **readable**: The events are separated. We pick a pivot, rotate around it, then move back into view.
+- It's **straightforward**: The rotation formula stays in its simplest form. We do not pollute it with the pivot math.
+- It **feels natural**: If we want to change the rotation, we change the formula. If we want to change the pivot, we write a different translation value. It feels great!
+
+We can even add a uniform for our pivot now:
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    float angle = TIME;
+
+    float distance_from_pivot = distance(UV, pivot);
+    float pivot_marker = step(distance_from_pivot, 0.04);
+
+    vec2 centered_uv = UV - pivot;
+
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    vec2 new_uv = rotated_uv + pivot;
+
+    vec4 texture_color = texture(TEXTURE, new_uv);
+    vec3 marker_color = vec3(1.0, 0.0, 0.0);
+
+    COLOR.rgb = mix(texture_color.rgb, marker_color, pivot_marker);
+    COLOR.a = texture_color.a;
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+  controls={
+    { 
+        "pivot": {label: "Pivot", type: "vec2", min: 0.0, max: 1.0, defaultVec: [0.5, 0.5]},
+    }
+  }
+>
+{`uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    float angle = TIME;
+
+    vec2 centered_uv = UV - pivot;
+
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    vec2 new_uv = rotated_uv + pivot;
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+Don't worry, Cashew didn't randomly turn into a clown. I just added a red point to better visualize our pivot.
+You actually already know how to make a circle from the time we built our portal to Shader World. 
+I think it's time for your first challenge:
+
+1. Write a shader that draws a red circle in the center of the screen.
+2. Use a `pivot` vec2 uniform to replace the hardcoded center position and freely move the point around.
+3. Try `mix`ing the circle with a rotating texture. You can use the default Godot svg that comes with any project or even [download Cashew]().
+
 
 <PostNav postId="shaders-4" />
