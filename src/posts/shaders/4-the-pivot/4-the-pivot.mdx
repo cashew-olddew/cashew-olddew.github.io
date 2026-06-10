@@ -2,6 +2,8 @@ import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGrou
 import Hint from '../../../components/prose/hint'
 
 import cashew from '../common-assets/cashew.jpg'
+import rotateTopLeft from './assets/rotate-top-left.mp4'
+import rotateCenter from './assets/rotate-center.mp4'
 
 # The Pivot
 
@@ -126,12 +128,16 @@ Let us, again, move away from shaders for a moment.
 Pick up a small piece of paper and pinch its top-left corner. 
 If you spin the paper, it rotates around that pinched point.
 
--- gif showcasing that --
+<Media width={260} label='Rotating Cashew from the top-right corner'>
+    <video src={rotateTopLeft} autoPlay loop muted playsInline type="video/mp4"/>
+</Media>
 
 Now, keep your hand exactly where it is, but slide the ~~canvas~~ paper over so that your fingers are pinching it right from the middle. 
 This time, it rotates around its center!
 
--- gif showcasing that
+<Media width={260} label='Rotating Cashew from the center'>
+    <video src={rotateCenter} autoPlay loop muted playsInline type="video/mp4"/>
+</Media>
 
 By pinching at a different location, you just picked a new **pivot point**.
 
