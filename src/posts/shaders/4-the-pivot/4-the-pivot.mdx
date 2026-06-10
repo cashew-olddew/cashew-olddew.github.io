@@ -1,4 +1,4 @@
-import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput, PostNav, AchievementList } from '../../../components'
+import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput, PostNav, AchievementList, ChallengeBlock, ChallengeStep } from '../../../components'
 import Hint from '../../../components/prose/hint'
 
 import cashew from '../common-assets/cashew.jpg'
@@ -207,7 +207,8 @@ Let's get back to Shader World and <Hint message="I've accidentally created an o
 I'm much happier with our code now:
 - It's **readable**: The events are separated. We pick a pivot, rotate around it, then move back into view.
 - It's **straightforward**: The rotation formula stays in its simplest form. We do not pollute it with the pivot math.
-- It **feels natural**: If we want to change the rotation, we change the formula. If we want to change the pivot, we write a different translation value. It feels great!
+- It **feels natural**: If we want to change the rotation, we change the formula. If we want to change the pivot, we write a different translation value.
+- It **feels great!**: 
 
 We can even add a uniform for our pivot now:
 
@@ -219,7 +220,7 @@ We can even add a uniform for our pivot now:
     float angle = TIME;
 
     float distance_from_pivot = distance(UV, pivot);
-    float pivot_marker = step(distance_from_pivot, 0.04);
+    float pivot_marker = 1. - step(0.04, distance_from_pivot);
 
     vec2 centered_uv = UV - pivot;
 
@@ -272,12 +273,69 @@ We can even add a uniform for our pivot now:
 </ShaderPreview>
 
 Don't worry, Cashew didn't randomly turn into a clown. I just added a red point to better visualize our pivot.
-You actually already know how to make a circle from the time we built our portal to Shader World. 
-I think it's time for your first challenge:
+As it turns out, you actually already know how to make a circle. We learned that when we built our portal to Shader World.
 
-1. Write a shader that draws a red circle in the center of the screen.
-2. Use a `pivot` vec2 uniform to replace the hardcoded center position and freely move the point around.
-3. Try `mix`ing the circle with a rotating texture. You can use the default Godot svg that comes with any project or even [download Cashew]().
+So, before we continue, I'd like you to try something on your own.
+
+I get it if you can't do it _right now_. 
+Maybe you're reading this on your phone, <Hint message="Just make sure you don't fall off! 🚌">on a bus</Hint>, or in some place where coding is not allowed.
+
+Whatever the case, <Hint message="Don't add this to a bookmark you'll never open. Set up an alarm!">find some time</Hint> to _do it_. <br/>
+This is the fun part! This is where you test your knowledge and this is where you truly learn.
+
+Okay, but before this transforms into a motivational speech, let's open Godot and see <Hint message="Notice how it's split into small problems. This is especially laid out this way so you can practice the GPU dance: What's the problem? -> How do I approach it? -> What tool do I use?">the challenge</Hint>!
+
+<ChallengeBlock>
+
+<ChallengeStep question="Write a shader that draws a red circle in the center of the screen.">
+
+We can use the `distance()` function to figure out how far the current pixel is from the center `(0.5, 0.5)`.<br/>
+If the pixel is reasonably close (let's say... less than `0.04`), then it's inside the circle.
+
+The tools to solve this are many. We could go with an if statement, a ternary operator, a step or even a smoothstep if you like your circles well done. Let's go with `step()` and use the result in our red channel.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    float dist = distance(UV, vec2(0.5, 0.5));
+    float circle = step(0.04, dist);
+    COLOR = vec4(circle, 0.0, 0.0, 1.0);
+}`}
+  width={260}
+  showCode={true}
+/>
+
+I'm getting flashbacks from my childhood, because we colored outside the lines. 
+
+The `step()` function returns `0.0` for values smaller than the set edge, and `1.0` otherwise. That's why we end up coloring only values _outside_ the circle.
+We can easily flip the result by subtracting it from `1.0`.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    float dist = distance(UV, vec2(0.5, 0.5));
+    float circle = 1. - step(0.04, dist);
+    COLOR = vec4(circle, 0.0, 0.0, 1.0);
+}`}
+  width={260}
+  showCode={true}
+>
+{`void fragment() {
+    float dist = distance(UV, vec2(0.5, 0.5));
+    // Alternatively we could've swapped the arguments: step(dist, 0.04);
+    // Think about why that works.
+    float circle = 1. - step(0.04, dist);
+    COLOR = vec4(circle, 0.0, 0.0, 1.0);
+}`}
+</ShaderPreview>
+
+</ChallengeStep>
+
+<ChallengeStep question={<>Use a <code>pivot</code> vec2 uniform to replace the hardcoded center position and freely move the point around.</>} />
+
+<ChallengeStep question={<>Try <code>mix</code>ing the circle with a rotating texture. You can use the default Godot svg that comes with any project or even <a href="">download Cashew</a>.</>} />
+
+</ChallengeBlock>
 
 
 <PostNav postId="shaders-4" />
