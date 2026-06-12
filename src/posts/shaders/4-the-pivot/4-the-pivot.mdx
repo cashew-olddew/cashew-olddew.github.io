@@ -4,6 +4,8 @@ import Hint from '../../../components/prose/hint'
 import cashew from '../common-assets/cashew.jpg'
 import rotateTopLeft from './assets/rotate-top-left.mp4'
 import rotateCenter from './assets/rotate-center.mp4'
+import croppedRotateCenter from './assets/cropped-rotate-center.mp4'
+import cashewHeart from './assets/cashew-heart.jpg'
 
 # The Pivot
 
@@ -103,13 +105,34 @@ In the previous post I had briefly mentioned that there was a method to make you
 
 Of course, I still don't want you to leave, but we need to look this one in the eyes to fully appreciate the elegance of the solution coming up next.
 
-```glsl
-// This rotates Cashew around (0.5, 0.5)
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`void fragment() {
+    float angle = TIME;
+
+    vec2 new_uv = vec2(
+      (UV.x - 0.5) * cos(angle) - (UV.y - 0.5) * sin(angle) + 0.5,
+      (UV.x - 0.5) * sin(angle) + (UV.y - 0.5) * cos(angle) + 0.5
+    );
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+>
+{`// This rotates Cashew around (0.5, 0.5)
 vec2 new_uv = vec2(
     (UV.x - 0.5) * cos(angle) - (UV.y - 0.5) * sin(angle) + 0.5,
     (UV.x - 0.5) * sin(angle) + (UV.y - 0.5) * cos(angle) + 0.5
-);
-```
+);`}
+</ShaderPreview>
 
 First of all, if I were to give you an <Hint message="Okay, if you're really curious, the key is to rewrite the rotation so that the point we want to rotate around cancels out the angle-dependent terms. Afterwards, we can easily add a constant equal to the result we want for each coordinate. For UV.x, we replace it with UV.x - 0.5, as that would equal 0 when UV.x is 0.5. We do the same with UV.y and both angle-dependent terms become 0. Lastly, since we want the result to be equal to the initial value, we add 0.5.">explanation</Hint> for how I got to this, I'd have to break my _'no math'_ vow.
 
@@ -128,7 +151,7 @@ Let us, again, move away from shaders for a moment.
 Pick up a small piece of paper and pinch its top-left corner. 
 If you spin the paper, it rotates around that pinched point.
 
-<Media width={260} label='Rotating Cashew from the top-right corner'>
+<Media width={260} label='Rotating Cashew from the top-left corner'>
     <video src={rotateTopLeft} autoPlay loop muted playsInline type="video/mp4"/>
 </Media>
 
@@ -151,14 +174,16 @@ Our rotation formula feels so much better when it doesn't have a bunch of number
 
 We already know how to move the canvas around from the previous lesson. Why don't we use that to shift it so its center lands in (0.0, 0.0)?
 
-The only caveat is that in real life, if you move the paper slightly, you still see it. Like.. it's in your hand.
+The only caveat is that in real life, if you move the paper slightly, you still see it. Like.. it's in your hand.<br/>
 In shaders, though, we can only see a limited region of our canvas. So when we move it, the image is no longer fully in frame.
 
--- showcase gif with limited view region --
+<Media width={260} label='Center Rotation with a limited view'>
+    <video src={croppedRotateCenter} autoPlay loop muted playsInline type="video/mp4"/>
+</Media>
 
-That's why, after rotating it, we have to take the image back into frame.
+That's why, after rotating it, we have to _take the image back_ into frame.
 
-Let's get back to Shader World and <Hint message="I've accidentally created an optical illusion. While Cashew rotates, look for a few seconds at its center. If you quickly look somewhere else there's a cool twisting effect. Fun!">see this</Hint> in practice:
+Let's get back to Shader World and <Hint message="I think I've accidentally created an optical illusion. While Cashew rotates, look for a few seconds at its center. If you quickly look somewhere else there's a cool twisting effect. Fun!">see this</Hint> in practice:
 
 <ShaderPreview
   sprite={cashew}
@@ -214,7 +239,7 @@ I'm much happier with our code now:
 - It's **readable**: The events are separated. We pick a pivot, rotate around it, then move back into view.
 - It's **straightforward**: The rotation formula stays in its simplest form. We do not pollute it with the pivot math.
 - It **feels natural**: If we want to change the rotation, we change the formula. If we want to change the pivot, we write a different translation value.
-- It **feels great!**: 
+- It **feels great!**
 
 We can even add a uniform for our pivot now:
 
@@ -225,9 +250,6 @@ We can even add a uniform for our pivot now:
   void fragment() {
     float angle = TIME;
 
-    float distance_from_pivot = distance(UV, pivot);
-    float pivot_marker = 1. - step(0.04, distance_from_pivot);
-
     vec2 centered_uv = UV - pivot;
 
     vec2 rotated_uv = vec2(
@@ -237,11 +259,7 @@ We can even add a uniform for our pivot now:
 
     vec2 new_uv = rotated_uv + pivot;
 
-    vec4 texture_color = texture(TEXTURE, new_uv);
-    vec3 marker_color = vec3(1.0, 0.0, 0.0);
-
-    COLOR.rgb = mix(texture_color.rgb, marker_color, pivot_marker);
-    COLOR.a = texture_color.a;
+    COLOR = texture(TEXTURE, new_uv);
 
     if (
       new_uv.x < 0.0 || new_uv.x > 1.0 ||
@@ -278,9 +296,10 @@ We can even add a uniform for our pivot now:
 }`}
 </ShaderPreview>
 
-Don't worry, Cashew didn't randomly turn into a clown. I just added a red point to better visualize our pivot.
-As it turns out, you actually already know how to make a circle. We learned that when we built our portal to Shader World.
+Great! We now have a dynamic pivot. The problem is that it's a bit hard to make out what's really happening when you move the sliders.
+We could see it better if we had a red circle on top of our texture at the pivot's position.
 
+You actually already know how to make a circle. We learned that when we built our portal to Shader World.<br/>
 So, before we continue, I'd like you to try something on your own.
 
 I get it if you can't do it _right now_. 
@@ -328,8 +347,8 @@ We can easily flip the result by subtracting it from `1.0`.
 >
 {`void fragment() {
     float dist = distance(UV, vec2(0.5, 0.5));
-    // Alternatively we could've swapped the arguments: step(dist, 0.04);
-    // Think about why that works.
+    // Alternatively we could've swapped the arguments: 
+    // step(dist, 0.04) Think about why that works.
     float circle = 1. - step(0.04, dist);
     COLOR = vec4(circle, 0.0, 0.0, 1.0);
 }`}
@@ -337,11 +356,314 @@ We can easily flip the result by subtracting it from `1.0`.
 
 </ChallengeStep>
 
-<ChallengeStep question={<>Use a <code>pivot</code> vec2 uniform to replace the hardcoded center position and freely move the point around.</>} />
+<ChallengeStep question={<>Use a <i>pivot</i> vec2 uniform to replace the hardcoded center position and freely move the point around.</>}>
 
-<ChallengeStep question={<>Try <code>mix</code>ing the circle with a rotating texture. You can use the default Godot svg that comes with any project or even <a href="">download Cashew</a>.</>} />
+I know what you're thinking. We've already done this before.<br/>
+You're right! Let's do it again.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    float dist = distance(UV, pivot);
+    float circle = 1. - step(0.04, dist);
+    COLOR = vec4(circle, 0.0, 0.0, 1.0);
+}`}
+  width={260}
+  showCode={true}
+  controls={
+    {"pivot": {label: "Pivot", type: "vec2", min: 0.0, max: 1.0, default: [0.5, 0.5]}}
+  }
+/>
+
+</ChallengeStep>
+<ChallengeStep question={<>Try <b>mix</b>ing the circle with a rotating texture. You can use the default Godot svg that comes with any project or even <a href="">download Cashew</a>.</>}>
+
+As a short reminder, here's how we sampled and rotated Cashew:
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    float angle = TIME;
+
+    vec2 centered_uv = UV - pivot;
+
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    vec2 new_uv = rotated_uv + pivot;
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+  controls={
+    { 
+        "pivot": {label: "Pivot", type: "vec2", min: 0.0, max: 1.0, defaultVec: [0.5, 0.5]},
+    }
+  }
+>
+{`uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    float angle = TIME;
+
+    vec2 centered_uv = UV - pivot;
+
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    vec2 new_uv = rotated_uv + pivot;
+
+    COLOR = texture(TEXTURE, new_uv);
+
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+If we add the result from the second exercise to this shader all that's left is to use the `mix()` function to combine the texture color with the color red.
+If we're inside the red circle, we'll paint red, otherwise we'll paint the texture.
+
+The code below might look long, but it's just the rotation and the circle glued together.
+Take a look at it and make sure you don't miss anything <Color color='#FC7F7F'>_important_</Color>.
+
+<ShaderPreview
+  sprite={cashew}
+  fullShader={`uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    float angle = TIME;
+
+    float distance_from_pivot = distance(UV, pivot);
+    float pivot_marker = 1. - step(0.04, distance_from_pivot);
+
+    vec2 centered_uv = UV - pivot;
+
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    vec2 new_uv = rotated_uv + pivot;
+
+    vec4 texture_color = texture(TEXTURE, new_uv);
+    vec4 marker_color = vec4(1.0, 0.0, 0.0, 1.0);
+
+    COLOR = mix(texture_color, marker_color, pivot_marker);
+
+    if (
+      new_uv.x < 0.0 || new_uv.x > 1.0 ||
+      new_uv.y < 0.0 || new_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+  controls={
+    { 
+        "pivot": {label: "Pivot", type: "vec2", min: 0.0, max: 1.0, defaultVec: [0.5, 0.5]},
+    }
+  }
+>
+{`uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    float angle = TIME;
+
+    // Generate the circle region
+    // IMPORTANT: we want this to be a static point
+    // That's why we do it with the initial UV, not the rotating one
+    float distance_from_pivot = distance(UV, pivot);
+    float pivot_marker = 1. - step(0.04, distance_from_pivot);
+
+    vec2 centered_uv = UV - pivot;
+
+    vec2 rotated_uv = vec2(
+        centered_uv.x * cos(angle) - centered_uv.y * sin(angle),
+        centered_uv.x * sin(angle) + centered_uv.y * cos(angle)
+    );
+
+    vec2 new_uv = rotated_uv + pivot;
+
+    // We save both colors and later decide which one to pick
+    vec4 texture_color = texture(TEXTURE, new_uv);
+    vec4 marker_color = vec4(1.0, 0.0, 0.0, 1.0);
+
+    // Pick the texture_color if outside the circle
+    // Pick red otherwise
+    COLOR = mix(texture_color, marker_color, pivot_marker);
+
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+<Align align="center">Well done! You just gave Cashew a clown career!</Align>
+
+</ChallengeStep>
 
 </ChallengeBlock>
 
+#### But there's more!
+
+<Separator />
+
+This is the second time we meet this chapter. Shaders are full of surprises.
+
+As you might've assumed, setting a pivot not only helps with rotations, but it actually helps with all kinds of transformations and effects!
+
+Take, for example, our previous scale shader:
+
+<ShaderPreview
+  sprite={cashewHeart}
+  controls={
+    { 
+      "scale": {label: "Scale", type: "float", min: 0.0, max: 4.0, default: 1.0},
+    }
+  }
+  fullShader={`uniform float scale = 1.0;
+  
+  void fragment() {
+    vec2 scaled_uv = UV * scale;
+
+    COLOR = texture(TEXTURE, scaled_uv);
+
+    if (
+      scaled_uv.x < 0.0 || scaled_uv.x > 1.0 ||
+      scaled_uv.y < 0.0 || scaled_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+>
+{`// For zooming we want uniform scale
+  // so we'll use the same value for x and y scaling
+uniform float scale = 1.0;
+
+void fragment() {
+    vec2 scaled_uv = UV * scale;
+
+    COLOR = texture(TEXTURE, scaled_uv);
+    
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+The detective job is calling again! We need to look for clues with our spyglass as there might be a secret message inside Cashew's eyes. The <Hint message="Please pretend you do not see it when the zoom level is normal">only way we can see it</Hint> is if we zoom in to that point.
+Since the current shader only zooms in the top-left corner, we need to call our _pivot_ friend again! 
+
+Similarly to the rotation, zooming is also just a function. A much simpler one, but a function nonetheless.<br/>
+The _pivot_ of this function is in `(0.0, 0.0)` by default, so changing the zoom location should be <Hint message={`Even though some of the examples I show are not part of the challenges, you can always try solving issues yourself before reading the solution. Especially in the "But there's more!" chapter, which I've just decided is probably going to reappear, I'm going to show more applications of a concept which you already know. Give it a shot!`}>as simple as before</Hint>.
+
+<ShaderPreview
+  sprite={cashewHeart}
+  controls={
+    { 
+      "scale": {label: "Scale", type: "float", min: 0.0, max: 4.0, default: 1.0},
+      "pivot": {label: "Pivot", type: "vec2", min: 0.0, max: 1.0, defaultVec: [0.5, 0.5]},
+    }
+  }
+  fullShader={`uniform float scale = 1.0;
+  uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    vec2 uv_with_pivot = UV - pivot;
+    vec2 scaled_uv = uv_with_pivot * scale;
+    scaled_uv = scaled_uv + pivot;
+
+    COLOR = texture(TEXTURE, scaled_uv);
+
+    if (
+      scaled_uv.x < 0.0 || scaled_uv.x > 1.0 ||
+      scaled_uv.y < 0.0 || scaled_uv.y > 1.0
+    ) {
+      discard;
+    }
+}`}
+  width={260}
+  showCode={true}
+>
+{`uniform float scale = 1.0;
+  uniform vec2 pivot = vec2(0.5, 0.5);
+  
+  void fragment() {
+    vec2 uv_with_pivot = UV - pivot;
+    vec2 scaled_uv = uv_with_pivot * scale;
+    scaled_uv = scaled_uv + pivot;
+
+    COLOR = texture(TEXTURE, scaled_uv);
+    
+    // ... discarding logic
+}`}
+</ShaderPreview>
+
+#### The pivot is not the point
+
+<Separator />
+
+Alright, being able to choose the point from which we transform our UV is a nice example of what we can do in order to make our life easier. However, despite holding the name of the lesson, _the pivot_ is not the point.
+
+> The point of this chapter is learning how to make our life easier
+
+It's not only the pivot we can change to achieve that. For example, when it comes to shaders, there's a lot of trigonometry involved.
+Most functions that deal with angles, such as `sin` and `cos`, are easiest to understand and work with on the _unit circle_, which is centered in `(0.0, 0.0)` and which ranges on both axes between `[-1.0, 1.0]`.
+
+We know how to make our lives easier by sliding the UV pivot to `(0.0, 0.0)`, but after we finish sliding, the UVs range between `[-0.5, 0.5]`. 
+We could stop here, but nobody is prohibiting us from making our lives even easier. We can also scale our UV, multiply it by 2.0, so that it lands between `[-1.0, 1.0]`, and that is going to prove very useful in our next lesson in which we'll learn how to **treat functions as brushes** and get rid of most math you'll see in any future shaders.
+
+> Oh, what's that?...
+
+The Unit Circle just told me it really likes you. It turned red just by looking at you. <br/>
+Alright, you two! I'll let you get to know each other before the next lesson:
+
+<ShaderPreview
+  fullShader={`void fragment() {
+    vec2 uv = UV - 0.5;
+    uv = uv * 2.0;
+
+    float unit_circle = step(
+      distance(uv, vec2(0.0)),
+      1.0
+    );
+
+    uv = uv / 2.0;
+    uv = uv + 0.5;
+
+    COLOR = vec4(unit_circle, 0.0, 0.0, 1.0);
+}`}
+  width={260}
+  showCode={true}
+/>
+
+Thank you so much for reading! Until next time, happy shading!
+
+<Separator />
+
+Writing this course, building shaders and interactive previews for them is really fun, but requires a large chunk of time and an even larger amount of peanuts. 🥜<br/>
+Fun cannot buy peanuts, but YOU CAN!
+
+If you genuinely feel like this guide helped you and you want it to continue, consider supporting my work!<br/>
+This series will stay entirely free, independent and clear of ads, but its completion and development speed will be greatly influenced by your help!
+
+You can find all the ways to keep the portal alive down below.<br/>
+Thank you so much!
+
+<SupportMe />
 
 <PostNav postId="shaders-4" />
