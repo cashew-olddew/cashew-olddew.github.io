@@ -1,0 +1,1 @@
+var e=`/assets/cashew-DH4rl0gL.jpg`;export{e as t};
