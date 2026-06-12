@@ -11,9 +11,7 @@ import cashewHeart from './assets/cashew-heart.jpg'
 
 The last guide left us on a bit of a cliffhanger. In the rotation shader Cashew quite literally looked like he was hanging off a cliff. Someone needs to be held accountable for this!
 
--- shader with cashew hanging. Just like rotation but a bit zoomed out to show a cliff image with cashew hanging from that spot --
-
-**Let's investigate!🔍**
+<Align align="center">**Let's investigate!🔍**</Align>
 
 <Separator />
 
@@ -83,7 +81,7 @@ vec2 new_uv = vec2(
     0.0 * sin(angle) + 0.0 * cos(angle)
 );
 
-// Let's hear this point's confession:
+// Let's see what's behind the point's mask:
 
 vec2 new_uv = vec2(0.0, 0.0);
 ```
@@ -93,7 +91,8 @@ From whatever <Hint message="Pun, very much, intended!">angle</Hint> you look at
 Visually, a UV value that stays the same, that doesn't change, is a value that will show no movement, which is exactly what we see when we try <Hint message="I'd show the shader again, but I don't want him to get dizzy.">rotating our Cashew</Hint>. 
 
 Hmm.. so if we could find a different function, one that stays fixed at `(0.5, 0.5)`, the rotation _pivot_ would be in the center.
-<Align align='center'><h5>Case Solved!</h5></Align>
+
+<Align align='center'>**Case Solved!**</Align>
 
 Now, what remains is to find that function to help Cashew rotate from the center, as initially intended.
 
@@ -216,7 +215,7 @@ Let's get back to Shader World and <Hint message="I think I've accidentally crea
 
     // We already know how to translate our canvas
     // Slide the UV from [0, 1] to [-0.5, 0.5]
-    // The UV is now centered in (0, 0)
+    // The UV is now centered at (0, 0)
     vec2 centered_uv = UV - vec2(0.5, 0.5);
 
     // Rotate using the simpler formula
@@ -317,7 +316,7 @@ Okay, but before this transforms into a motivational speech, let's open Godot an
 We can use the `distance()` function to figure out how far the current pixel is from the center `(0.5, 0.5)`.<br/>
 If the pixel is reasonably close (let's say... less than `0.04`), then it's inside the circle.
 
-The tools to solve this are many. We could go with an if statement, a ternary operator, a step or even a smoothstep if you like your circles well done. Let's go with `step()` and use the result in our red channel.
+We've got a few options here. We could go with an if statement, a ternary operator, a step or even a smoothstep if you like your circles well done. Let's go with `step()` and use the result in our red channel.
 
 <ShaderPreview
   sprite={cashew}
@@ -373,7 +372,7 @@ You're right! Let's do it again.
   width={260}
   showCode={true}
   controls={
-    {"pivot": {label: "Pivot", type: "vec2", min: 0.0, max: 1.0, default: [0.5, 0.5]}}
+    {"pivot": {label: "Pivot", type: "vec2", min: 0.0, max: 1.0, defaultVec: [0.5, 0.5]}}
   }
 />
 
@@ -487,7 +486,8 @@ Take a look at it and make sure you don't miss anything <Color color='#FC7F7F'>_
 
     // Generate the circle region
     // IMPORTANT: we want this to be a static point
-    // That's why we do it with the initial UV, not the rotating one
+    // That's why we do it with the initial UV, 
+    // not the rotating one
     float distance_from_pivot = distance(UV, pivot);
     float pivot_marker = 1. - step(0.04, distance_from_pivot);
 
@@ -522,7 +522,7 @@ Take a look at it and make sure you don't miss anything <Color color='#FC7F7F'>_
 
 <Separator />
 
-This is the second time we meet this chapter. Shaders are full of surprises.
+This is the second time we meet this chapter. Shaders are full of surprises.⭐
 
 As you might've assumed, setting a pivot not only helps with rotations, but it actually helps with all kinds of transformations and effects!
 
@@ -565,7 +565,8 @@ void fragment() {
 }`}
 </ShaderPreview>
 
-The detective job is calling again! We need to look for clues with our spyglass as there might be a secret message inside Cashew's eyes. The <Hint message="Please pretend you do not see it when the zoom level is normal">only way we can see it</Hint> is if we zoom in to that point.
+The detective job is calling again! We need to look for clues with our spyglass as there might be a secret message inside one of Cashew's eyes. The <Hint message="Please pretend you do not see it when the zoom level is normal">only way we can see it</Hint> is if we zoom in to it.
+
 Since the current shader only zooms in the top-left corner, we need to call our _pivot_ friend again! 
 
 Similarly to the rotation, zooming is also just a function. A much simpler one, but a function nonetheless.<br/>
@@ -617,20 +618,26 @@ The _pivot_ of this function is in `(0.0, 0.0)` by default, so changing the zoom
 
 <Separator />
 
-Alright, being able to choose the point from which we transform our UV is a nice example of what we can do in order to make our life easier. However, despite holding the name of the lesson, _the pivot_ is not the point.
+Alright, being able to choose the point of our UV is a nice example of what we can do in order to make our life easier. However, despite holding the name of the lesson, _the pivot_ is not the point.
 
 > The point of this chapter is learning how to make our life easier
 
-It's not only the pivot we can change to achieve that. For example, when it comes to shaders, there's a lot of trigonometry involved.
-Most functions that deal with angles, such as `sin` and `cos`, are easiest to understand and work with on the _unit circle_, which is centered in `(0.0, 0.0)` and which ranges on both axes between `[-1.0, 1.0]`.
+It's not only the pivot we can change to achieve that. For example, shaders love trigonometry.
+Most functions that deal with angles, such as `sin` and `cos`, are easiest to understand and work with in the right system. That system is **The Unit Circle**.
 
-We know how to make our lives easier by sliding the UV pivot to `(0.0, 0.0)`, but after we finish sliding, the UVs range between `[-0.5, 0.5]`. 
-We could stop here, but nobody is prohibiting us from making our lives even easier. We can also scale our UV, multiply it by 2.0, so that it lands between `[-1.0, 1.0]`, and that is going to prove very useful in our next lesson in which we'll learn how to **treat functions as brushes** and get rid of most math you'll see in any future shaders.
+It's a circle centered at `(0.0, 0.0)` which sits comfortably when both axes range from `[-1.0, 1.0]`.
 
-> Oh, what's that?...
+We know how to make our lives easier by sliding the UV pivot to `(0.0, 0.0)`, but after we finish sliding, the UVs only range between `[-0.5, 0.5]`. 
 
-The Unit Circle just told me it really likes you. It turned red just by looking at you. <br/>
-Alright, you two! I'll let you get to know each other before the next lesson:
+We could put an end to it right here, but nobody is stopping us from making our lives even easier. <br/>
+If we take that shifted space and multiply it by 2.0, we land in `[-1.0, 1.0]`, matching the system of the unit circle.
+
+This is going to prove incredibly useful in our next lesson in which we'll learn how to **treat functions as brushes** and get rid of most math you'll see in any future shaders.
+
+<Separator />
+
+Don't look now, but I think the Unit Circle turned red just by noticing you.<br/>
+Alright, you two! I'll leave you alone to get to know each other.
 
 <ShaderPreview
   fullShader={`void fragment() {
@@ -641,9 +648,6 @@ Alright, you two! I'll let you get to know each other before the next lesson:
       distance(uv, vec2(0.0)),
       1.0
     );
-
-    uv = uv / 2.0;
-    uv = uv + 0.5;
 
     COLOR = vec4(unit_circle, 0.0, 0.0, 1.0);
 }`}
