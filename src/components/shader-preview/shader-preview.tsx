@@ -61,9 +61,11 @@ interface ShaderPreviewProps {
   sampling?: 'linear' | 'nearest'
   /** Additional textures bound as sampler2D uniforms. Key = uniform name, value = image URL. */
   textures?: Record<string, string>
+  /** Red border for _bad_ shaders */
+  badCode?: boolean
 }
 
-export function ShaderPreview({ width, height, align = 'center', sprite = defaultSprite, fullShader, children, controls, textures, showCode = true, border = true, vertexPadding = 0, sampling = 'linear' }: Readonly<ShaderPreviewProps>) {
+export function ShaderPreview({ width, height, align = 'center', sprite = defaultSprite, fullShader, children, controls, textures, showCode = true, border = true, vertexPadding = 0, sampling = 'linear', badCode = false }: Readonly<ShaderPreviewProps>) {
   const [controlValues, setControlValues] = useState<Record<string, number>>(() => {
     if (!controls) return {}
     return Object.fromEntries(
@@ -165,7 +167,7 @@ export function ShaderPreview({ width, height, align = 'center', sprite = defaul
     <div className="shader-preview">
       {showCode && (
         <div
-          className="shader-preview-code"
+          className={`shader-preview-code${badCode ? ' prose-error-code' : ''}`}
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: highlightedCode }}
         />

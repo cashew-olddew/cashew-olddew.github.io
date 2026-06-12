@@ -1,75 +1,45 @@
-# React + TypeScript + Vite
+# The Cashew Blog
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An OS-like blog in which you'll find my thoughts on things.
 
-Currently, two official plugins are available:
+## Support
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H2XSCXW)
 
-## React Compiler
+Donations are appreciated and help me continue creating free content. Please donate only what you can afford. 🥜
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## How does it work?
 
-Note: This will impact Vite dev & build performances.
+It's just a simple react project with mdx support. 
+Under `src` you'll find:
+- assets: general assets used for building the site, not for any blog post in particular
+- components: contains views (web-view and desktop), OS-like elements (folder, icons-grid, etc.) and components used to enhance the basic Markdown prose.
+- hooks: useful things.
+- posts: actual blog posts. Here's where I write everything.
+- styles: css stuff
+- utils: things used by other things
 
-## Expanding the ESLint configuration
+## How do I run this locally?
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Run `npm install`, then run `npm run dev`. 
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Suggestions
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Feel free to raise any issues with no restrictions. Any proposal is welcome.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Contributing
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Contributions are very welcome, especially for fixing any of the blog's bugs.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+⚠️ AI-assisted contributions ⚠️
+AI tools can be helpful, but please keep AI-generated code to a minimum. Large AI-generated changes can be difficult to review and may introduce subtle issues. If you use AI assistance when preparing a PR, please:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Clearly indicate which parts of the code were AI-generated.
+- Keep changes small and focused on a single issue.
+- Ensure the code has been reviewed and tested before submitting.
+
+## License
+
+This project and shaders fall under the CC0 license, meaning that you can do anything you want with them, even use it commercially. You do not have any obligation to credit me, but doing so would be highly appreciated.
+
+Exceptions to this rule apply to any of the assets used. Make sure to check the license set by their creator before using them.

@@ -1,7 +1,7 @@
 import { ShaderPreview, Separator, RevealSection, Media, Align, Color, MediaGroup, SupportMe, TalkingInput, PostNav, AchievementList } from '../../../components'
 import Hint from '../../../components/prose/hint'
 
-import cashew from './assets/cashew.jpg'
+import cashew from '../common-assets/cashew.jpg'
 import cashewSample from './assets/cashew-sample.jpg'
 import sampleOffset from './assets/sample-right.png'
 import regionOutside from './assets/region-outside-2.png'
@@ -519,7 +519,6 @@ Add `TIME` and suddenly Cashew is <Hint message="I also had to tweak some number
 >
 {`void fragment() {
     vec2 new_uv = vec2(
-        
         UV.x + sin(UV.y * 10.0 + TIME) * 0.01,
         UV.y + cos(UV.x * 10.0 + TIME) * 0.01
     );

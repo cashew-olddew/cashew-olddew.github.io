@@ -81,6 +81,15 @@ export const items: DesktopItem[] = [
     load: () => import('./shaders/3-the-uv-canvas/3-the-uv-canvas.mdx'),
   },
   {
+    id: 'shaders-4',
+    title: '4. The Pivot',
+    emoji: '📌',
+    type: 'post',
+    parent: 'shaders',
+    date: '2026-05-29',
+    load: () => import('./shaders/4-the-pivot/4-the-pivot.mdx'),
+  },
+  {
     id: 'make-it-exist-first',
     title: 'Make it exist',
     emoji: '🥜',

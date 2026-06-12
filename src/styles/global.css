@@ -20,6 +20,9 @@
 
     --accent: var(--yellow-7);
     --accent-soft: var(--yellow-4);
+    --accent-challenge: var(--yellow-7);
+
+    --challenge-bg: var(--sand-1);
 
     --godot: #478cbf;
 
@@ -61,6 +64,9 @@
 
     --accent: var(--yellow-5);
     --accent-soft: var(--yellow-7);
+    --accent-challenge: var(--yellow-5);
+
+    --challenge-bg: var(--stone-11);
 
     --link: var(--yellow-4);
     --danger: var(--red-4);
